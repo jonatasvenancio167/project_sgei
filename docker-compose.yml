@@ -1,0 +1,96 @@
+services:
+  db:
+    image: postgres:16.10
+    environment:
+      POSTGRES_DB: project_sgei_development
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6381:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    volumes:
+      - .:/rails
+      - bundle_cache:/usr/local/bundle
+    environment:
+      DATABASE_HOST: db
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: password
+      RAILS_ENV: development
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+    entrypoint: [ "bash", "-lc", "rm -f /rails/tmp/pids/server.pid ; find /rails/bin -type f -exec sed -i 's/\\r$//' {} + ; bin/rails db:prepare ; exec ./bin/thrust ./bin/rails server" ]
+
+  sidekiq:
+    build: .
+    command: bundle exec sidekiq
+    restart: unless-stopped
+    environment:
+      RAILS_ENV: development
+      DATABASE_HOST: db
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: password
+      REDIS_URL: redis://redis:6379/0
+    volumes:
+      - .:/rails
+      - bundle_cache:/usr/local/bundle
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/rails
+      - bundle_cache:/usr/local/bundle
+    environment:
+      RAILS_ENV: test
+      DATABASE_HOST: db
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: password
+      DATABASE_URL: postgres://postgres:password@db:5432/social_midia_test
+    depends_on:
+      db:
+        condition: service_healthy
+    command: [ "bundle", "exec", "rspec" ]
+
+volumes:
+  postgres_data:
+  redis_data:
+  bundle_cache:
