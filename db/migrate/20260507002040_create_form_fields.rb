@@ -13,7 +13,7 @@ class CreateFormFields < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :form_fields, :type
+    add_index :form_fields, :label_type
     add_index :form_fields, :position
   end
 end
