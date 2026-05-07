@@ -1,0 +1,17 @@
+<%= form_with(model: departament) do |form| %>
+  <% if departament.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(departament.errors.count, "error") %> prohibited this departament from being saved:</h2>
+
+      <ul>
+        <% departament.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

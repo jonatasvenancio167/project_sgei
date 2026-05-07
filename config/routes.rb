@@ -1,4 +1,17 @@
 Rails.application.routes.draw do
+  resources :notifications
+  resources :form_responses
+  resources :integrations
+  resources :user_notifications
+  resources :form_answers
+  resources :form_fields
+  resources :forms
+  resources :event_attendees
+  resources :events
+  resources :memberchips
+  resources :departaments
+  resources :users
+  resources :churches
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

@@ -1,0 +1,16 @@
+<p style="color: green"><%= notice %></p>
+
+<% content_for :title, "Form responses" %>
+
+<h1>Form responses</h1>
+
+<div id="form_responses">
+  <% @form_responses.each do |form_response| %>
+    <%= render form_response %>
+    <p>
+      <%= link_to "Show this form response", form_response %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New form response", new_form_response_path %>

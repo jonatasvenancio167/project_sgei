@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @church %>
+
+<div>
+  <%= link_to "Edit this church", edit_church_path(@church) %> |
+  <%= link_to "Back to churches", churches_path %>
+
+  <%= button_to "Destroy this church", @church, method: :delete %>
+</div>

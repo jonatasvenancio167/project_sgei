@@ -1,0 +1,12 @@
+<% content_for :title, "Editing integration" %>
+
+<h1>Editing integration</h1>
+
+<%= render "form", integration: @integration %>
+
+<br>
+
+<div>
+  <%= link_to "Show this integration", @integration %> |
+  <%= link_to "Back to integrations", integrations_path %>
+</div>

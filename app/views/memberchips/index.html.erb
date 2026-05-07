@@ -1,0 +1,16 @@
+<p style="color: green"><%= notice %></p>
+
+<% content_for :title, "Memberchips" %>
+
+<h1>Memberchips</h1>
+
+<div id="memberchips">
+  <% @memberchips.each do |memberchip| %>
+    <%= render memberchip %>
+    <p>
+      <%= link_to "Show this memberchip", memberchip %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New memberchip", new_memberchip_path %>

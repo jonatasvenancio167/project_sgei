@@ -1,0 +1,2 @@
+class Memberchip < ApplicationRecord
+end

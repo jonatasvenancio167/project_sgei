@@ -1,0 +1,12 @@
+<% content_for :title, "Editing church" %>
+
+<h1>Editing church</h1>
+
+<%= render "form", church: @church %>
+
+<br>
+
+<div>
+  <%= link_to "Show this church", @church %> |
+  <%= link_to "Back to churches", churches_path %>
+</div>

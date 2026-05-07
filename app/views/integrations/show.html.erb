@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @integration %>
+
+<div>
+  <%= link_to "Edit this integration", edit_integration_path(@integration) %> |
+  <%= link_to "Back to integrations", integrations_path %>
+
+  <%= button_to "Destroy this integration", @integration, method: :delete %>
+</div>

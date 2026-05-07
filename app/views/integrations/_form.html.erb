@@ -1,0 +1,17 @@
+<%= form_with(model: integration) do |form| %>
+  <% if integration.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(integration.errors.count, "error") %> prohibited this integration from being saved:</h2>
+
+      <ul>
+        <% integration.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

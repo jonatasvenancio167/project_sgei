@@ -1,0 +1,16 @@
+<p style="color: green"><%= notice %></p>
+
+<% content_for :title, "Integrations" %>
+
+<h1>Integrations</h1>
+
+<div id="integrations">
+  <% @integrations.each do |integration| %>
+    <%= render integration %>
+    <p>
+      <%= link_to "Show this integration", integration %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New integration", new_integration_path %>

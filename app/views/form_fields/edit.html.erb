@@ -1,0 +1,12 @@
+<% content_for :title, "Editing form field" %>
+
+<h1>Editing form field</h1>
+
+<%= render "form", form_field: @form_field %>
+
+<br>
+
+<div>
+  <%= link_to "Show this form field", @form_field %> |
+  <%= link_to "Back to form fields", form_fields_path %>
+</div>

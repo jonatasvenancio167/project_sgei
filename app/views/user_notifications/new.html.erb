@@ -1,0 +1,11 @@
+<% content_for :title, "New user notification" %>
+
+<h1>New user notification</h1>
+
+<%= render "form", user_notification: @user_notification %>
+
+<br>
+
+<div>
+  <%= link_to "Back to user notifications", user_notifications_path %>
+</div>

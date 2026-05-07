@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  church: one
+  title: MyString
+  message: MyText
+  notification_type: 1
+
+two:
+  church: two
+  title: MyString
+  message: MyText
+  notification_type: 1

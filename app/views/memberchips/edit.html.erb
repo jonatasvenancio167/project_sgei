@@ -1,0 +1,12 @@
+<% content_for :title, "Editing memberchip" %>
+
+<h1>Editing memberchip</h1>
+
+<%= render "form", memberchip: @memberchip %>
+
+<br>
+
+<div>
+  <%= link_to "Show this memberchip", @memberchip %> |
+  <%= link_to "Back to memberchips", memberchips_path %>
+</div>
