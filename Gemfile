@@ -2,6 +2,7 @@ source "https://rubygems.org"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "~> 8.0.0.rc1"
+gem "devise", "~> 5.0"
 # The modern asset pipeline for Rails [https://github.com/rails/propshaft]
 gem "propshaft"
 # Use postgresql as the database for Active Record
@@ -27,6 +28,9 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 gem "solid_cache"
 gem "solid_queue"
 gem "solid_cable"
+
+# Tailwind CSS v4 (CLI via tailwindcss-ruby) [https://github.com/rails/tailwindcss-rails]
+gem "tailwindcss-rails", "~> 4.0"
 
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
@@ -61,3 +65,4 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
 end
+
