@@ -14,9 +14,10 @@ FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
 # Rails app lives here
 WORKDIR /rails
 
-# Install base packages
+# Install base packages (+ build-essential para compilar extensões nativas no `bundle install`
+# em desenvolvimento com volume bundle_cache, ex.: bcrypt)
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl libjemalloc2 libvips postgresql-client && \
+    apt-get install --no-install-recommends -y build-essential curl libjemalloc2 libvips postgresql-client && \
     ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
@@ -49,6 +50,9 @@ RUN find /rails/bin -type f -exec sed -i 's/\r$//' {} +
 
 # Precompile bootsnap code for faster boot times
 RUN bundle exec bootsnap precompile -j 1 app/ lib/
+
+# Tailwind CSS v4 — compiled to app/assets/builds/tailwind.css (Propshaft)
+RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails tailwindcss:build
 
 # Final stage for app image
 FROM base

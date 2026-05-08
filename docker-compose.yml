@@ -44,6 +44,10 @@ services:
       DATABASE_PASSWORD: password
       RAILS_ENV: development
       REDIS_URL: redis://redis:6379/0
+      # Imagem de produção define BUNDLE_WITHOUT=development; em dev precisamos das gems desse grupo.
+      BUNDLE_WITHOUT: ""
+      # Permite sincronizar o volume bundle_cache com o Gemfile.lock após alterações.
+      BUNDLE_DEPLOYMENT: "false"
     depends_on:
       db:
         condition: service_healthy
@@ -51,26 +55,10 @@ services:
         condition: service_healthy
     stdin_open: true
     tty: true
-    entrypoint: [ "bash", "-lc", "rm -f /rails/tmp/pids/server.pid ; find /rails/bin -type f -exec sed -i 's/\\r$//' {} + ; bin/rails db:prepare ; exec ./bin/thrust ./bin/rails server" ]
+    entrypoint: [ "bash", "/rails/bin/docker-compose-web" ]
 
-  sidekiq:
-    build: .
-    command: bundle exec sidekiq
-    restart: unless-stopped
-    environment:
-      RAILS_ENV: development
-      DATABASE_HOST: db
-      DATABASE_USER: postgres
-      DATABASE_PASSWORD: password
-      REDIS_URL: redis://redis:6379/0
-    volumes:
-      - .:/rails
-      - bundle_cache:/usr/local/bundle
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+  # Jobs em background: este projeto usa Solid Queue (gem solid_queue), não Sidekiq.
+  # Para processar filas em dev: SOLID_QUEUE_IN_PUMA=1 no web ou `bin/jobs` conforme config/queue.yml.
 
   test:
     build:
@@ -85,10 +73,17 @@ services:
       DATABASE_USER: postgres
       DATABASE_PASSWORD: password
       DATABASE_URL: postgres://postgres:password@db:5432/social_midia_test
+      BUNDLE_WITHOUT: ""
+      BUNDLE_DEPLOYMENT: "false"
     depends_on:
       db:
         condition: service_healthy
-    command: [ "bundle", "exec", "rspec" ]
+    command:
+      [
+        "bash",
+        "-lc",
+        "cd /rails && bundle config unset without 2>/dev/null || true; bundle config unset deployment 2>/dev/null || true; bundle install --jobs 4 --retry 3 && bundle exec rspec",
+      ]
 
 volumes:
   postgres_data:
