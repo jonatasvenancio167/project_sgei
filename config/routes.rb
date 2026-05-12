@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  get "components/index"
   devise_for :users
   resources :notifications
   resources :form_responses
@@ -24,5 +25,5 @@ Rails.application.routes.draw do
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
   # Defines the root path route ("/")
-  root "churches#index"
+  root "users#index"
 end

@@ -8,7 +8,7 @@ class CreateUsers < ActiveRecord::Migration[8.0]
       t.string :phone
 
       t.integer :role, default: 2
-      t.boolean :active, default: true
+      t.integer :status, default: 0
 
       t.datetime :deleted_at
 

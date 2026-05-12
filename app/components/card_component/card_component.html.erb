@@ -1,0 +1,31 @@
+<div class="rounded-xl border bg-card text-card-foreground shadow <%= classes %>">
+  <% if header? || title? || description? %>
+    <div class="flex flex-col space-y-1.5 p-6">
+      <% if title? %>
+        <div class="font-semibold leading-none tracking-tight">
+          <%= title %>
+        </div>
+      <% end %>
+      
+      <% if description? %>
+        <div class="text-sm text-muted-foreground">
+          <%= description %>
+        </div>
+      <% end %>
+
+      <% if header? %>
+        <%= header %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="p-6 pt-0">
+    <%= content %>
+  </div>
+
+  <% if footer? %>
+    <div class="flex items-center p-6 pt-0">
+      <%= footer %>
+    </div>
+  <% end %>
+</div>

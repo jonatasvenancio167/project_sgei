@@ -1,0 +1,62 @@
+<div class="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 dark:bg-slate-950">
+  <div class="max-w-7xl mx-auto">
+    <div class="mb-12">
+      <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-5xl">
+        Component Library
+      </h1>
+      <p class="mt-4 text-lg text-slate-600 dark:text-slate-400">
+        Shadcn-style components ported to <strong>ViewComponent</strong>.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <%# Shadcn Style Card %>
+      <%= render(CardComponent.new) do |c| %>
+        <% c.with_title { "Create project" } %>
+        <% c.with_description { "Deploy your new project in one-click." } %>
+        
+        <form>
+          <div class="grid w-full items-center gap-4">
+            <div class="flex flex-col space-y-1.5">
+              <label for="name" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Name</label>
+              <input id="name" placeholder="Name of your project" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
+            </div>
+          </div>
+        </form>
+
+        <% c.with_footer do %>
+          <div class="flex justify-between w-full">
+            <button class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
+              Cancel
+            </button>
+            <button class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-slate-900 text-white shadow hover:bg-slate-900/90 h-9 px-4 py-2 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-50/90">
+              Deploy
+            </button>
+          </div>
+        <% end %>
+      <% end %>
+
+      <%# Simple Notification Card %>
+      <%= render(CardComponent.new) do |c| %>
+        <% c.with_title { "Notifications" } %>
+        <% c.with_description { "You have 3 unread messages." } %>
+        
+        <div class="space-y-4">
+          <div class="flex items-start space-x-4">
+            <div class="mt-1 h-2 w-2 rounded-full bg-blue-600"></div>
+            <div class="flex-1 space-y-1">
+              <p class="text-sm font-medium leading-none">Your call has been confirmed.</p>
+              <p class="text-sm text-slate-500">1 hour ago</p>
+            </div>
+          </div>
+        </div>
+
+        <% c.with_footer do %>
+          <button class="w-full inline-flex items-center justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow hover:bg-slate-900/90 dark:bg-slate-50 dark:text-slate-900">
+            Mark all as read
+          </button>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>
