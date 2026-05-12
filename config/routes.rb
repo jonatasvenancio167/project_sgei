@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  devise_for :users
   resources :notifications
   resources :form_responses
   resources :integrations
