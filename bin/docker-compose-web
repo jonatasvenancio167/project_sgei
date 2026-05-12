@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Entrypoint para `docker compose` em desenvolvimento: sincroniza gems do volume com o lockfile
+# (inclui o grupo development) e arranca o servidor.
+set -e
+
+rm -f /rails/tmp/pids/server.pid
+find /rails/bin -type f -exec sed -i 's/\r$//' {} + 2>/dev/null || true
+
+cd /rails
+
+# Volume /usr/local/bundle pode ter sido populado com --without development (imagem produção).
+bundle config unset without 2>/dev/null || true
+bundle config unset deployment 2>/dev/null || true
+
+bundle install --jobs 4 --retry 3
+
+bin/rails db:prepare
+
+exec ./bin/thrust ./bin/rails server
