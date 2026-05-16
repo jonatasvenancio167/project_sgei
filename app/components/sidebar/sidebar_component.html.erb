@@ -1,0 +1,35 @@
+<div
+  data-sidebar-target="sidebar"
+  data-state="expanded"
+  data-collapsible="<%= @collapsible %>"
+  data-variant="<%= @variant %>"
+  data-side="<%= @side %>"
+  class="group peer hidden md:block text-sidebar-foreground"
+>
+  <!-- Sidebar Gap (Desktop) -->
+  <div
+    class="duration-200 relative h-svh w-[var(--sidebar-width)] bg-transparent transition-[width] ease-linear
+           group-data-[state=collapsed]:w-0
+           group-data-[side=right]:rotate-180"
+  ></div>
+
+  <div
+    class="duration-200 fixed inset-y-0 z-10 hidden h-svh w-[var(--sidebar-width)] transition-[left,right,width] ease-linear md:flex
+           group-data-[side=left]:left-0 
+           group-data-[side=right]:right-0 
+           group-data-[state=collapsed]:group-data-[side=left]:-left-[var(--sidebar-width)]
+           group-data-[state=collapsed]:group-data-[side=right]:-right-[var(--sidebar-width)]
+           group-data-[state=collapsed]:group-data-[collapsible=icon]:w-[var(--sidebar-width-icon)]
+           group-data-[state=collapsed]:group-data-[collapsible=icon]:left-0
+           group-data-[state=collapsed]:group-data-[collapsible=icon]:right-0
+           group-data-[variant=floating]:p-2 
+           group-data-[variant=inset]:p-2"
+  >
+    <div
+      data-sidebar="sidebar"
+      class="flex h-full w-full flex-col bg-sidebar border-sidebar-border group-data-[side=left]:border-r group-data-[side=right]:border-l group-data-[variant=floating]:rounded-xl group-data-[variant=floating]:border group-data-[variant=floating]:shadow group-data-[variant=inset]:rounded-xl group-data-[variant=inset]:border group-data-[variant=inset]:shadow"
+    >
+      <%= content %>
+    </div>
+  </div>
+</div>

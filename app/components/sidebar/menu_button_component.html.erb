@@ -1,0 +1,9 @@
+<button
+  type="button"
+  data-sidebar="menu-button"
+  data-active="<%= is_active %>"
+  class="<%= button_classes %>"
+  <% if tooltip %>title="<%= tooltip %>"<% end %>
+>
+  <%= content %>
+</button>
