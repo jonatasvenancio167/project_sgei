@@ -1,17 +1,68 @@
-<%= form_with(model: event) do |form| %>
+<%= form_with(model: event, id: "new_event_form", class: "grid gap-6") do |f| %>
   <% if event.errors.any? %>
-    <div style="color: red">
-      <h2><%= pluralize(event.errors.count, "error") %> prohibited this event from being saved:</h2>
-
-      <ul>
-        <% event.errors.each do |error| %>
-          <li><%= error.full_message %></li>
+    <div id="error_explanation" class="rounded-lg bg-destructive/10 p-3 text-xs text-destructive">
+      <h2 class="font-semibold"><%= pluralize(event.errors.count, "erro") %> impediram a criação:</h2>
+      <ul class="list-disc pl-4 mt-1">
+        <% event.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
         <% end %>
       </ul>
     </div>
   <% end %>
 
-  <div>
-    <%= form.submit %>
+  <div class="grid gap-2">
+    <%= f.label :title, "Título *", class: "text-sm font-medium" %>
+    <%= f.text_field :title, class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50", required: true, maxlength: 120 %>
+  </div>
+
+  <div class="grid gap-2">
+    <%= f.label :slug, "Slug", class: "text-sm font-medium" %>
+    <%= f.text_field :slug, class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50", placeholder: "gerado-automaticamente", maxlength: 80 %>
+  </div>
+
+  <div class="grid gap-2">
+    <%= f.label :description, "Descrição", class: "text-sm font-medium" %>
+    <%= f.text_area :description, rows: 4, class: "flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50", maxlength: 2000 %>
+  </div>
+
+  <div class="grid gap-2">
+    <%= f.label :thumbnail, "Imagem (URL)", class: "text-sm font-medium" %>
+    <%= f.url_field :thumbnail, class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50", placeholder: "https://...", maxlength: 500 %>
+  </div>
+
+  <div class="grid gap-2">
+    <%= f.label :location, "Local", class: "text-sm font-medium" %>
+    <%= f.text_field :location, class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50", maxlength: 200 %>
+  </div>
+
+  <div class="grid gap-4 sm:grid-cols-2">
+    <div class="grid gap-2">
+      <%= f.label :start_date, "Início *", class: "text-sm font-medium" %>
+      <%= f.datetime_local_field :start_date, class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50", required: true %>
+    </div>
+    <div class="grid gap-2">
+      <%= f.label :end_date, "Término", class: "text-sm font-medium" %>
+      <%= f.datetime_local_field :end_date, class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" %>
+    </div>
+  </div>
+
+  <div class="grid gap-4 sm:grid-cols-2">
+    <div class="grid gap-2">
+      <%= f.label :departament_id, "Departamento", class: "text-sm font-medium" %>
+      <%= f.collection_select :departament_id, current_user.admin? ? Departament.all : current_user.departaments + [nil], :id, :name, { include_blank: "Geral" }, class: "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" %>
+    </div>
+    <div class="grid gap-2">
+      <%= f.label :visibility, "Visibilidade", class: "text-sm font-medium" %>
+      <%= f.select :visibility, [["Privada", "private_event"], ["Membros", "member_only"], ["Pública", "public_event"]], {}, class: "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" %>
+    </div>
+  </div>
+
+  <div class="mt-4 flex flex-col-reverse sm:flex-row sm:justify-end sm:gap-3">
+    <button type="button" 
+            class="mt-2 sm:mt-0 inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            data-action="click->modal#close">
+      Cancelar
+    </button>
+    <%= f.submit "Criar evento", class: "inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" %>
   </div>
 <% end %>

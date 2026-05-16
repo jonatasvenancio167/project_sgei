@@ -1,16 +1,32 @@
-<p style="color: green"><%= notice %></p>
+<% content_for :title, "Eventos" %>
 
-<% content_for :title, "Events" %>
+<div class="mx-auto max-w-6xl p-8 lg:p-12">
+  <header class="flex items-end justify-between">
+    <div>
+      <p class="text-sm text-muted-foreground">Agenda</p>
+      <h1 class="mt-1 font-serif text-4xl">Eventos</h1>
+      <% unless @decorator.user.admin? %>
+        <p class="mt-2 text-sm text-muted-foreground">
+          Eventos do departamento <span class="font-medium text-foreground"><%= @decorator.user.primary_department_name %></span> e da igreja (Geral).
+        </p>
+      <% end %>
+    </div>
+    
+    <button type="button" 
+            class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            onclick="document.getElementById('modal-new-event').dispatchEvent(new CustomEvent('modal:open'))">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus mr-1 h-4 w-4"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+      Novo evento
+    </button>
+  </header>
 
-<h1>Events</h1>
-
-<div id="events">
-  <% @events.each do |event| %>
-    <%= render event %>
-    <p>
-      <%= link_to "Show this event", event %>
-    </p>
-  <% end %>
+  <%= render "events/filters", decorator: @decorator %>
+  <%= render "events/table", decorator: @decorator %>
 </div>
 
-<%= link_to "New event", new_event_path %>
+<!-- Modal for New Event -->
+<%= render Shared::ModalComponent.new(id: "modal-new-event", title: "Novo evento", description: "Preencha os dados do evento. Campos com * são obrigatórios.", size: :lg) do |modal| %>
+  <% modal.with_body do %>
+    <%= render "events/form", event: @event %>
+  <% end %>
+<% end %>

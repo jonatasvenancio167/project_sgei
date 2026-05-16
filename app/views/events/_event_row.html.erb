@@ -1,0 +1,18 @@
+<tr id="<%= dom_id(event) %>" class="border-t border-border/60 hover:bg-muted/50 transition-colors">
+  <td class="px-5 py-4 text-muted-foreground whitespace-nowrap text-center">
+    <%= event.start_date_formatted %>
+  </td>
+  <td class="px-5 py-4 font-medium text-left"><%= event.title %></td>
+  <td class="px-5 py-4 text-muted-foreground text-left"><%= event.location.presence || "—" %></td>
+  <td class="px-5 py-4 text-center">
+    <span class="rounded-full bg-secondary px-2.5 py-0.5 text-[10px] font-medium text-secondary-foreground">
+      <%= event.department_name %>
+    </span>
+  </td>
+  <td class="px-5 py-4 text-center">
+    <span class="rounded-full px-2.5 py-0.5 text-[10px] font-medium <%= event.visibility_badge_class %>">
+      <%= event.visibility_label %>
+    </span>
+  </td>
+  <td class="px-5 py-4 font-mono text-xs text-center"><%= event.event_attendees_count %></td>
+</tr>

@@ -1,0 +1,90 @@
+<!-- Barra de filtros -->
+<div class="mt-6 flex flex-col gap-4">
+  <%= search_form_for decorator.q, url: painel_eventos_path, method: :get, class: "contents" do |f| %>
+    <!-- Linha 1: busca + chips de período -->
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+      <div class="relative flex-1">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <%= f.search_field :title_or_location_or_description_cont, 
+            placeholder: "Buscar por título, local ou descrição...", 
+            class: "flex h-10 w-full rounded-md border border-input bg-background pl-9 pr-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+            onchange: "this.form.submit()" %>
+      </div>
+      
+      <div class="flex flex-wrap gap-2">
+        <% decorator.period_options.each do |value, label| %>
+          <%= link_to label, painel_eventos_path(params.to_unsafe_h.merge(period: value)), class: decorator.period_class(value) %>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Linha 2: filtros avançados + ordenação -->
+    <div class="flex flex-wrap items-center gap-3">
+      <div class="flex items-center gap-1.5 text-sm text-muted-foreground">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-days h-4 w-4"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
+        <span>Filtros:</span>
+      </div>
+
+      <%= f.select :departament_id_eq, options_for_select(decorator.department_options, decorator.q.departament_id_eq), {}, 
+          class: "h-8 w-auto rounded-full border-border/60 bg-secondary px-3 text-xs font-medium text-secondary-foreground hover:bg-secondary/80 focus:outline-none",
+          onchange: "this.form.submit()" %>
+
+      <%= f.select :visibility_eq, options_for_select(decorator.visibility_options, decorator.q.visibility_eq), {}, 
+          class: "h-8 w-auto rounded-full border-border/60 bg-secondary px-3 text-xs font-medium text-secondary-foreground hover:bg-secondary/80 focus:outline-none",
+          onchange: "this.form.submit()" %>
+
+      <div class="ml-auto flex items-center gap-2">
+        <%= f.select :s, options_for_select(decorator.sort_options, decorator.q.s), {}, 
+            class: "h-8 w-auto rounded-full border-border/60 bg-secondary px-3 text-xs font-medium text-secondary-foreground hover:bg-secondary/80 focus:outline-none",
+            onchange: "this.form.submit()" %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Chips de filtros ativos + limpar -->
+  <% if decorator.has_active_filters? %>
+    <div class="flex flex-wrap items-center gap-2">
+      <% if (search = decorator.search_query).present? %>
+        <span class="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
+          Busca: "<%= search %>"
+          <%= link_to painel_eventos_path(params.to_unsafe_h.deep_merge(q: { title_or_location_or_description_cont: nil })), class: "ml-1 rounded-full hover:text-foreground" do %>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x h-3 w-3"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          <% end %>
+        </span>
+      <% end %>
+      
+      <% if (label = decorator.period_label).present? %>
+        <span class="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
+          <%= label %>
+          <%= link_to painel_eventos_path(params.to_unsafe_h.merge(period: nil)), class: "ml-1 rounded-full hover:text-foreground" do %>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x h-3 w-3"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          <% end %>
+        </span>
+      <% end %>
+
+      <% if (dept = decorator.department_label).present? %>
+        <span class="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
+          <%= dept %>
+          <%= link_to painel_eventos_path(params.to_unsafe_h.deep_merge(q: { departament_id_eq: nil })), class: "ml-1 rounded-full hover:text-foreground" do %>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x h-3 w-3"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          <% end %>
+        </span>
+      <% end %>
+
+      <% if (vis = decorator.visibility_label).present? %>
+        <span class="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
+          <%= vis %>
+          <%= link_to painel_eventos_path(params.to_unsafe_h.deep_merge(q: { visibility_eq: nil })), class: "ml-1 rounded-full hover:text-foreground" do %>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x h-3 w-3"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          <% end %>
+        </span>
+      <% end %>
+
+      <%= link_to "Limpar todos", painel_eventos_path, class: "ml-1 text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline" %>
+    </div>
+  <% end %>
+
+  <p class="text-xs text-muted-foreground font-medium">
+    <%= decorator.result_count_text %>
+  </p>
+</div>
