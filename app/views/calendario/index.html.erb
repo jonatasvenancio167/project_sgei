@@ -1,0 +1,88 @@
+<% content_for :title, "Calendário" %>
+
+<div class="mx-auto max-w-6xl p-8 lg:p-12">
+  <header>
+    <p class="text-sm text-muted-foreground">Agenda</p>
+    <h1 class="mt-1 font-serif text-4xl">Calendário</h1>
+  </header>
+
+  <div class="mt-8 grid gap-6 lg:grid-cols-[auto_1fr]">
+    <!-- Calendar Card -->
+    <div class="h-fit rounded-2xl border border-border/60 bg-card p-4" style="box-shadow: var(--shadow-soft)">
+      <div class="w-full max-w-[280px]">
+        <div class="flex items-center justify-between px-2 py-2">
+          <%= link_to calendario_path(date: @date.prev_month), class: "rounded-lg p-1 hover:bg-secondary transition-colors" do %>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left size-4"><path d="m15 18-6-6 6-6"/></svg>
+          <% end %>
+          <div class="text-sm font-medium">
+            <%= I18n.l(@date, format: "%B %Y") %>
+          </div>
+          <%= link_to calendario_path(date: @date.next_month), class: "rounded-lg p-1 hover:bg-secondary transition-colors" do %>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right size-4"><path d="m9 18 6-6-9-6"/></svg>
+          <% end %>
+        </div>
+
+        <div class="mt-2 grid grid-cols-7 gap-1 text-center text-[10px] font-medium text-muted-foreground">
+          <div>Do</div>
+          <div>Se</div>
+          <div>Te</div>
+          <div>Qu</div>
+          <div>Qu</div>
+          <div>Se</div>
+          <div>Sa</div>
+        </div>
+
+        <div class="mt-1 grid grid-cols-7 gap-1">
+          <% 
+            start_of_month = @date.beginning_of_month
+            start_of_calendar = start_of_month.beginning_of_week(:sunday)
+            end_of_month = @date.end_of_month
+            end_of_calendar = end_of_month.end_of_week(:sunday)
+            
+            days = (start_of_calendar..end_of_calendar).to_a
+          %>
+
+          <% days.each do |day| %>
+            <div class="flex aspect-square items-center justify-center text-xs">
+              <% if day.month == @date.month %>
+                <% is_today = day == Date.current %>
+                <% has_event = @events.any? { |e| e.start_date == day } %>
+                <div class="flex h-8 w-8 items-center justify-center rounded-lg transition-colors <%= is_today ? 'bg-primary text-primary-foreground font-semibold' : 'hover:bg-secondary cursor-pointer' %> <%= 'ring-1 ring-primary/20' if has_event && !is_today %>">
+                  <%= day.day %>
+                </div>
+              <% else %>
+                <span class="text-muted-foreground/40"><%= day.day %></span>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Events List Card -->
+    <div class="rounded-2xl border border-border/60 bg-card p-6" style="box-shadow: var(--shadow-soft)">
+      <h2 class="font-serif text-2xl">Eventos do mês</h2>
+      <ul class="mt-5 space-y-3">
+        <% if @events.empty? %>
+          <li class="text-sm text-muted-foreground">Nenhum evento para o seu perfil neste mês.</li>
+        <% end %>
+
+        <% @events.each do |event| %>
+          <% color_class = @dept_colors[event.departament&.name] || "bg-primary" %>
+          <li class="flex items-center gap-4 rounded-xl border border-border/60 bg-background/40 p-4 transition-all hover:bg-background/60">
+            <span class="h-12 w-1.5 shrink-0 rounded-full <%= color_class %>"></span>
+            <div class="flex-1 min-w-0">
+              <p class="truncate text-sm font-semibold text-foreground"><%= event.title %></p>
+              <p class="text-xs text-muted-foreground">
+                <%= I18n.l(event.start_date, format: "%A, %d de %B").downcase %>
+              </p>
+            </div>
+            <div class="shrink-0 rounded-full bg-secondary px-3 py-1 text-[10px] font-medium text-secondary-foreground">
+              <%= event.departament&.name || "Geral" %>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+</div>
