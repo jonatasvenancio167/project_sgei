@@ -1,9 +1,18 @@
-<button
-  type="button"
-  data-sidebar="menu-button"
-  data-active="<%= is_active %>"
-  class="<%= button_classes %>"
-  <% if tooltip %>title="<%= tooltip %>"<% end %>
->
-  <%= content %>
-</button>
+<% if href %>
+  <%= link_to href, 
+      class: button_classes,
+      data: { sidebar: "menu-button", active: is_active },
+      title: tooltip do %>
+    <%= content %>
+  <% end %>
+<% else %>
+  <button
+    type="button"
+    data-sidebar="menu-button"
+    data-active="<%= is_active %>"
+    class="<%= button_classes %>"
+    <% if tooltip %>title="<%= tooltip %>"<% end %>
+  >
+    <%= content %>
+  </button>
+<% end %>

@@ -2,17 +2,18 @@
 
 module Sidebar
   class MenuButtonComponent < ViewComponent::Base
-    def initialize(variant: :default, size: :default, is_active: false, tooltip: nil, class_name: "")
+    def initialize(variant: :default, size: :default, is_active: false, tooltip: nil, class_name: "", href: nil)
       @variant = variant
       @size = size
       @is_active = is_active
       @tooltip = tooltip
       @class_name = class_name
+      @href = href
     end
 
     private
 
-    attr_reader :variant, :size, :is_active, :tooltip, :class_name
+    attr_reader :variant, :size, :is_active, :tooltip, :class_name, :href
 
     def button_classes
       [
