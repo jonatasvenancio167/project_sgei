@@ -42,6 +42,12 @@
       <% end %>
     </div>
 
-    <%= yield %>
+    <% if user_signed_in? %>
+      <%= render "shared/sidebar" do %>
+        <%= yield %>
+      <% end %>
+    <% else %>
+      <%= yield %>
+    <% end %>
   </body>
 </html>
