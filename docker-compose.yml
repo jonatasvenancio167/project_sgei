@@ -57,6 +57,24 @@ services:
     tty: true
     entrypoint: [ "bash", "/rails/bin/docker-compose-web" ]
 
+  css:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/rails
+      - bundle_cache:/usr/local/bundle
+    environment:
+      DATABASE_HOST: db
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: password
+      RAILS_ENV: development
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["bin/rails", "tailwindcss:watch"]
+
+
   # Jobs em background: este projeto usa Solid Queue (gem solid_queue), não Sidekiq.
   # Para processar filas em dev: SOLID_QUEUE_IN_PUMA=1 no web ou `bin/jobs` conforme config/queue.yml.
 
