@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_12_004101) do
+ActiveRecord::Schema[8.0].define(version: 2026_06_13_152246) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -30,6 +30,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_12_004101) do
     t.string "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "color", default: "bg-blue-500 text-white"
+    t.string "icon", default: "users"
     t.index ["church_id"], name: "index_departaments_on_church_id"
     t.index ["name"], name: "index_departaments_on_name"
   end
@@ -63,6 +65,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_12_004101) do
     t.datetime "deleted_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "event_attendees_count"
     t.index ["church_id"], name: "index_events_on_church_id"
     t.index ["created_by_id"], name: "index_events_on_created_by_id"
     t.index ["deleted_at"], name: "index_events_on_deleted_at"

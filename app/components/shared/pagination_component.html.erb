@@ -1,0 +1,88 @@
+<div class="flex flex-wrap items-center justify-between gap-4 px-4 py-3 text-sm text-muted-foreground">
+  <!-- Left: item count info -->
+  <div class="flex items-center gap-4">
+    <% if total_count == 0 %>
+      <span>Nenhum <%= item_label[:singular] %> encontrado.</span>
+    <% else %>
+      <span>
+        Mostrando <span class="font-medium text-foreground"><%= range_start %>–<%= range_end %></span>
+        de <span class="font-medium text-foreground"><%= total_count %></span>
+        <%= total_count == 1 ? item_label[:singular] : item_label[:plural] %>
+      </span>
+    <% end %>
+
+    <!-- Per-page selector -->
+    <div class="flex items-center gap-2">
+      <span class="text-xs">Por página:</span>
+      <div class="flex gap-1">
+        <% Shared::PaginationComponent::PAGE_SIZE_OPTIONS.each do |size| %>
+          <%= link_to url_builder.call(page: 1, per: size),
+                class: "inline-flex h-7 min-w-[28px] items-center justify-center rounded-md px-2 text-xs transition-colors #{
+                  page_size == size \
+                    ? 'bg-primary text-primary-foreground font-medium' \
+                    : 'hover:bg-secondary text-muted-foreground'
+                }" do %>
+            <%= size %>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: page navigation -->
+  <% if total_pages > 1 %>
+    <nav class="flex items-center gap-1" aria-label="Paginação">
+      <!-- Previous -->
+      <% if current_page > 1 %>
+        <%= link_to url_builder.call(page: current_page - 1, per: page_size),
+              class: "inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border/60 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground",
+              aria: { label: "Página anterior" } do %>
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 18-6-6 6-6"/>
+          </svg>
+        <% end %>
+      <% else %>
+        <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border/60 text-muted-foreground/40 cursor-not-allowed">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 18-6-6 6-6"/>
+          </svg>
+        </span>
+      <% end %>
+
+      <!-- Page numbers -->
+      <% page_windows.each do |p| %>
+        <% if p == :gap %>
+          <span class="inline-flex h-8 w-8 items-center justify-center text-xs text-muted-foreground">…</span>
+        <% elsif p == current_page %>
+          <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-xs font-medium">
+            <%= p %>
+          </span>
+        <% else %>
+          <%= link_to p.to_s, url_builder.call(page: p, per: page_size),
+                class: "inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border/60 text-xs text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground" %>
+        <% end %>
+      <% end %>
+
+      <!-- Next -->
+      <% if current_page < total_pages %>
+        <%= link_to url_builder.call(page: current_page + 1, per: page_size),
+              class: "inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border/60 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground",
+              aria: { label: "Próxima página" } do %>
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m9 18 6-6-6-6"/>
+          </svg>
+        <% end %>
+      <% else %>
+        <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border/60 text-muted-foreground/40 cursor-not-allowed">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m9 18 6-6-6-6"/>
+          </svg>
+        </span>
+      <% end %>
+    </nav>
+  <% end %>
+</div>
