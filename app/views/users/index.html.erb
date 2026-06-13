@@ -1,16 +1,301 @@
-<p style="color: green"><%= notice %></p>
+<% content_for :title, "Membros" %>
 
-<% content_for :title, "Users" %>
+<%
+  # ── Helpers ──────────────────────────────────────────────────────────────
+  current_q    = params[:q].to_s
+  current_role = params[:role].to_s
+  current_dept = params[:dept].to_s
+  current_per  = @per
+  active_filters = (current_role.present? && current_role != "todos" ? 1 : 0) +
+                   (current_dept.present? && current_dept != "todos" ? 1 : 0)
 
-<h1>Users</h1>
+  url_builder = ->(page:, per:) do
+    painel_membros_path(q: current_q, role: current_role, dept: current_dept, page: page, per: per)
+  end
+%>
 
-<div id="users">
-  <% @users.each do |user| %>
-    <%= render user %>
-    <p>
-      <%= link_to "Show this user", user %>
-    </p>
+<div class="mx-auto max-w-6xl p-8 lg:p-12">
+  <!-- Header -->
+  <header class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <p class="text-sm text-muted-foreground">Pessoas</p>
+      <h1 class="mt-1 font-serif text-4xl">Membros</h1>
+    </div>
+    <button type="button"
+            class="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors cursor-pointer"
+            onclick="document.getElementById('modal-new-member').dispatchEvent(new CustomEvent('modal:open'))">
+      <%= lucide_icon("plus", class: "h-4 w-4 mr-2") %> Novo membro
+    </button>
+  </header>
+
+  <!-- Flash messages -->
+  <% if notice.present? %>
+    <div class="mt-4 flex items-center gap-3 rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-700 dark:text-green-400">
+      <%= lucide_icon("circle-check", class: "h-4 w-4 shrink-0") %>
+      <%= notice %>
+    </div>
   <% end %>
+  <% if alert.present? %>
+    <div class="mt-4 flex items-center gap-3 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+      <%= lucide_icon("circle-alert", class: "h-4 w-4 shrink-0") %>
+      <%= alert %>
+    </div>
+  <% end %>
+
+  <!-- Main card -->
+  <div class="mt-8 rounded-2xl border border-border/60 bg-card" style="box-shadow: var(--shadow-soft)">
+
+    <!-- ── Filters bar ────────────────────────────────────────────────── -->
+    <%= form_with url: painel_membros_path, method: :get, local: true,
+                  class: "flex flex-wrap items-center gap-3 border-b border-border/60 p-4" do |f| %>
+
+      <!-- Search -->
+      <div class="relative min-w-[220px] flex-1">
+        <div class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+          <%= lucide_icon("search", class: "h-4 w-4") %>
+        </div>
+        <%= f.text_field :q, value: current_q,
+              placeholder: "Buscar por nome, email ou telefone",
+              class: "flex h-9 w-full rounded-md border border-input bg-transparent pl-9 pr-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" %>
+      </div>
+
+      <!-- Role select -->
+      <%= f.select :role,
+            options_for_select([
+              ["Todos os cargos", "todos"],
+              ["Admin", "admin"],
+              ["Líder", "leader"],
+              ["Membro", "member"]
+            ], current_role.presence || "todos"),
+            {},
+            class: "flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring w-[170px]" %>
+
+      <!-- Department select -->
+      <%= f.select :dept,
+            options_for_select(
+              [["Todos os departamentos", "todos"], ["Sem departamento", "sem"]] +
+                @departaments.map { |d| [d.name, d.id.to_s] },
+              current_dept.presence || "todos"
+            ),
+            {},
+            class: "flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring w-[210px]" %>
+
+      <!-- Submit (hidden, auto-submit) + Clear button -->
+      <button type="submit" class="hidden"></button>
+
+      <% if active_filters > 0 || current_q.present? %>
+        <%= link_to painel_membros_path,
+              class: "inline-flex items-center gap-1.5 rounded-lg border border-border/60 bg-transparent px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground" do %>
+          <%= lucide_icon("x", class: "h-3.5 w-3.5") %> Limpar
+        <% end %>
+      <% else %>
+        <span class="flex items-center gap-1 text-xs text-muted-foreground">
+          <%= lucide_icon("filter", class: "h-3 w-3") %> Sem filtros
+        </span>
+      <% end %>
+
+      <!-- Per page (hidden field to preserve when form re-submits) -->
+      <%= f.hidden_field :per, value: current_per %>
+    <% end %>
+
+    <!-- Auto-submit on select change -->
+    <script>
+      (function() {
+        var form = document.querySelector('form[action="<%= painel_membros_path %>"]');
+        if (!form) return;
+        form.querySelectorAll('select').forEach(function(sel) {
+          sel.addEventListener('change', function() { form.submit(); });
+        });
+      })();
+    </script>
+
+    <!-- ── Table ──────────────────────────────────────────────────────── -->
+    <div class="overflow-x-auto">
+      <table class="w-full caption-bottom text-sm">
+        <thead class="[&_tr]:border-b">
+          <tr class="border-b border-border/60 transition-colors hover:bg-muted/50">
+            <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Membro</th>
+            <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Departamento</th>
+            <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Cargo</th>
+            <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground hidden md:table-cell">Telefone</th>
+            <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground hidden lg:table-cell">Desde</th>
+          </tr>
+        </thead>
+        <tbody class="[&_tr:last-child]:border-0">
+          <% if @users.empty? %>
+            <tr>
+              <td colspan="5">
+                <div class="flex flex-col items-center gap-2 py-12 text-center text-sm text-muted-foreground">
+                  <%= lucide_icon("users", class: "h-6 w-6 opacity-50") %>
+                  Nenhum membro encontrado com esses filtros.
+                </div>
+              </td>
+            </tr>
+          <% else %>
+            <% @users.each do |u| %>
+              <%
+                initials = u.name.to_s.split.first(2).map { |p| p[0]&.upcase }.join
+                primary_dept = u.departaments.first
+              %>
+              <tr class="border-b border-border/60 transition-colors hover:bg-muted/30">
+                <!-- Name + avatar -->
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-3">
+                    <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary text-xs font-medium text-secondary-foreground">
+                      <%= initials.present? ? initials : "?" %>
+                    </span>
+                    <div class="min-w-0">
+                      <p class="truncate text-sm font-medium"><%= u.name %></p>
+                      <p class="truncate text-xs text-muted-foreground">
+                        <%= u.email.present? ? u.email : "—" %>
+                      </p>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Department -->
+                <td class="px-4 py-3">
+                  <% if primary_dept %>
+                    <span class="inline-flex items-center rounded-full border border-border/60 bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
+                      <%= primary_dept.name %>
+                    </span>
+                  <% else %>
+                    <span class="text-xs text-muted-foreground">— sem departamento</span>
+                  <% end %>
+                </td>
+
+                <!-- Role -->
+                <td class="px-4 py-3">
+                  <% case u.role %>
+                  <% when "admin" %>
+                    <span class="inline-flex items-center gap-1 rounded-full bg-primary/20 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                      <%= lucide_icon("shield", class: "h-3 w-3") %> Admin
+                    </span>
+                  <% when "leader" %>
+                    <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                      <%= lucide_icon("crown", class: "h-3 w-3") %> Líder
+                    </span>
+                  <% else %>
+                    <span class="text-sm text-muted-foreground">Membro</span>
+                  <% end %>
+                </td>
+
+                <!-- Phone -->
+                <td class="hidden px-4 py-3 text-xs text-muted-foreground md:table-cell">
+                  <%= u.phone.present? ? u.phone : "—" %>
+                </td>
+
+                <!-- Joined at -->
+                <td class="hidden px-4 py-3 text-xs text-muted-foreground lg:table-cell">
+                  <%= u.created_at.strftime("%d/%m/%Y") %>
+                </td>
+              </tr>
+            <% end %>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── Pagination ─────────────────────────────────────────────────── -->
+    <div class="border-t border-border/60">
+      <%= render Shared::PaginationComponent.new(
+            current_page: @page,
+            total_pages:  @total_pages,
+            total_count:  @total,
+            page_size:    @per,
+            url_builder:  url_builder,
+            item_label:   { singular: "membro", plural: "membros" }
+          ) %>
+    </div>
+  </div>
 </div>
 
-<%= link_to "New user", new_user_path %>
+<!-- ── Modal: Novo Membro ──────────────────────────────────────────────── -->
+<%= render Shared::ModalComponent.new(
+      id: "modal-new-member",
+      title: "Novo membro",
+      description: "Cadastre um novo membro e, se quiser, já vincule a um departamento.",
+      size: :md
+    ) do |modal| %>
+  <% modal.with_body do %>
+    <%= form_with url: painel_membros_create_path, method: :post, local: true, class: "space-y-4" do |f| %>
+      <!-- Preserve current filter params so redirect lands on same page -->
+      <%= hidden_field_tag :q,    current_q %>
+      <%= hidden_field_tag :role, current_role %>
+      <%= hidden_field_tag :dept, current_dept %>
+      <%= hidden_field_tag :per,  current_per %>
+
+      <!-- Nome (obrigatório) -->
+      <div class="space-y-2">
+        <label for="user_name" class="text-sm font-medium">
+          Nome <span class="text-destructive">*</span>
+        </label>
+        <%= f.text_field :name, id: "user_name",
+              placeholder: "Ex: João Silva",
+              class: "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+              required: true %>
+      </div>
+
+      <!-- Telefone + Email -->
+      <div class="grid grid-cols-2 gap-3">
+        <div class="space-y-2">
+          <label for="user_phone" class="text-sm font-medium">
+            Telefone <span class="text-destructive">*</span>
+          </label>
+          <%= f.text_field :phone, id: "user_phone",
+                placeholder: "(11) 91111-1111",
+                maxlength: 15,
+                data: {
+                  controller: "phone-mask",
+                  action: "input->phone-mask#mask",
+                  "phone-mask-target" => "input"
+                },
+                class: "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                required: true %>
+        </div>
+        <div class="space-y-2">
+          <label for="user_email" class="text-sm font-medium text-muted-foreground">
+            Email <span class="text-xs font-normal">(opcional)</span>
+          </label>
+          <%= f.email_field :email, id: "user_email",
+                placeholder: "joao@exemplo.com",
+                class: "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" %>
+        </div>
+      </div>
+
+      <!-- Departamento -->
+      <div class="space-y-2">
+        <label for="user_departament_id" class="text-sm font-medium">Departamento</label>
+        <select name="user[departament_id]" id="user_departament_id"
+                class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                data-members-dialogs-target="deptSelect">
+          <option value="">Sem departamento</option>
+          <% @departaments.each do |d| %>
+            <option value="<%= d.id %>"><%= d.name %></option>
+          <% end %>
+        </select>
+      </div>
+
+      <!-- Cargo -->
+      <div class="space-y-2">
+        <label for="user_role" class="text-sm font-medium">Cargo</label>
+        <%= f.select :role,
+              options_for_select([["Membro", "member"], ["Líder", "leader"]], "member"),
+              {},
+              id: "user_role",
+              class: "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" %>
+      </div>
+
+      <!-- Footer buttons -->
+      <div class="flex justify-end gap-3 border-t border-border/40 pt-4">
+        <button type="button"
+                class="inline-flex items-center justify-center rounded-lg border border-border/60 bg-transparent px-4 py-2 text-sm font-medium text-foreground hover:bg-secondary transition-colors cursor-pointer"
+                onclick="document.getElementById('modal-new-member').dispatchEvent(new CustomEvent('modal:close'))">
+          Cancelar
+        </button>
+        <%= f.submit "Adicionar membro",
+              class: "inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors cursor-pointer" %>
+      </div>
+    <% end %>
+  <% end %>
+<% end %>

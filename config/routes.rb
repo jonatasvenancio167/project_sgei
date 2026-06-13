@@ -11,7 +11,11 @@ Rails.application.routes.draw do
   resources :event_attendees
   resources :events
   resources :memberchips
-  resources :departaments
+  resources :departaments do
+    member do
+      post :add_members
+    end
+  end
   resources :users
   resources :churches
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
@@ -24,7 +28,13 @@ Rails.application.routes.draw do
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
-  get "overview", to: "overview#index", as: :overview
+  get  "overview", to: "overview#index", as: :overview
+  get  "painel/calendario", to: "calendario#index", as: :calendario
+  get  "painel/eventos", to: "events#index", as: :painel_eventos
+  get  "painel/membros", to: "users#index",  as: :painel_membros
+  post "painel/membros", to: "users#create", as: :painel_membros_create
+
+
   
   # Defines the root path route ("/")
   root "overview#index"

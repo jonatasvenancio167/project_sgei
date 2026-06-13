@@ -13,6 +13,24 @@ class User < ApplicationRecord
   enum :status, { active: 0, inactive: 1 }, prefix: true
   enum :role, { admin: 0, leader: 1, member: 2 }
 
+  # ── Validations ──────────────────────────────────────────────────────────
+  validates :name, presence: { message: "é obrigatório" }
+  validates :phone, presence: { message: "é obrigatório" },
+                    format: {
+                      with: /\A\(\d{2}\) \d{4,5}-\d{4}\z/,
+                      message: "deve estar no formato (DD) 91111-1111"
+                    },
+                    allow_blank: false
+
+  # Make email optional (Devise requires email by default; override here)
+  def email_required?
+    false
+  end
+
+  def password_required?
+    encrypted_password.blank? ? new_record? : false
+  end
+
   def role_label
     case role
     when "admin" then "Secretaria"
