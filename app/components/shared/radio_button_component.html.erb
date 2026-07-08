@@ -1,0 +1,16 @@
+<label for="<%= input_id %>" class="<%= disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer" %>">
+  <input type="radio"
+         id="<%= input_id %>"
+         name="<%= name %>"
+         value="<%= value %>"
+         class="peer sr-only"
+         <%= "checked" if checked %>
+         <%= "disabled" if disabled %>
+         <%= "required" if required %>>
+  <span class="inline-flex items-center gap-1.5 rounded-lg border border-input bg-transparent px-3 py-1.5 text-sm text-muted-foreground shadow-sm transition-colors hover:bg-secondary/50 hover:text-foreground peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:font-medium peer-checked:text-primary peer-focus-visible:ring-1 peer-focus-visible:ring-ring">
+    <% if icon.present? %>
+      <%= lucide_icon(icon, class: "h-3.5 w-3.5") %>
+    <% end %>
+    <%= label %>
+  </span>
+</label>
