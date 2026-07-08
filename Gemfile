@@ -19,7 +19,7 @@ gem "stimulus-rails"
 gem "jbuilder"
 gem "view_component"
 gem "ransack"
-gem "pagy", "~> 9.3"
+gem "pagy", "~> 43.4"
 
 
 
