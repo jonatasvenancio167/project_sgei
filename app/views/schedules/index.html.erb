@@ -1,0 +1,45 @@
+<% content_for :title, "Escalas" %>
+
+<div class="mx-auto max-w-6xl p-8 lg:p-12">
+  <header class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <p class="text-sm text-muted-foreground">Organização</p>
+      <h1 class="mt-1 font-serif text-4xl">Escalas</h1>
+      <p class="mt-2 text-sm text-muted-foreground">
+        Organize as escalas de serviço por departamento e período.
+      </p>
+    </div>
+    <button type="button"
+            class="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors cursor-pointer"
+            onclick="document.getElementById('modal-new-schedule').dispatchEvent(new CustomEvent('modal:open'))">
+      <%= lucide_icon("plus", class: "h-4 w-4 mr-2") %> Nova escala
+    </button>
+  </header>
+
+  <% if @decorator.empty? %>
+    <div class="mt-8 rounded-2xl border border-dashed border-border/60 bg-card/40 p-10 text-center">
+      <%= lucide_icon("calendar-range", class: "mx-auto mb-3 h-10 w-10 text-muted-foreground") %>
+      <p class="text-sm text-muted-foreground">
+        Nenhuma escala cadastrada ainda.
+      </p>
+    </div>
+  <% else %>
+    <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <% @decorator.decorated_schedules.each do |schedule| %>
+        <%= render "schedules/card", schedule: schedule %>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
+<%= render Shared::ModalComponent.new(id: "modal-new-schedule", title: "Nova escala", description: "Defina as colunas que farão parte desta escala.", size: :lg) do |modal| %>
+  <% modal.with_body do %>
+    <%= render "schedules/form", schedule: @schedule, decorator: @decorator %>
+  <% end %>
+<% end %>
+
+<% if @schedule&.errors&.any? %>
+  <script>
+    document.getElementById("modal-new-schedule")?.dispatchEvent(new CustomEvent("modal:open"));
+  </script>
+<% end %>

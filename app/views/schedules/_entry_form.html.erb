@@ -1,0 +1,68 @@
+<%= form_with url: painel_schedule_entries_create_path(schedule.id), method: :post, local: true, class: "space-y-4" do %>
+  <input type="hidden" name="month" value="<%= month %>" />
+
+  <%# Datalist para autocompletar campos de texto com nomes dos membros %>
+  <% datalist_id = "members-dept-#{schedule.id}" %>
+  <datalist id="<%= datalist_id %>">
+    <% members.each do |m| %>
+      <option value="<%= m.name %>"></option>
+    <% end %>
+  </datalist>
+
+  <% field_class = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" %>
+
+  <div class="space-y-1.5">
+    <label class="text-sm font-medium">Data <span class="text-destructive">*</span></label>
+    <input type="date"
+           name="entry[date]"
+           required
+           class="<%= field_class %>" />
+    <p class="text-xs text-muted-foreground">Os membros escalados serão notificados e lembrados perto desta data.</p>
+  </div>
+
+  <% columns.each do |column| %>
+    <div class="space-y-1.5">
+      <label class="text-sm font-medium"><%= column.name %></label>
+
+      <% case column.column_type %>
+      <% when "member" %>
+        <select name="entry[cell_values][<%= column.id %>]" class="<%= field_class %> cursor-pointer">
+          <option value="">— selecione um membro —</option>
+          <% members.each do |m| %>
+            <option value="<%= m.id %>"><%= m.name %></option>
+          <% end %>
+        </select>
+      <% when "date" %>
+        <input type="date" name="entry[cell_values][<%= column.id %>]" class="<%= field_class %>" />
+      <% when "time" %>
+        <input type="time" name="entry[cell_values][<%= column.id %>]" class="<%= field_class %>" />
+      <% when "number" %>
+        <input type="number" name="entry[cell_values][<%= column.id %>]" class="<%= field_class %>" />
+      <% when "boolean" %>
+        <select name="entry[cell_values][<%= column.id %>]" class="<%= field_class %> cursor-pointer">
+          <option value="true">Sim</option>
+          <option value="false">Não</option>
+        </select>
+      <% else %>
+        <input type="text"
+               name="entry[cell_values][<%= column.id %>]"
+               placeholder="<%= column.name %>"
+               list="<%= datalist_id %>"
+               autocomplete="off"
+               class="<%= field_class %>" />
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
+    <button type="button"
+            class="inline-flex items-center justify-center rounded-lg border border-border/60 bg-transparent px-4 py-2 text-sm font-medium hover:bg-secondary transition-colors cursor-pointer"
+            data-action="click->modal#close">
+      Cancelar
+    </button>
+    <button type="submit"
+            class="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors cursor-pointer">
+      Adicionar
+    </button>
+  </div>
+<% end %>

@@ -1,0 +1,112 @@
+<% editing = schedule.persisted? %>
+<%= form_with url: editing ? painel_schedule_update_path(schedule.id) : painel_schedules_create_path,
+              method: editing ? :patch : :post,
+              local: true,
+              id: editing ? "edit_schedule_#{schedule.id}_form" : "new_schedule_form",
+              class: "space-y-4",
+              data: { controller: "schedule-form" } do %>
+  <% if schedule.errors.any? %>
+    <div class="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+      <%= schedule.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
+  <div class="space-y-2">
+    <label class="text-sm font-medium">Nome</label>
+    <input type="text"
+           name="schedule[name]"
+           value="<%= schedule.name %>"
+           placeholder="Ex: Mídia, Vocalistas…"
+           class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+           required />
+  </div>
+
+  <div class="grid gap-3 sm:grid-cols-2">
+    <div class="space-y-2">
+      <label class="text-sm font-medium">Departamento</label>
+      <select name="schedule[departament_id]"
+              class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              required>
+        <% decorator.department_options.each do |dept| %>
+          <option value="<%= dept.id %>" <%= "selected" if schedule.departament_id == dept.id %>>
+            <%= dept.name %>
+          </option>
+        <% end %>
+      </select>
+    </div>
+
+    <div class="space-y-2">
+      <label class="text-sm font-medium">Cor de destaque</label>
+      <input type="hidden"
+             name="schedule[color]"
+             value="<%= schedule.color.presence || decorator.color_choices.first[:key] %>"
+             data-schedule-form-target="colorInput" />
+      <div class="flex flex-wrap gap-2">
+        <% decorator.color_choices.each do |choice| %>
+          <button type="button"
+                  data-color="<%= choice[:key] %>"
+                  data-schedule-form-target="colorButton"
+                  data-action="click->schedule-form#selectColor"
+                  aria-label="<%= choice[:label] %>"
+                  class="h-8 w-8 rounded-full border-2 transition cursor-pointer <%= choice[:key] %> border-transparent">
+          </button>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="space-y-2">
+    <label class="text-sm font-medium">Colunas</label>
+    <div class="space-y-2" data-schedule-form-target="list">
+      <% columns_data = schedule.schedule_columns.any? \
+           ? schedule.schedule_columns.map { |c| { name: c.name, type: c.column_type } } \
+           : [{ name: "", type: "text" }, { name: "", type: "member" }] %>
+      <% columns_data.each_with_index do |column, i| %>
+        <div class="flex items-center gap-2" data-schedule-form-target="row">
+          <button type="button"
+                  class="grid h-9 w-9 shrink-0 place-items-center rounded-md border border-border/60 text-muted-foreground hover:bg-muted/50 cursor-pointer"
+                  aria-label="Mover"
+                  data-action="click->schedule-form#moveUp"
+                  data-index="<%= i %>">
+            <%= lucide_icon("grip-vertical", class: "h-4 w-4") %>
+          </button>
+          <input type="text"
+                 name="columns[][name]"
+                 value="<%= column[:name] %>"
+                 placeholder="Coluna <%= i + 1 %>"
+                 class="flex h-9 min-w-0 flex-1 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
+          <select name="columns[][type]"
+                  class="flex h-9 w-32 shrink-0 cursor-pointer rounded-md border border-input bg-transparent px-2 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+            <% ScheduleColumn::COLUMN_TYPES.each do |value, label| %>
+              <option value="<%= value %>" <%= "selected" if column[:type] == value %>><%= label %></option>
+            <% end %>
+          </select>
+          <button type="button"
+                  class="inline-flex shrink-0 items-center justify-center rounded-lg p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors cursor-pointer"
+                  aria-label="Remover"
+                  data-action="click->schedule-form#removeColumn">
+            <%= lucide_icon("trash-2", class: "h-4 w-4") %>
+          </button>
+        </div>
+      <% end %>
+    </div>
+    <p class="text-xs text-muted-foreground">Inclua ao menos uma coluna do tipo Membro — é ela que vincula e notifica os escalados.</p>
+    <button type="button"
+            class="inline-flex items-center justify-center rounded-lg bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground hover:bg-secondary/80 transition-colors cursor-pointer"
+            data-action="click->schedule-form#addColumn">
+      <%= lucide_icon("plus", class: "h-4 w-4 mr-1") %> Adicionar coluna
+    </button>
+  </div>
+
+  <div class="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
+    <button type="button"
+            class="inline-flex items-center justify-center rounded-lg border border-border/60 bg-transparent px-4 py-2 text-sm font-medium text-foreground hover:bg-secondary transition-colors cursor-pointer"
+            data-action="click->modal#close">
+      Cancelar
+    </button>
+    <button type="submit"
+            class="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors cursor-pointer">
+      <%= editing ? "Atualizar escala" : "Criar escala" %>
+    </button>
+  </div>
+<% end %>
