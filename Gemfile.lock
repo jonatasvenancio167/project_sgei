@@ -86,6 +86,8 @@ GEM
     brakeman (8.0.4)
       racc
     builder (3.3.0)
+    byebug (13.0.0)
+      reline (>= 0.6.0)
     capybara (3.40.0)
       addressable
       matrix
@@ -386,6 +388,7 @@ PLATFORMS
 DEPENDENCIES
   bootsnap
   brakeman
+  byebug
   capybara
   debug
   devise (~> 5.0)
