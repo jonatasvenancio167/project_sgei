@@ -1,0 +1,165 @@
+<%= form_with model: @church, url: settings_church_path, method: :patch, local: true, class: "flex flex-col gap-6" do |f| %>
+
+  <!-- ── Identidade visual ─────────────────────────────────────────────── -->
+  <%= render CardComponent.new do |card| %>
+    <% card.with_title { "Identidade visual" } %>
+    <% card.with_description { "Como sua igreja aparece no sistema." } %>
+
+    <div class="grid gap-6 md:grid-cols-[auto_1fr]">
+      <div class="flex flex-col items-center gap-2">
+        <span class="grid h-24 w-24 place-items-center rounded-full border border-border/60 bg-secondary font-serif text-2xl text-secondary-foreground">
+          <%= @church.display_name_or_default.split.first(2).map { |part| part[0]&.upcase }.join %>
+        </span>
+        <button type="button" disabled
+                class="inline-flex cursor-not-allowed items-center gap-2 rounded-lg border border-border/60 px-3 py-1.5 text-sm text-muted-foreground opacity-60">
+          <%= lucide_icon("upload", class: "h-3.5 w-3.5") %> Trocar logo (em breve)
+        </button>
+      </div>
+
+      <div class="grid gap-4">
+        <div class="space-y-2">
+          <label for="church_display_name" class="text-sm font-medium">Nome exibido no sistema</label>
+          <%= f.text_field :display_name, id: "church_display_name",
+                placeholder: @church.name, class: settings_input_classes %>
+          <p class="text-xs text-muted-foreground">Aparece no cabeçalho no lugar de “Ekklesia”.</p>
+        </div>
+
+        <div class="space-y-2">
+          <span class="text-sm font-medium">Cor primária</span>
+          <div class="flex flex-wrap items-center gap-2">
+            <% Church::PRIMARY_COLORS.each do |color| %>
+              <label class="cursor-pointer">
+                <%= f.radio_button :primary_color, color, class: "peer sr-only" %>
+                <span class="block h-8 w-8 rounded-full border-2 border-transparent transition-transform peer-checked:scale-110 peer-checked:border-foreground"
+                      style="background-color: <%= color %>" title="<%= color %>"></span>
+              </label>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- ── Dados gerais ──────────────────────────────────────────────────── -->
+  <%= render CardComponent.new do |card| %>
+    <% card.with_title { "Dados gerais" } %>
+    <% card.with_description { "Informações jurídicas e de contato." } %>
+
+    <div class="grid gap-4 md:grid-cols-2">
+      <div class="space-y-2 md:col-span-2">
+        <label for="church_name" class="text-sm font-medium">Nome completo da instituição <span class="text-destructive">*</span></label>
+        <%= f.text_field :name, id: "church_name", required: true, class: settings_input_classes %>
+      </div>
+
+      <div class="space-y-2">
+        <label for="church_cnpj" class="text-sm font-medium">CNPJ</label>
+        <%= f.text_field :cnpj, id: "church_cnpj", placeholder: "00.000.000/0000-00", class: settings_input_classes %>
+      </div>
+
+      <div class="space-y-2">
+        <label for="church_phone" class="text-sm font-medium">Telefone</label>
+        <%= f.text_field :phone, id: "church_phone", placeholder: "(85) 3000-0000", class: settings_input_classes %>
+      </div>
+
+      <div class="space-y-2">
+        <label for="church_email" class="text-sm font-medium">Email institucional</label>
+        <%= f.email_field :email, id: "church_email", class: settings_input_classes %>
+      </div>
+
+      <div class="space-y-2">
+        <label for="church_website" class="text-sm font-medium">Site</label>
+        <%= f.text_field :website, id: "church_website", placeholder: "https://", class: settings_input_classes %>
+      </div>
+
+      <div class="space-y-2">
+        <label for="church_founded_at" class="text-sm font-medium">Data de fundação</label>
+        <%= f.date_field :founded_at, id: "church_founded_at", class: settings_input_classes %>
+      </div>
+
+      <div class="space-y-2">
+        <label for="church_responsible_name" class="text-sm font-medium">Responsável</label>
+        <%= f.text_field :responsible_name, id: "church_responsible_name", placeholder: "Nome do dirigente", class: settings_input_classes %>
+      </div>
+
+      <div class="space-y-2">
+        <label for="church_church_type" class="text-sm font-medium">Tipo</label>
+        <%= f.select :church_type,
+              options_for_select(
+                [["Sede", "headquarters"], ["Congregação", "congregation"], ["Ponto de Pregação", "preaching_point"]],
+                @church.church_type
+              ),
+              {}, id: "church_church_type", class: settings_input_classes %>
+      </div>
+
+      <div class="space-y-2">
+        <label for="church_timezone" class="text-sm font-medium">Fuso horário</label>
+        <%= f.select :timezone,
+              options_for_select(Church::TIMEZONES.map { |value, label| [label, value] }, @church.timezone),
+              {}, id: "church_timezone", class: settings_input_classes %>
+      </div>
+
+      <div class="space-y-2">
+        <label for="church_status" class="text-sm font-medium">Status</label>
+        <%= f.select :status,
+              options_for_select([["Ativa", "active"], ["Inativa", "inactive"]], @church.status),
+              {}, id: "church_status", class: settings_input_classes %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- ── Endereço ──────────────────────────────────────────────────────── -->
+  <%= render CardComponent.new do |card| %>
+    <% card.with_title do %>
+      <span class="flex items-center gap-2"><%= lucide_icon("map-pin", class: "h-4 w-4") %> Endereço</span>
+    <% end %>
+
+    <%= f.fields_for :address, @church.address || @church.build_address do |address_form| %>
+      <div class="grid gap-4 md:grid-cols-6">
+        <div class="space-y-2 md:col-span-2">
+          <label for="church_address_zip_code" class="text-sm font-medium">CEP</label>
+          <%= address_form.text_field :zip_code, id: "church_address_zip_code", placeholder: "00000-000", class: settings_input_classes %>
+        </div>
+
+        <div class="space-y-2 md:col-span-3">
+          <label for="church_address_street" class="text-sm font-medium">Logradouro</label>
+          <%= address_form.text_field :street, id: "church_address_street", class: settings_input_classes %>
+        </div>
+
+        <div class="space-y-2">
+          <label for="church_address_number" class="text-sm font-medium">Número</label>
+          <%= address_form.text_field :number, id: "church_address_number", class: settings_input_classes %>
+        </div>
+
+        <div class="space-y-2 md:col-span-2">
+          <label for="church_address_complement" class="text-sm font-medium">Complemento</label>
+          <%= address_form.text_field :complement, id: "church_address_complement", class: settings_input_classes %>
+        </div>
+
+        <div class="space-y-2 md:col-span-2">
+          <label for="church_address_neighborhood" class="text-sm font-medium">Bairro</label>
+          <%= address_form.text_field :neighborhood, id: "church_address_neighborhood", class: settings_input_classes %>
+        </div>
+
+        <div class="space-y-2">
+          <label for="church_address_city" class="text-sm font-medium">Cidade</label>
+          <%= address_form.text_field :city, id: "church_address_city", class: settings_input_classes %>
+        </div>
+
+        <div class="space-y-2">
+          <label for="church_address_state" class="text-sm font-medium">Estado</label>
+          <%= address_form.text_field :state, id: "church_address_state", maxlength: 2, class: settings_input_classes %>
+        </div>
+      </div>
+    <% end %>
+  <% end %>
+
+  <!-- ── Save bar ──────────────────────────────────────────────────────── -->
+  <div class="sticky bottom-0 flex justify-end gap-2 border-t border-border/60 bg-background/95 px-2 py-3 backdrop-blur">
+    <%= link_to "Descartar", painel_settings_path(section: "church"),
+          class: "inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground" %>
+    <button type="submit"
+            class="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90">
+      <%= lucide_icon("save", class: "h-4 w-4") %> Salvar alterações
+    </button>
+  </div>
+<% end %>

@@ -1,0 +1,53 @@
+<%= render CardComponent.new do |card| %>
+  <% card.with_title { "Perfis e Permissões" } %>
+  <% card.with_description do %>
+    Controle de acesso por módulo. O perfil <b>Secretaria</b> sempre possui acesso total.
+  <% end %>
+
+  <%= form_with url: settings_permissions_path, method: :patch, local: true do %>
+    <div class="overflow-x-auto rounded-lg border border-border/60">
+      <table class="w-full caption-bottom text-sm">
+        <thead>
+          <tr class="border-b border-border/60">
+            <th class="h-10 w-[200px] px-4 text-left align-middle font-medium text-muted-foreground">Módulo</th>
+            <th class="h-10 px-4 text-center align-middle">
+              <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                <%= lucide_icon("crown", class: "h-3 w-3") %> Líder de Departamento
+              </span>
+            </th>
+            <th class="h-10 px-4 text-center align-middle">
+              <span class="inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground">Membro</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="[&_tr:last-child]:border-0">
+          <% RolePermission::MODULES.each do |module_key, module_label| %>
+            <tr class="border-b border-border/60 transition-colors hover:bg-muted/30">
+              <td class="px-4 py-3 font-medium"><%= module_label %></td>
+              <% RolePermission.roles.each_key do |role| %>
+                <% permission = @permissions[[role, module_key]] %>
+                <% allowed = permission.nil? || permission.allowed? %>
+                <td class="px-4 py-3 text-center">
+                  <label class="relative inline-flex cursor-pointer items-center">
+                    <input type="hidden" name="permissions[<%= role %>][<%= module_key %>]" value="0">
+                    <input type="checkbox" name="permissions[<%= role %>][<%= module_key %>]" value="1"
+                           class="peer sr-only" <%= "checked" if allowed %>>
+                    <span class="h-5 w-9 rounded-full bg-input transition-colors peer-checked:bg-primary peer-focus-visible:ring-1 peer-focus-visible:ring-ring"></span>
+                    <span class="absolute left-0.5 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-background shadow transition-transform peer-checked:translate-x-4"></span>
+                  </label>
+                </td>
+              <% end %>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-4 flex justify-end border-t border-border/60 pt-4">
+      <button type="submit"
+              class="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90">
+        <%= lucide_icon("save", class: "h-4 w-4") %> Salvar permissões
+      </button>
+    </div>
+  <% end %>
+<% end %>

@@ -1,0 +1,33 @@
+<%
+  integrations = [
+    { name: "WhatsApp Business", description: "Envie notificações e confirmações via WhatsApp API.", icon: "message-square" },
+    { name: "SMTP personalizado", description: "Configure host, porta, usuário e senha para envio de emails.", icon: "mail" },
+    { name: "Google Calendar", description: "Sincronize eventos e escalas com a agenda do Google.", icon: "calendar" }
+  ]
+%>
+
+<div class="grid gap-4 md:grid-cols-2">
+  <% integrations.each do |integration| %>
+    <%= render CardComponent.new do |card| %>
+      <% card.with_header do %>
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span class="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
+              <%= lucide_icon(integration[:icon], class: "h-5 w-5") %>
+            </span>
+            <div>
+              <h3 class="text-base font-semibold leading-tight"><%= integration[:name] %></h3>
+              <p class="mt-1 text-sm text-muted-foreground"><%= integration[:description] %></p>
+            </div>
+          </div>
+          <span class="inline-flex shrink-0 items-center rounded-full border border-border/60 px-2.5 py-0.5 text-xs">Em breve</span>
+        </div>
+      <% end %>
+
+      <button type="button" disabled
+              class="w-full cursor-not-allowed rounded-lg border border-border/60 px-4 py-2 text-sm font-medium text-muted-foreground opacity-60">
+        Conectar
+      </button>
+    <% end %>
+  <% end %>
+</div>

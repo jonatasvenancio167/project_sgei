@@ -1,0 +1,215 @@
+<%
+  current_q      = params[:q].to_s
+  current_role   = params[:role].to_s
+  current_status = params[:status].to_s
+%>
+
+<%= render CardComponent.new do |card| %>
+  <% card.with_header do %>
+    <div class="flex flex-wrap items-start justify-between gap-4">
+      <div>
+        <h2 class="font-semibold leading-none tracking-tight">Usuários e Acesso</h2>
+        <p class="mt-1.5 text-sm text-muted-foreground">Pessoas com acesso a <%= @church.display_name_or_default %>.</p>
+      </div>
+      <button type="button"
+              class="inline-flex cursor-pointer items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+              onclick="document.getElementById('modal-invite-user').dispatchEvent(new CustomEvent('modal:open'))">
+        <%= lucide_icon("user-plus", class: "mr-2 h-4 w-4") %> Convidar usuário
+      </button>
+    </div>
+  <% end %>
+
+  <!-- ── Filters ─────────────────────────────────────────────────────── -->
+  <%= form_with url: painel_settings_path, method: :get, local: true, id: "settings-users-filters",
+        class: "mb-4 flex flex-wrap items-center gap-2" do |f| %>
+    <%= hidden_field_tag :section, "users" %>
+
+    <div class="relative min-w-[220px] flex-1">
+      <div class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+        <%= lucide_icon("search", class: "h-4 w-4") %>
+      </div>
+      <%= f.text_field :q, value: current_q, placeholder: "Buscar por nome ou email",
+            class: settings_input_classes("pl-9") %>
+    </div>
+
+    <%= f.select :role,
+          options_for_select([
+            ["Todos os perfis", "all"],
+            ["Secretaria", "admin"],
+            ["Líder de Departamento", "leader"],
+            ["Membro", "member"]
+          ], current_role.presence || "all"),
+          {}, class: settings_input_classes("w-[200px]") %>
+
+    <%= f.select :status,
+          options_for_select([
+            ["Todos os status", "all"],
+            ["Ativo", "active"],
+            ["Inativo", "inactive"]
+          ], current_status.presence || "all"),
+          {}, class: settings_input_classes("w-[160px]") %>
+
+    <button type="submit" class="hidden"></button>
+  <% end %>
+
+  <script>
+    (function() {
+      var form = document.getElementById('settings-users-filters');
+      if (!form) return;
+      form.querySelectorAll('select').forEach(function(sel) {
+        sel.addEventListener('change', function() { form.submit(); });
+      });
+    })();
+  </script>
+
+  <!-- ── Table ───────────────────────────────────────────────────────── -->
+  <div class="overflow-x-auto rounded-lg border border-border/60">
+    <table class="w-full caption-bottom text-sm">
+      <thead>
+        <tr class="border-b border-border/60">
+          <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Usuário</th>
+          <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Perfil</th>
+          <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
+          <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground hidden md:table-cell">Entrada</th>
+          <th class="h-10 w-[120px] px-4 text-right align-middle font-medium text-muted-foreground">Ações</th>
+        </tr>
+      </thead>
+      <tbody class="[&_tr:last-child]:border-0">
+        <% if @users.empty? %>
+          <tr>
+            <td colspan="5">
+              <div class="flex flex-col items-center gap-2 py-10 text-center text-sm text-muted-foreground">
+                <%= lucide_icon("users", class: "h-6 w-6 opacity-50") %>
+                Nenhum usuário encontrado.
+              </div>
+            </td>
+          </tr>
+        <% else %>
+          <% @users.each do |user| %>
+            <tr class="border-b border-border/60 transition-colors hover:bg-muted/30">
+              <td class="px-4 py-3">
+                <div class="flex items-center gap-3">
+                  <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary text-xs font-medium text-secondary-foreground">
+                    <%= user.name.to_s.split.first(2).map { |part| part[0]&.upcase }.join.presence || "?" %>
+                  </span>
+                  <div class="min-w-0">
+                    <p class="truncate text-sm font-medium"><%= user.name %></p>
+                    <p class="truncate text-xs text-muted-foreground"><%= user.email.presence || "—" %></p>
+                  </div>
+                </div>
+              </td>
+
+              <td class="px-4 py-3">
+                <% case user.role %>
+                <% when "admin" %>
+                  <span class="inline-flex items-center gap-1 rounded-full bg-primary/20 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                    <%= lucide_icon("shield", class: "h-3 w-3") %> Secretaria
+                  </span>
+                <% when "leader" %>
+                  <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                    <%= lucide_icon("crown", class: "h-3 w-3") %> Líder
+                  </span>
+                <% else %>
+                  <span class="text-sm text-muted-foreground">Membro</span>
+                <% end %>
+              </td>
+
+              <td class="px-4 py-3">
+                <%= settings_status_badge(user.status_active?, active_label: "Ativo", inactive_label: "Inativo") %>
+              </td>
+
+              <td class="hidden px-4 py-3 text-xs text-muted-foreground md:table-cell">
+                <%= user.created_at.strftime("%d/%m/%Y") %>
+              </td>
+
+              <td class="px-4 py-3 text-right">
+                <div class="inline-flex gap-1">
+                  <%= button_to toggle_status_settings_user_path(user, q: current_q, role: current_role, status: current_status),
+                        method: :patch, title: user.status_active? ? "Desativar acesso" : "Ativar acesso",
+                        class: "cursor-pointer rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground" do %>
+                    <%= lucide_icon("power", class: "h-3.5 w-3.5") %>
+                  <% end %>
+                  <%= button_to settings_user_path(user, q: current_q, role: current_role, status: current_status),
+                        method: :delete, title: "Remover usuário",
+                        data: { turbo_confirm: "Remover o acesso de #{user.name}?" },
+                        class: "cursor-pointer rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive" do %>
+                    <%= lucide_icon("trash-2", class: "h-3.5 w-3.5") %>
+                  <% end %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>
+
+<!-- ── Modal: Convidar usuário ─────────────────────────────────────────── -->
+<%= render Shared::ModalComponent.new(
+      id: "modal-invite-user",
+      title: "Convidar usuário",
+      description: "Ele receberá acesso à instituição atual.",
+      size: :md
+    ) do |modal| %>
+  <% modal.with_body do %>
+    <%= form_with url: settings_users_path, method: :post, scope: :user, local: true, class: "space-y-4" do |f| %>
+      <div class="space-y-2">
+        <label for="invite_user_name" class="text-sm font-medium">Nome completo <span class="text-destructive">*</span></label>
+        <%= f.text_field :name, id: "invite_user_name", required: true, class: settings_input_classes %>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div class="space-y-2">
+          <label for="invite_user_email" class="text-sm font-medium">Email <span class="text-destructive">*</span></label>
+          <%= f.email_field :email, id: "invite_user_email", required: true, class: settings_input_classes %>
+        </div>
+        <div class="space-y-2">
+          <label for="invite_user_phone" class="text-sm font-medium">Telefone <span class="text-destructive">*</span></label>
+          <%= f.text_field :phone, id: "invite_user_phone", required: true,
+                placeholder: "(11) 91111-1111", maxlength: 15,
+                data: { controller: "phone-mask", action: "input->phone-mask#mask", "phone-mask-target" => "input" },
+                class: settings_input_classes %>
+        </div>
+        <div class="space-y-2">
+          <label for="invite_user_password" class="text-sm font-medium">Senha</label>
+          <%= f.password_field :password, id: "invite_user_password",
+                placeholder: "Deixe em branco para gerar", class: settings_input_classes %>
+        </div>
+        <div class="space-y-2">
+          <label for="invite_user_password_confirmation" class="text-sm font-medium">Confirmar senha</label>
+          <%= f.password_field :password_confirmation, id: "invite_user_password_confirmation", class: settings_input_classes %>
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <label for="invite_user_role" class="text-sm font-medium">Perfil</label>
+        <%= f.select :role,
+              options_for_select([["Membro", "member"], ["Líder de Departamento", "leader"], ["Secretaria", "admin"]], "member"),
+              {}, id: "invite_user_role", class: settings_input_classes %>
+      </div>
+
+      <div class="space-y-2">
+        <span class="text-sm font-medium">Status</span>
+        <div class="flex flex-wrap gap-2">
+          <%= render Shared::RadioButtonComponent.new(
+                name: "user[status]", value: "active",
+                label: "Ativo", icon: "circle-check", checked: true) %>
+          <%= render Shared::RadioButtonComponent.new(
+                name: "user[status]", value: "inactive",
+                label: "Inativo", icon: "power") %>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 border-t border-border/40 pt-4">
+        <button type="button"
+                class="inline-flex cursor-pointer items-center justify-center rounded-lg border border-border/60 bg-transparent px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+                onclick="document.getElementById('modal-invite-user').dispatchEvent(new CustomEvent('modal:close'))">
+          Cancelar
+        </button>
+        <%= f.submit "Convidar",
+              class: "inline-flex cursor-pointer items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90" %>
+      </div>
+    <% end %>
+  <% end %>
+<% end %>

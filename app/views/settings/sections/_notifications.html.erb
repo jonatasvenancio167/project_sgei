@@ -1,0 +1,56 @@
+<%= render CardComponent.new do |card| %>
+  <% card.with_title { "Notificações" } %>
+  <% card.with_description { "Quais eventos disparam avisos e por quais canais." } %>
+
+  <%= form_with url: settings_notification_settings_path, method: :patch, local: true do %>
+    <div class="overflow-x-auto rounded-lg border border-border/60">
+      <table class="w-full caption-bottom text-sm">
+        <thead>
+          <tr class="border-b border-border/60">
+            <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Evento</th>
+            <th class="h-10 w-[100px] px-4 text-center align-middle font-medium text-muted-foreground">Ativo</th>
+            <th class="h-10 w-[320px] px-4 text-left align-middle font-medium text-muted-foreground">Canal</th>
+          </tr>
+        </thead>
+        <tbody class="[&_tr:last-child]:border-0">
+          <% @notification_settings.each do |event_key, setting| %>
+            <tr class="border-b border-border/60 transition-colors hover:bg-muted/30">
+              <td class="px-4 py-3 font-medium"><%= NotificationSetting::EVENTS[event_key] %></td>
+
+              <td class="px-4 py-3 text-center">
+                <label class="relative inline-flex cursor-pointer items-center">
+                  <input type="hidden" name="notification_settings[<%= event_key %>][active]" value="0">
+                  <input type="checkbox" name="notification_settings[<%= event_key %>][active]" value="1"
+                         class="peer sr-only" <%= "checked" if setting.active? %>>
+                  <span class="h-5 w-9 rounded-full bg-input transition-colors peer-checked:bg-primary peer-focus-visible:ring-1 peer-focus-visible:ring-ring"></span>
+                  <span class="absolute left-0.5 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-background shadow transition-transform peer-checked:translate-x-4"></span>
+                </label>
+              </td>
+
+              <td class="px-4 py-3">
+                <div class="flex flex-wrap gap-2">
+                  <%= render Shared::RadioButtonComponent.new(
+                        name: "notification_settings[#{event_key}][channel]", value: "email",
+                        label: "Email", icon: "mail", checked: setting.channel_email?) %>
+                  <%= render Shared::RadioButtonComponent.new(
+                        name: "notification_settings[#{event_key}][channel]", value: "whatsapp",
+                        label: "WhatsApp", icon: "message-square", checked: setting.channel_whatsapp?) %>
+                  <%= render Shared::RadioButtonComponent.new(
+                        name: "notification_settings[#{event_key}][channel]", value: "both",
+                        label: "Ambos", checked: setting.channel_both?) %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-4 flex justify-end border-t border-border/60 pt-4">
+      <button type="submit"
+              class="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90">
+        <%= lucide_icon("save", class: "h-4 w-4") %> Salvar notificações
+      </button>
+    </div>
+  <% end %>
+<% end %>
