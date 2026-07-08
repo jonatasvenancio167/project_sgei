@@ -1,5 +1,11 @@
 <% content_for :title, "Eventos" %>
 
+<%
+  url_builder = ->(page:, per:) do
+    painel_eventos_path(params.to_unsafe_h.merge(page: page, per: per))
+  end
+%>
+
 <div class="mx-auto max-w-6xl p-8 lg:p-12">
   <header class="flex items-end justify-between">
     <div>
@@ -21,7 +27,7 @@
   </header>
 
   <%= render "events/filters", decorator: @decorator %>
-  <%= render "events/table", decorator: @decorator %>
+  <%= render "events/table", decorator: @decorator, url_builder: url_builder %>
 </div>
 
 <!-- Modal for New Event -->

@@ -34,17 +34,15 @@
     </table>
   </div>
   
-  <% if @pagy.pages > 1 %>
-    <div class="flex items-center justify-between border-t border-border/60 bg-secondary/20 px-6 py-4">
-      <div class="text-xs text-muted-foreground">
-        Exibindo <span class="font-medium text-foreground"><%= @pagy.from %></span> a <span class="font-medium text-foreground"><%= @pagy.to %></span> de <span class="font-medium text-foreground"><%= @pagy.count %></span> eventos
-      </div>
-      <div class="pagy-nav">
-        <%== pagy_nav(@pagy) %>
-      </div>
-
-
-    </div>
-  <% end %>
+  <div class="border-t border-border/60">
+    <%= render Shared::PaginationComponent.new(
+          current_page: @pagy.page,
+          total_pages:  @pagy.pages,
+          total_count:  @pagy.count,
+          page_size:    @pagy.limit,
+          url_builder:  url_builder,
+          item_label:   { singular: "evento", plural: "eventos" }
+        ) %>
+  </div>
 </div>
 
