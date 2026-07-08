@@ -13,7 +13,7 @@ class OverviewController < ApplicationController
     end
 
     # Active Forms
-    @active_forms = Form.where(active: true).includes(:event, event: :departament)
+    @active_forms = Form.active.includes(:departament, event: :departament)
     
     unless @user.admin?
       # Forms are associated with events, which are associated with departments
@@ -24,7 +24,7 @@ class OverviewController < ApplicationController
     if @user.admin?
       @stats = [
         { label: "Eventos este mês", value: Event.where(start_date: Time.current.beginning_of_month..Time.current.end_of_month).count.to_s, icon: "calendar-days", hint: "+4 vs. mês passado" },
-        { label: "Inscrições abertas", value: Form.where(active: true).count.to_s, icon: "clipboard-list", hint: "#{EventAttendee.count} inscritos no total" },
+        { label: "Inscrições abertas", value: Form.active.count.to_s, icon: "clipboard-list", hint: "#{EventAttendee.count} inscritos no total" },
         { label: "Membros ativos", value: User.status_active.count.to_s, icon: "users", hint: "#{Departament.count} departamentos" },
         { label: "Engajamento", value: "87%", icon: "trending-up", hint: "Notificações abertas" }
       ]

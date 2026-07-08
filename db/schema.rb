@@ -10,9 +10,34 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_06_13_152246) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_08_100500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "addresses", force: :cascade do |t|
+    t.string "street"
+    t.string "number"
+    t.string "complement"
+    t.string "neighborhood"
+    t.string "city"
+    t.string "state"
+    t.string "zip_code"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "audit_logs", force: :cascade do |t|
+    t.bigint "church_id", null: false
+    t.bigint "user_id"
+    t.string "module_key", null: false
+    t.string "action", null: false
+    t.string "detail"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["church_id", "created_at"], name: "index_audit_logs_on_church_id_and_created_at"
+    t.index ["church_id"], name: "index_audit_logs_on_church_id"
+    t.index ["user_id"], name: "index_audit_logs_on_user_id"
+  end
 
   create_table "churches", force: :cascade do |t|
     t.string "name", null: false
@@ -21,6 +46,19 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_13_152246) do
     t.string "phone"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "display_name"
+    t.string "cnpj"
+    t.string "website"
+    t.date "founded_at"
+    t.string "timezone", default: "America/Fortaleza", null: false
+    t.string "primary_color", default: "#4f6e5d", null: false
+    t.integer "church_type", default: 0, null: false
+    t.integer "status", default: 0, null: false
+    t.string "responsible_name"
+    t.bigint "address_id"
+    t.bigint "parent_church_id"
+    t.index ["address_id"], name: "index_churches_on_address_id"
+    t.index ["parent_church_id"], name: "index_churches_on_parent_church_id"
     t.index ["slug"], name: "index_churches_on_slug", unique: true
   end
 
@@ -80,8 +118,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_13_152246) do
     t.text "value"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "form_response_id"
     t.index ["form_field_id"], name: "index_form_answers_on_form_field_id"
     t.index ["form_id"], name: "index_form_answers_on_form_id"
+    t.index ["form_response_id"], name: "index_form_answers_on_form_response_id"
     t.index ["value"], name: "index_form_answers_on_value"
   end
 
@@ -101,11 +141,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_13_152246) do
 
   create_table "form_responses", force: :cascade do |t|
     t.bigint "form_id", null: false
-    t.bigint "user_id", null: false
+    t.bigint "user_id"
     t.datetime "submitted_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "token"
+    t.string "guest_name"
+    t.string "guest_email"
+    t.string "guest_phone"
     t.index ["form_id"], name: "index_form_responses_on_form_id"
+    t.index ["token"], name: "index_form_responses_on_token", unique: true
     t.index ["user_id"], name: "index_form_responses_on_user_id"
   end
 
@@ -118,10 +163,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_13_152246) do
     t.datetime "deleted_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "departament_id"
+    t.integer "limit"
+    t.string "slug"
+    t.string "banner_url"
     t.index ["active"], name: "index_forms_on_active"
     t.index ["church_id"], name: "index_forms_on_church_id"
     t.index ["deleted_at"], name: "index_forms_on_deleted_at"
+    t.index ["departament_id"], name: "index_forms_on_departament_id"
     t.index ["event_id"], name: "index_forms_on_event_id"
+    t.index ["slug"], name: "index_forms_on_slug", unique: true
   end
 
   create_table "integrations", force: :cascade do |t|
@@ -145,6 +196,17 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_13_152246) do
     t.index ["user_id"], name: "index_memberchips_on_user_id"
   end
 
+  create_table "notification_settings", force: :cascade do |t|
+    t.bigint "church_id", null: false
+    t.string "event_key", null: false
+    t.boolean "active", default: true, null: false
+    t.integer "channel", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["church_id", "event_key"], name: "index_notification_settings_on_church_id_and_event_key", unique: true
+    t.index ["church_id"], name: "index_notification_settings_on_church_id"
+  end
+
   create_table "notifications", force: :cascade do |t|
     t.bigint "church_id", null: false
     t.string "title"
@@ -153,6 +215,68 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_13_152246) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["church_id"], name: "index_notifications_on_church_id"
+  end
+
+  create_table "role_permissions", force: :cascade do |t|
+    t.bigint "church_id", null: false
+    t.integer "role", null: false
+    t.string "module_key", null: false
+    t.boolean "allowed", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["church_id", "role", "module_key"], name: "index_role_permissions_on_church_id_and_role_and_module_key", unique: true
+    t.index ["church_id"], name: "index_role_permissions_on_church_id"
+  end
+
+  create_table "schedule_assignments", force: :cascade do |t|
+    t.bigint "schedule_entry_id", null: false
+    t.bigint "user_id", null: false
+    t.bigint "schedule_column_id", null: false
+    t.datetime "notified_at"
+    t.datetime "reminder_7d_sent_at"
+    t.datetime "reminder_3d_sent_at"
+    t.datetime "reminder_1d_sent_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["schedule_column_id"], name: "index_schedule_assignments_on_schedule_column_id"
+    t.index ["schedule_entry_id", "user_id", "schedule_column_id"], name: "index_schedule_assignments_uniqueness", unique: true
+    t.index ["schedule_entry_id"], name: "index_schedule_assignments_on_schedule_entry_id"
+    t.index ["user_id"], name: "index_schedule_assignments_on_user_id"
+  end
+
+  create_table "schedule_columns", force: :cascade do |t|
+    t.bigint "schedule_id", null: false
+    t.string "name", null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "column_type", default: "text", null: false
+    t.index ["schedule_id", "position"], name: "index_schedule_columns_on_schedule_id_and_position"
+    t.index ["schedule_id"], name: "index_schedule_columns_on_schedule_id"
+  end
+
+  create_table "schedule_entries", force: :cascade do |t|
+    t.bigint "schedule_id", null: false
+    t.string "month", null: false
+    t.integer "position", default: 0, null: false
+    t.jsonb "cell_values", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.date "date"
+    t.index ["date"], name: "index_schedule_entries_on_date"
+    t.index ["schedule_id", "month"], name: "index_schedule_entries_on_schedule_id_and_month"
+    t.index ["schedule_id"], name: "index_schedule_entries_on_schedule_id"
+  end
+
+  create_table "schedules", force: :cascade do |t|
+    t.bigint "church_id", null: false
+    t.bigint "departament_id", null: false
+    t.string "name", null: false
+    t.string "color", default: "bg-blue-500 text-white", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["church_id"], name: "index_schedules_on_church_id"
+    t.index ["departament_id"], name: "index_schedules_on_departament_id"
   end
 
   create_table "user_notifications", force: :cascade do |t|
@@ -181,6 +305,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_13_152246) do
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
     t.integer "status", default: 0
+    t.bigint "address_id"
+    t.index ["address_id"], name: "index_users_on_address_id"
     t.index ["church_id"], name: "index_users_on_church_id"
     t.index ["deleted_at"], name: "index_users_on_deleted_at"
     t.index ["email"], name: "index_users_on_email", unique: true
@@ -188,6 +314,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_13_152246) do
     t.index ["role"], name: "index_users_on_role"
   end
 
+  add_foreign_key "audit_logs", "churches"
+  add_foreign_key "audit_logs", "users"
+  add_foreign_key "churches", "addresses"
+  add_foreign_key "churches", "churches", column: "parent_church_id"
   add_foreign_key "departaments", "churches"
   add_foreign_key "event_attendees", "events"
   add_foreign_key "event_attendees", "users"
@@ -195,17 +325,29 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_13_152246) do
   add_foreign_key "events", "departaments"
   add_foreign_key "events", "users", column: "created_by_id"
   add_foreign_key "form_answers", "form_fields"
+  add_foreign_key "form_answers", "form_responses"
   add_foreign_key "form_answers", "forms"
   add_foreign_key "form_fields", "forms"
   add_foreign_key "form_responses", "forms"
   add_foreign_key "form_responses", "users"
   add_foreign_key "forms", "churches"
+  add_foreign_key "forms", "departaments"
   add_foreign_key "forms", "events"
   add_foreign_key "integrations", "churches"
   add_foreign_key "memberchips", "departaments"
   add_foreign_key "memberchips", "users"
+  add_foreign_key "notification_settings", "churches"
   add_foreign_key "notifications", "churches"
+  add_foreign_key "role_permissions", "churches"
+  add_foreign_key "schedule_assignments", "schedule_columns"
+  add_foreign_key "schedule_assignments", "schedule_entries"
+  add_foreign_key "schedule_assignments", "users"
+  add_foreign_key "schedule_columns", "schedules"
+  add_foreign_key "schedule_entries", "schedules"
+  add_foreign_key "schedules", "churches"
+  add_foreign_key "schedules", "departaments"
   add_foreign_key "user_notifications", "notifications"
   add_foreign_key "user_notifications", "users"
+  add_foreign_key "users", "addresses"
   add_foreign_key "users", "churches"
 end

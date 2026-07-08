@@ -68,7 +68,15 @@
               <p class="text-sm font-medium"><%= f.title %></p>
               <span class="rounded-full px-2.5 py-0.5 text-[10px] bg-primary/15 text-primary">Aberto</span>
             </div>
-            <p class="mt-1 text-xs text-muted-foreground">Inscrição para <%= f.event.title %></p>
+            <p class="mt-1 text-xs text-muted-foreground">
+              <% if f.event %>
+                Inscrição para <%= f.event.title %>
+              <% elsif f.departament %>
+                Inscrição de <%= f.departament.name %>
+              <% else %>
+                Inscrição geral
+              <% end %>
+            </p>
           </li>
         <% end %>
       </ul>

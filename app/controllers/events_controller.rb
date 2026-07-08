@@ -5,7 +5,9 @@ class EventsController < ApplicationController
   def index
     @user = current_user
     q, events = EventQuery.new(params, user: @user).call
-    @pagy, @events = pagy(events)
+    per = [params[:per].to_i, 10].max
+    per = Shared::PaginationComponent::PAGE_SIZE_OPTIONS.include?(per) ? per : 10
+    @pagy, @events = pagy(events, limit: per)
     @decorator = ::Events::IndexDecorator.new(q, @events, params, @user, view_context)
     @event = Event.new # For the modal form
   end

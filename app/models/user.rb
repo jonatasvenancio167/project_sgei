@@ -5,10 +5,14 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable
 
   belongs_to :church
+  belongs_to :address, optional: true, dependent: :destroy
   has_many :memberchips, dependent: :destroy
   has_many :departaments, through: :memberchips
   has_many :event_attendees, dependent: :destroy
   has_many :events, through: :event_attendees
+  has_many :schedule_assignments, dependent: :destroy
+  has_many :schedule_entries, through: :schedule_assignments
+  has_many :audit_logs, dependent: :nullify
 
   enum :status, { active: 0, inactive: 1 }, prefix: true
   enum :role, { admin: 0, leader: 1, member: 2 }

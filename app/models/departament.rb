@@ -25,6 +25,7 @@ class Departament < ApplicationRecord
   has_many :events, dependent: :destroy
   has_many :memberchips, dependent: :destroy
   has_many :users, through: :memberchips
+  has_many :schedules, dependent: :destroy
 
   validates :name, presence: true, uniqueness: { scope: :church_id }
   validates :color, presence: true, inclusion: { in: COLOR_CHOICES.map { |c| c[:key] } }
