@@ -1,0 +1,16 @@
+<nav class="flex h-fit flex-col gap-1 rounded-xl border border-border/60 bg-card p-2">
+  <% SettingsHelper::SECTIONS.each do |section| %>
+    <% active = section[:key] == @section %>
+    <%= link_to painel_settings_path(section: section[:key]),
+          class: class_names(
+            "flex items-start gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors",
+            active ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground"
+          ) do %>
+      <%= lucide_icon(section[:icon], class: "mt-0.5 h-4 w-4 shrink-0") %>
+      <span class="flex flex-col">
+        <span class="<%= class_names("font-medium", "text-foreground": active) %>"><%= section[:label] %></span>
+        <span class="text-xs text-muted-foreground"><%= section[:description] %></span>
+      </span>
+    <% end %>
+  <% end %>
+</nav>
