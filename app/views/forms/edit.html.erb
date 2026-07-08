@@ -1,12 +1,17 @@
-<% content_for :title, "Editing form" %>
+<% content_for :title, "Editar formulário" %>
 
-<h1>Editing form</h1>
+<div class="mx-auto max-w-2xl p-8 lg:p-12">
+  <header class="mb-8">
+    <p class="text-sm text-muted-foreground">
+      <%= link_to "Formulários", forms_path, class: "hover:text-foreground transition-colors" %>
+      <span class="mx-1">·</span>
+      <%= link_to @form.title, form_path(@form), class: "hover:text-foreground transition-colors" %>
+      <span class="mx-1">·</span> Editar
+    </p>
+    <h1 class="mt-1 font-serif text-4xl">Editar formulário</h1>
+  </header>
 
-<%= render "form", form: @form %>
-
-<br>
-
-<div>
-  <%= link_to "Show this form", @form %> |
-  <%= link_to "Back to forms", forms_path %>
+  <div class="rounded-2xl border border-border/60 bg-card p-6" style="box-shadow: var(--shadow-soft)">
+    <%= render "form", form: @form, departaments: @departaments %>
+  </div>
 </div>

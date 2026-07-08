@@ -1,11 +1,16 @@
-<% content_for :title, "New form" %>
+<% content_for :title, "Novo formulário" %>
 
-<h1>New form</h1>
+<div class="mx-auto max-w-2xl p-8 lg:p-12">
+  <header class="mb-8">
+    <p class="text-sm text-muted-foreground">
+      <%= link_to "Formulários", forms_path, class: "hover:text-foreground transition-colors" %>
+      <span class="mx-1">·</span> Novo
+    </p>
+    <h1 class="mt-1 font-serif text-4xl">Criar formulário</h1>
+    <p class="mt-2 text-sm text-muted-foreground">Defina o título, departamento e limite de inscrições. Você poderá adicionar campos depois.</p>
+  </header>
 
-<%= render "form", form: @form %>
-
-<br>
-
-<div>
-  <%= link_to "Back to forms", forms_path %>
+  <div class="rounded-2xl border border-border/60 bg-card p-6" style="box-shadow: var(--shadow-soft)">
+    <%= render "form", form: @form, departaments: @departaments %>
+  </div>
 </div>

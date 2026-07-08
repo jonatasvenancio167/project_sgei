@@ -1,0 +1,78 @@
+<%# Locals: field (FormField), form (Form) %>
+<turbo-frame id="field_<%= field.id %>">
+  <div class="group relative rounded-xl border border-border/60 bg-card p-5" style="box-shadow: var(--shadow-soft)" data-controller="form-field">
+    <%= form_with(model: [form, field], html: { class: "space-y-4" }) do |f| %>
+      <div class="flex items-start gap-3">
+        <%# Drag handle (visual) %>
+        <div class="mt-2 cursor-grab text-muted-foreground/40 hover:text-muted-foreground">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="lucide lucide-grip-vertical"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+        </div>
+
+        <div class="flex-1 space-y-3">
+          <%# Label row %>
+          <div class="flex items-center gap-2">
+            <div class="flex-1">
+              <%= f.text_field :label,
+                    class: "w-full rounded-md border-0 bg-transparent px-0 py-0 text-sm font-medium placeholder:text-muted-foreground/50 focus:ring-0 focus-visible:outline-none",
+                    placeholder: "Pergunta sem título",
+                    required: true %>
+            </div>
+
+            <%# Type selector %>
+            <%= f.select :label_type,
+                  FormField::TYPES.map { |t| [FormField::TYPE_LABELS[t], t] },
+                  {},
+                  class: "rounded-md border border-input bg-background px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-ring",
+                  data: { action: "change->form-field#typeChanged", "form-field-target": "typeSelect" } %>
+          </div>
+
+          <%# Choices editor (select / radio / checkbox) %>
+          <% marker = field.label_type == "select" ? "select" : (field.label_type == "checkbox" ? "checkbox" : "radio") %>
+          <div class="<%= 'hidden' unless field.choice_field? %> space-y-1" data-form-field-target="choicesSection">
+            <div class="space-y-1" data-form-field-target="optionsList">
+              <% (field.choices.presence || [""]).each_with_index do |choice, i| %>
+                <%= render "form_fields/option_row", choice: choice, marker: marker, index: i + 1 %>
+              <% end %>
+            </div>
+
+            <button type="button"
+                    data-action="form-field#addOption"
+                    class="ml-7 inline-flex items-center gap-1.5 py-1 text-xs font-medium text-primary transition-colors hover:text-primary/80">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+              Adicionar opção
+            </button>
+
+            <template data-form-field-target="optionTemplate">
+              <%= render "form_fields/option_row", choice: "", marker: marker, index: nil %>
+            </template>
+          </div>
+        </div>
+
+        <%# Actions %>
+        <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <%# Required toggle %>
+          <label class="flex items-center gap-1 cursor-pointer text-xs text-muted-foreground hover:text-foreground">
+            <%= f.check_box :required, class: "h-3.5 w-3.5 rounded border-input text-primary focus:ring-primary" %>
+            Obrig.
+          </label>
+
+          <%# Save %>
+          <%= f.submit "Salvar",
+                class: "inline-flex items-center justify-center rounded-md bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground hover:bg-primary/90 cursor-pointer" %>
+
+          <%# Delete %>
+          <%= button_to form_form_field_path(form, field), method: :delete,
+                data: { turbo_confirm: "Remover este campo?" },
+                class: "inline-flex items-center justify-center rounded-md p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors" do %>
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+          <% end %>
+        </div>
+      </div>
+
+      <%# Required badge %>
+      <% if field.required? %>
+        <p class="ml-7 text-[10px] text-destructive font-medium">Campo obrigatório</p>
+      <% end %>
+    <% end %>
+  </div>
+</turbo-frame>

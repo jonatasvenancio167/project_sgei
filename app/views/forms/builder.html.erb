@@ -1,0 +1,113 @@
+<% content_for :title, "Builder – #{@form.title}" %>
+
+<div class="mx-auto max-w-3xl p-6 lg:p-10" data-controller="form-builder">
+  <%# Header %>
+  <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <p class="text-xs text-muted-foreground">
+        <%= link_to "Formulários", forms_path, class: "hover:text-foreground transition-colors" %>
+        <span class="mx-1">·</span>
+        <%= link_to @form.title, form_path(@form), class: "hover:text-foreground transition-colors" %>
+        <span class="mx-1">·</span> Campos
+      </p>
+      <h1 class="mt-0.5 font-serif text-2xl"><%= @form.title %></h1>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <span class="rounded-full px-2.5 py-0.5 text-[11px] font-medium <%= @form.active? ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground' %>">
+        <%= @form.status_label %>
+      </span>
+
+      <%= link_to public_form_path(@form.slug), target: "_blank",
+            class: "inline-flex items-center gap-1.5 rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium transition-colors hover:bg-accent" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="lucide lucide-external-link"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 0 2 2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Ver formulário público
+      <% end %>
+
+      <%= link_to form_path(@form), class: "inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="lucide lucide-bar-chart-2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Ver respostas
+      <% end %>
+    </div>
+  </div>
+
+  <%# Banner section %>
+  <div class="mb-6 rounded-2xl border border-border/60 bg-card p-5" style="box-shadow: var(--shadow-soft)">
+    <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Banner de divulgação</p>
+    <%= form_with(model: @form, url: @form, method: :patch, class: "flex gap-3") do |f| %>
+      <%= f.url_field :banner_url,
+            class: "flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring",
+            placeholder: "https://... URL da imagem do banner" %>
+      <%= f.submit "Salvar banner",
+            class: "shrink-0 inline-flex items-center justify-center rounded-md bg-primary px-3 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90 cursor-pointer" %>
+    <% end %>
+    <% if @form.banner_url.present? %>
+      <div class="mt-3 overflow-hidden rounded-lg border border-border/60">
+        <img src="<%= @form.banner_url %>" alt="Banner" class="h-32 w-full object-cover">
+      </div>
+    <% end %>
+  </div>
+
+  <%# Share link %>
+  <div class="mb-6 flex items-center gap-2 rounded-xl border border-dashed border-primary/40 bg-primary/5 px-4 py-3">
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="lucide lucide-link shrink-0 text-primary"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+    <span class="flex-1 truncate text-xs text-muted-foreground font-mono">
+      <%= request.base_url %><%= public_form_path(@form.slug) %>
+    </span>
+    <button type="button"
+            class="shrink-0 text-xs font-medium text-primary hover:underline"
+            onclick="navigator.clipboard.writeText('<%= request.base_url %><%= public_form_path(@form.slug) %>').then(() => this.textContent='Copiado!').catch(() => {})">
+      Copiar link
+    </button>
+  </div>
+
+  <%# Fields list %>
+  <div class="mb-4 flex items-center justify-between">
+    <h2 class="text-sm font-semibold">Campos do formulário</h2>
+    <span class="text-xs text-muted-foreground"><%= @form_fields.size %> campo<%= @form_fields.size != 1 ? 's' : '' %></span>
+  </div>
+
+  <div id="fields_list" class="space-y-3">
+    <% if @form_fields.empty? %>
+      <div id="empty_fields" class="rounded-xl border border-dashed border-border bg-secondary/30 py-10 text-center text-sm text-muted-foreground">
+        Nenhum campo ainda. Adicione o primeiro campo abaixo.
+      </div>
+    <% else %>
+      <% @form_fields.each do |field| %>
+        <%= render "form_fields/field", field: field, form: @form %>
+      <% end %>
+    <% end %>
+  </div>
+
+  <%# Add field area %>
+  <div class="mt-6 space-y-3">
+    <button type="button"
+            class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-primary/50 bg-primary/5 py-3 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
+            data-action="click->form-builder#toggleAddPanel">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="lucide lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+      Adicionar campo
+    </button>
+
+    <%# Type selector panel (hidden by default) %>
+    <div data-form-builder-target="addPanel" class="hidden rounded-2xl border border-border/60 bg-card p-5" style="box-shadow: var(--shadow-elegant)">
+      <p class="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Escolha o tipo de campo</p>
+
+      <div class="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-5">
+        <% FormField::TYPES.each do |type| %>
+          <%= form_with url: form_form_fields_path(@form), method: :post,
+                data: { turbo_stream: true }, class: "contents" do |f| %>
+            <%= hidden_field_tag "form_field[label]", "Novo campo" %>
+            <%= hidden_field_tag "form_field[label_type]", type %>
+            <%= hidden_field_tag "form_field[required]", "0" %>
+            <button type="submit"
+                    data-action="click->form-builder#hideAddPanel"
+                    class="flex flex-col items-center gap-2 rounded-xl border border-border/60 bg-background p-3 text-center text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary cursor-pointer">
+              <%= lucide_icon(FormField::TYPE_ICONS[type], class: "h-5 w-5") %>
+              <span><%= FormField::TYPE_LABELS[type] %></span>
+            </button>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

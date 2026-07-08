@@ -1,10 +1,228 @@
-<p style="color: green"><%= notice %></p>
+<% content_for :title, @form.title %>
 
-<%= render @form %>
+<div class="mx-auto max-w-5xl p-6 lg:p-10">
+  <% if notice.present? %>
+    <div class="mb-5 rounded-lg bg-primary/10 px-4 py-3 text-sm text-primary"><%= notice %></div>
+  <% end %>
 
-<div>
-  <%= link_to "Edit this form", edit_form_path(@form) %> |
-  <%= link_to "Back to forms", forms_path %>
+  <%# Header %>
+  <div class="flex flex-wrap items-start justify-between gap-4">
+    <div>
+      <p class="text-xs text-muted-foreground">
+        <%= link_to "Formulários", forms_path, class: "hover:text-foreground transition-colors" %>
+        <span class="mx-1">·</span>
+        <span><%= @form.departament&.name || "Geral" %></span>
+      </p>
+      <h1 class="mt-1 font-serif text-3xl"><%= @form.title %></h1>
+      <% if @form.description.present? %>
+        <p class="mt-1 text-sm text-muted-foreground max-w-xl"><%= @form.description %></p>
+      <% end %>
+    </div>
 
-  <%= button_to "Destroy this form", @form, method: :delete %>
+    <div class="flex flex-wrap items-center gap-2">
+      <span class="rounded-full px-2.5 py-0.5 text-[11px] font-medium <%= @form.active? ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground' %>">
+        <%= @form.status_label %>
+      </span>
+
+      <% if current_user.admin? || current_user.leader? %>
+        <%= button_to toggle_active_form_path(@form), method: :patch,
+              class: "inline-flex items-center justify-center rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium transition-colors hover:bg-accent" do %>
+          <%= @form.active? ? "Encerrar" : "Reabrir" %>
+        <% end %>
+
+        <%= link_to builder_form_path(@form),
+              class: "inline-flex items-center gap-1.5 rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium transition-colors hover:bg-accent" do %>
+          <%= lucide_icon("pencil", class: "h-3.5 w-3.5") %>
+          Editar campos
+        <% end %>
+      <% end %>
+
+      <%# Copy share link %>
+      <button type="button"
+              class="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+              onclick="navigator.clipboard.writeText('<%= request.base_url %><%= public_form_path(@form.slug) %>').then(() => { this.textContent='Link copiado!'; setTimeout(() => this.innerHTML='<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'12\\' height=\\'12\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'currentColor\\' stroke-width=\\'2\\' class=\\'lucide lucide-link\\'><path d=\\'M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71\\'/><path d=\\'M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71\\'/></svg> Compartilhar link', 2000) })">
+        <%= lucide_icon("send", class: "h-3.5 w-3.5") %>
+        Compartilhar link
+      </button>
+    </div>
+  </div>
+
+  <%# Stats row %>
+  <div class="mt-6 grid gap-3 sm:grid-cols-3">
+    <div class="rounded-xl border border-border/60 bg-card p-4" style="box-shadow: var(--shadow-soft)">
+      <p class="text-[11px] uppercase tracking-wide text-muted-foreground">Inscrições</p>
+      <p class="mt-1 font-serif text-3xl"><%= @form.responses_count %></p>
+      <% if @form.limit.present? %>
+        <p class="mt-0.5 text-xs text-muted-foreground">de <%= @form.limit %> vagas</p>
+        <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary">
+          <div class="h-full rounded-full bg-primary" style="width: <%= @form.fill_percentage %>%"></div>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="rounded-xl border border-border/60 bg-card p-4" style="box-shadow: var(--shadow-soft)">
+      <p class="text-[11px] uppercase tracking-wide text-muted-foreground">Campos</p>
+      <p class="mt-1 font-serif text-3xl"><%= @form_fields.size %></p>
+      <p class="mt-0.5 text-xs text-muted-foreground">perguntas configuradas</p>
+    </div>
+
+    <div class="rounded-xl border border-border/60 bg-card p-4" style="box-shadow: var(--shadow-soft)">
+      <p class="text-[11px] uppercase tracking-wide text-muted-foreground">Link público</p>
+      <p class="mt-1 truncate font-mono text-[11px] text-muted-foreground">/f/<%= @form.slug %></p>
+      <%= link_to public_form_path(@form.slug), target: "_blank",
+            class: "mt-2 inline-flex items-center gap-1 text-xs text-primary hover:underline" do %>
+        <%= lucide_icon("external-link", class: "h-3 w-3") %>
+        Abrir formulário
+      <% end %>
+    </div>
+  </div>
+
+  <%# Tabs %>
+  <div class="mt-8 border-b border-border/60">
+    <nav class="flex gap-1">
+      <% [["overview", "Visão geral"], ["responses", "Inscritos"], ["statistics", "Estatísticas"]].each do |tab_id, label| %>
+        <%= link_to label, form_path(@form, tab: tab_id),
+              class: "border-b-2 px-4 py-2.5 text-sm font-medium transition-colors #{@tab == tab_id ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'}" %>
+      <% end %>
+    </nav>
+  </div>
+
+  <div class="mt-6">
+    <%# ── Visão geral ── %>
+    <% if @tab == "overview" %>
+      <% if @form_fields.empty? %>
+        <div class="rounded-2xl border border-dashed border-border bg-secondary/30 py-14 text-center">
+          <p class="text-sm text-muted-foreground">Este formulário ainda não tem campos configurados.</p>
+          <% if current_user.admin? || current_user.leader? %>
+            <%= link_to builder_form_path(@form),
+                  class: "mt-3 inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90" do %>
+              <%= lucide_icon("pencil", class: "h-3.5 w-3.5") %>
+              Configurar campos
+            <% end %>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="space-y-2">
+          <% @form_fields.each_with_index do |field, i| %>
+            <div class="flex items-center gap-3 rounded-xl border border-border/60 bg-card px-4 py-3">
+              <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-secondary text-[11px] font-semibold text-muted-foreground"><%= i + 1 %></span>
+              <span class="flex-1 text-sm font-medium"><%= field.label %></span>
+              <span class="text-[11px] text-muted-foreground"><%= field.type_label %></span>
+              <% if field.required? %>
+                <span class="rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-medium text-destructive">Obrigatório</span>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+
+    <%# ── Inscritos ── %>
+    <% elsif @tab == "responses" %>
+      <div class="overflow-hidden rounded-2xl border border-border/60 bg-card" style="box-shadow: var(--shadow-soft)">
+        <% if @responses.empty? %>
+          <div class="flex flex-col items-center gap-3 py-16 text-center">
+            <%= lucide_icon("users-round", class: "h-10 w-10 opacity-20") rescue nil %>
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="opacity-20"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>
+            <p class="text-sm text-muted-foreground">Nenhuma resposta ainda.</p>
+          </div>
+        <% else %>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-secondary/50 text-left text-xs uppercase tracking-wide text-muted-foreground">
+                <tr>
+                  <th class="px-5 py-3 font-semibold">#</th>
+                  <th class="px-5 py-3 font-semibold">Nome</th>
+                  <th class="px-5 py-3 font-semibold">E-mail</th>
+                  <th class="px-5 py-3 font-semibold">Telefone</th>
+                  <th class="px-5 py-3 font-semibold text-right">Enviado em</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @responses.each_with_index do |resp, i| %>
+                  <tr class="border-t border-border/40 hover:bg-secondary/20 transition-colors">
+                    <td class="px-5 py-3 text-muted-foreground text-xs"><%= (@pagy.page - 1) * @pagy.limit + i + 1 %></td>
+                    <td class="px-5 py-3 font-medium"><%= resp.submitter_name %></td>
+                    <td class="px-5 py-3 text-muted-foreground"><%= resp.submitter_email %></td>
+                    <td class="px-5 py-3 text-muted-foreground"><%= resp.guest_phone || "—" %></td>
+                    <td class="px-5 py-3 text-right text-muted-foreground text-xs"><%= resp.submitted_on %></td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+          <div class="border-t border-border/60">
+            <%= render Shared::PaginationComponent.new(
+                  current_page: @pagy.page,
+                  total_pages:  @pagy.pages,
+                  total_count:  @pagy.count,
+                  page_size:    @pagy.limit,
+                  url_builder:  ->(page:, per:) { form_path(@form, tab: "responses", page: page, per: per) },
+                  item_label:   { singular: "inscrição", plural: "inscrições" }
+                ) %>
+          </div>
+        <% end %>
+      </div>
+
+    <%# ── Estatísticas ── %>
+    <% elsif @tab == "statistics" %>
+      <% if @form_fields.empty? || @form.responses_count == 0 %>
+        <div class="rounded-2xl border border-dashed border-border bg-secondary/30 py-14 text-center">
+          <p class="text-sm text-muted-foreground">Ainda não há respostas para gerar estatísticas.</p>
+        </div>
+      <% else %>
+        <div class="space-y-5">
+          <% @form_fields.each do |field| %>
+            <% stat = @stats[field.id] %>
+            <div class="rounded-2xl border border-border/60 bg-card p-5" style="box-shadow: var(--shadow-soft)">
+              <div class="flex items-center gap-2 mb-4">
+                <span class="text-xs text-muted-foreground"><%= field.type_label %></span>
+                <h3 class="font-medium"><%= field.label %></h3>
+                <span class="ml-auto text-xs text-muted-foreground"><%= stat[:total] %> respostas</span>
+              </div>
+
+              <% if stat[:type] == :choices %>
+                <% max_count = stat[:tally].map(&:last).max.to_f %>
+                <div class="space-y-2">
+                  <% stat[:tally].each do |choice, count| %>
+                    <div>
+                      <div class="mb-1 flex items-center justify-between text-xs">
+                        <span class="font-medium"><%= choice %></span>
+                        <span class="text-muted-foreground"><%= count %> (<%= stat[:total] > 0 ? (count * 100.0 / stat[:total]).round : 0 %>%)</span>
+                      </div>
+                      <div class="h-2 overflow-hidden rounded-full bg-secondary">
+                        <div class="h-full rounded-full bg-primary transition-all"
+                             style="width: <%= max_count > 0 ? (count / max_count * 100).round : 0 %>%"></div>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              <% else %>
+                <div class="space-y-1 max-h-48 overflow-y-auto">
+                  <% stat[:sample].each do |val| %>
+                    <p class="rounded-md bg-secondary/50 px-3 py-1.5 text-xs"><%= val %></p>
+                  <% end %>
+                  <% if stat[:total] > stat[:sample].size %>
+                    <p class="text-xs text-muted-foreground text-center pt-1">+ <%= stat[:total] - stat[:sample].size %> respostas a mais</p>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+
+  <%# Danger zone – admin only %>
+  <% if current_user.admin? %>
+    <div class="mt-10 rounded-2xl border border-destructive/20 bg-card p-5">
+      <h3 class="text-sm font-medium text-destructive">Zona de perigo</h3>
+      <%= button_to form_path(@form), method: :delete,
+            class: "mt-3 inline-flex items-center justify-center rounded-md border border-destructive px-4 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive hover:text-destructive-foreground",
+            data: { turbo_confirm: "Remover \"#{@form.title}\"? Esta ação não pode ser desfeita." } do %>
+        <%= lucide_icon("trash-2", class: "mr-1 h-3.5 w-3.5") %>
+        Remover formulário
+      <% end %>
+    </div>
+  <% end %>
 </div>

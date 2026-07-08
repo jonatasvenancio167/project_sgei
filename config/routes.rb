@@ -5,9 +5,6 @@ Rails.application.routes.draw do
   resources :form_responses
   resources :integrations
   resources :user_notifications
-  resources :form_answers
-  resources :form_fields
-  resources :forms
   resources :event_attendees
   resources :events
   resources :memberchips
@@ -18,24 +15,53 @@ Rails.application.routes.draw do
   end
   resources :users
   resources :churches
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
+  # Forms with builder and nested field management
+  resources :forms do
+    member do
+      get  :builder
+      get  :statistics
+      post :reorder_fields
+      patch :toggle_active
+    end
+    resources :form_fields, only: %i[create update destroy]
+  end
+
+  # Public form - no authentication required
+  get  "/f/:slug",          to: "public/forms#show",    as: :public_form
+  post "/f/:slug",          to: "public/forms#submit",  as: :public_form_submit
+  get  "/f/:slug/obrigado", to: "public/forms#success", as: :public_form_success
+
   get "up" => "rails/health#show", as: :rails_health_check
-
-  # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
-  # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
-  # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
   get  "overview", to: "overview#index", as: :overview
   get  "painel/calendario", to: "calendario#index", as: :calendario
   get  "painel/eventos", to: "events#index", as: :painel_eventos
   get  "painel/membros", to: "users#index",  as: :painel_membros
   post "painel/membros", to: "users#create", as: :painel_membros_create
+  get    "painel/escalas",          to: "schedules#index",   as: :painel_schedules
+  post   "painel/escalas",          to: "schedules#create",  as: :painel_schedules_create
+  patch  "painel/escalas/:id",      to: "schedules#update",  as: :painel_schedule_update
+  delete "painel/escalas/:id",      to: "schedules#destroy", as: :painel_schedule_destroy
+  get    "painel/escalas/:id/:month",             to: "schedules#show",           as: :painel_schedule_month,          constraints: { month: /\d{4}-\d{2}/ }
+  post   "painel/escalas/:schedule_id/entradas",   to: "schedule_entries#create",  as: :painel_schedule_entries_create
+  delete "painel/escalas/:schedule_id/entradas/:id", to: "schedule_entries#destroy", as: :painel_schedule_entry_destroy
 
+  resources :schedules, only: %i[index create show update destroy]
 
-  
-  # Defines the root path route ("/")
+  get "painel/configuracoes", to: "settings#show", as: :painel_settings
+
+  namespace :settings do
+    resource :church, only: :update
+    resources :congregations, only: :create do
+      member { patch :toggle_status }
+    end
+    resources :users, only: %i[create destroy] do
+      member { patch :toggle_status }
+    end
+    resource :permissions, only: :update
+    resource :notification_settings, only: :update
+  end
+
   root "overview#index"
 end

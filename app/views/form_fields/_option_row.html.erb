@@ -1,0 +1,19 @@
+<%# Locals: choice (String), marker ("radio"|"checkbox"|"select"), index (Integer or nil) %>
+<div class="group/option flex items-center gap-2" data-option-row>
+  <span class="flex w-5 shrink-0 items-center justify-center text-muted-foreground/50">
+    <svg data-marker-type="radio" class="<%= 'hidden' unless marker == 'radio' %>" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>
+    <svg data-marker-type="checkbox" class="<%= 'hidden' unless marker == 'checkbox' %>" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="3"/></svg>
+    <span data-marker-type="select" class="<%= 'hidden' unless marker == 'select' %> text-xs font-medium"><%= index %>.</span>
+  </span>
+
+  <input type="text" name="form_field[choices][]" value="<%= choice %>"
+         placeholder="Opção <%= index %>"
+         data-action="keydown.enter->form-field#optionKeydown"
+         class="flex-1 border-0 border-b border-transparent bg-transparent px-0 py-1 text-sm placeholder:text-muted-foreground/50 transition-colors hover:border-border focus:border-primary focus:outline-none focus:ring-0">
+
+  <button type="button" title="Remover opção"
+          data-action="form-field#removeOption"
+          class="rounded-md p-1 text-muted-foreground/40 opacity-0 transition-all group-hover/option:opacity-100 focus:opacity-100 hover:bg-destructive/10 hover:text-destructive">
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+  </button>
+</div>

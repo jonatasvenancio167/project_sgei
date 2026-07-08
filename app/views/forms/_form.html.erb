@@ -1,17 +1,57 @@
-<%= form_with(model: form) do |form| %>
+<%= form_with(model: form, class: "grid gap-6") do |f| %>
   <% if form.errors.any? %>
-    <div style="color: red">
-      <h2><%= pluralize(form.errors.count, "error") %> prohibited this form from being saved:</h2>
-
-      <ul>
-        <% form.errors.each do |error| %>
-          <li><%= error.full_message %></li>
+    <div class="rounded-lg bg-destructive/10 p-3 text-xs text-destructive">
+      <h2 class="font-semibold"><%= pluralize(form.errors.count, "erro") %> impediu o salvamento:</h2>
+      <ul class="mt-1 list-disc pl-4">
+        <% form.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
         <% end %>
       </ul>
     </div>
   <% end %>
 
-  <div>
-    <%= form.submit %>
+  <div class="grid gap-2">
+    <%= f.label :title, "Título *", class: "text-sm font-medium" %>
+    <%= f.text_field :title,
+          class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          required: true, maxlength: 200, placeholder: "Ex: Retiro de jovens 2026" %>
+  </div>
+
+  <div class="grid gap-2">
+    <%= f.label :description, "Descrição", class: "text-sm font-medium" %>
+    <%= f.text_area :description, rows: 3,
+          class: "flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          maxlength: 1000, placeholder: "Descreva o objetivo deste formulário..." %>
+  </div>
+
+  <div class="grid gap-4 sm:grid-cols-2">
+    <div class="grid gap-2">
+      <%= f.label :departament_id, "Departamento", class: "text-sm font-medium" %>
+      <%= f.collection_select :departament_id, departaments, :id, :name,
+            { include_blank: "Geral (toda a igreja)" },
+            class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" %>
+    </div>
+
+    <div class="grid gap-2">
+      <%= f.label :limit, "Limite de inscrições", class: "text-sm font-medium" %>
+      <%= f.number_field :limit, min: 1,
+            class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            placeholder: "Sem limite" %>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-3 rounded-lg border border-border/60 bg-secondary/30 px-4 py-3">
+    <%= f.check_box :active, class: "h-4 w-4 rounded border-input text-primary focus:ring-primary" %>
+    <div>
+      <%= f.label :active, "Formulário aberto", class: "text-sm font-medium cursor-pointer" %>
+      <p class="text-xs text-muted-foreground">Quando ativo, aceita novas respostas.</p>
+    </div>
+  </div>
+
+  <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+    <%= link_to "Cancelar", forms_path,
+          class: "inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent" %>
+    <%= f.submit form.new_record? ? "Criar formulário" : "Salvar alterações",
+          class: "inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 cursor-pointer" %>
   </div>
 <% end %>

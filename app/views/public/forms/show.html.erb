@@ -1,0 +1,154 @@
+<% content_for :title, @form.title %>
+
+<div class="min-h-screen bg-secondary/30 pb-16">
+  <%# Banner %>
+  <% if @form.banner_url.present? %>
+    <div class="h-48 w-full overflow-hidden sm:h-64">
+      <img src="<%= @form.banner_url %>" alt="<%= @form.title %>" class="h-full w-full object-cover">
+    </div>
+  <% else %>
+    <div class="h-3 w-full bg-primary"></div>
+  <% end %>
+
+  <div class="mx-auto max-w-xl px-4 pt-8">
+    <%# Form card %>
+    <div class="rounded-2xl border border-border/60 bg-card p-6 shadow-md sm:p-8">
+      <h1 class="font-serif text-3xl"><%= @form.title %></h1>
+      <% if @form.description.present? %>
+        <p class="mt-2 text-sm text-muted-foreground"><%= @form.description %></p>
+      <% end %>
+
+      <% if @form.limit.present? %>
+        <div class="mt-4">
+          <div class="flex items-center justify-between text-xs text-muted-foreground">
+            <span><%= @form.responses_count %> inscritos</span>
+            <span><%= @form.limit %> vagas</span>
+          </div>
+          <div class="mt-1 h-1.5 overflow-hidden rounded-full bg-secondary">
+            <div class="h-full rounded-full bg-primary transition-all" style="width: <%= @form.fill_percentage %>%"></div>
+          </div>
+          <% if @form.limit.present? && @form.responses_count >= @form.limit %>
+            <p class="mt-2 text-xs font-medium text-destructive">Vagas esgotadas.</p>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+    <%# Submission form %>
+    <%= form_with url: public_form_submit_path(@form.slug), method: :post, class: "mt-4 space-y-4" do |f| %>
+      <%# Guest identification %>
+      <div class="rounded-2xl border border-border/60 bg-card p-6 shadow-sm">
+        <p class="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Seus dados</p>
+        <div class="space-y-4">
+          <div class="grid gap-1.5">
+            <label class="text-sm font-medium">Nome completo *</label>
+            <input type="text" name="guest_name" required
+                   class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                   placeholder="Seu nome">
+          </div>
+          <div class="grid gap-1.5">
+            <label class="text-sm font-medium">E-mail *</label>
+            <input type="email" name="guest_email" required
+                   class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                   placeholder="seu@email.com">
+          </div>
+          <div class="grid gap-1.5">
+            <label class="text-sm font-medium">Telefone / WhatsApp</label>
+            <input type="tel" name="guest_phone"
+                   class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                   placeholder="(00) 00000-0000">
+          </div>
+        </div>
+      </div>
+
+      <%# Dynamic fields %>
+      <% @form_fields.each do |field| %>
+        <div class="rounded-2xl border border-border/60 bg-card p-6 shadow-sm">
+          <label class="block text-sm font-medium mb-3">
+            <%= field.label %>
+            <% if field.required? %>
+              <span class="text-destructive ml-0.5">*</span>
+            <% end %>
+          </label>
+
+          <% case field.label_type %>
+          <% when "text" %>
+            <input type="text" name="answers[<%= field.id %>]"
+                   <%= "required" if field.required? %>
+                   class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                   placeholder="Sua resposta">
+
+          <% when "textarea" %>
+            <textarea name="answers[<%= field.id %>]" rows="4"
+                      <%= "required" if field.required? %>
+                      class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+                      placeholder="Sua resposta"></textarea>
+
+          <% when "email" %>
+            <input type="email" name="answers[<%= field.id %>]"
+                   <%= "required" if field.required? %>
+                   class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                   placeholder="email@exemplo.com">
+
+          <% when "phone" %>
+            <input type="tel" name="answers[<%= field.id %>]"
+                   <%= "required" if field.required? %>
+                   class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                   placeholder="(00) 00000-0000">
+
+          <% when "number" %>
+            <input type="number" name="answers[<%= field.id %>]"
+                   <%= "required" if field.required? %>
+                   class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring">
+
+          <% when "date" %>
+            <input type="date" name="answers[<%= field.id %>]"
+                   <%= "required" if field.required? %>
+                   class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+
+          <% when "select" %>
+            <select name="answers[<%= field.id %>]"
+                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+              <option value="">Selecione...</option>
+              <% field.choices.each do |choice| %>
+                <option value="<%= choice %>"><%= choice %></option>
+              <% end %>
+            </select>
+
+          <% when "radio" %>
+            <div class="space-y-2">
+              <% field.choices.each do |choice| %>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="answers[<%= field.id %>]" value="<%= choice %>"
+                         <%= "required" if field.required? %>
+                         class="h-4 w-4 border-input text-primary focus:ring-primary">
+                  <span class="text-sm"><%= choice %></span>
+                </label>
+              <% end %>
+            </div>
+
+          <% when "checkbox" %>
+            <div class="space-y-2">
+              <% field.choices.each do |choice| %>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" name="answers[<%= field.id %>][]" value="<%= choice %>"
+                         class="h-4 w-4 rounded border-input text-primary focus:ring-primary">
+                  <span class="text-sm"><%= choice %></span>
+                </label>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+
+      <button type="submit"
+              class="inline-flex w-full items-center justify-center rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring">
+        Enviar inscrição
+      </button>
+
+      <p class="text-center text-xs text-muted-foreground">
+        Ao enviar você concorda com o uso dos seus dados para fins de comunicação da igreja.
+      </p>
+    <% end %>
+  </div>
+</div>
