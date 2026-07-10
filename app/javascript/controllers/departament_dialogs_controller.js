@@ -9,7 +9,9 @@ export default class extends Controller {
     "memberRow",
     "leaderIdInput",
     "tabButton",
-    "tabContent"
+    "tabContent",
+    "addSubmit",
+    "requireMsg"
   ]
 
   connect() {
@@ -24,10 +26,11 @@ export default class extends Controller {
       "sparkles": '<path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path><path d="m5 3 1 2.5L8.5 6 6 7 5 9.5 4 7 1.5 6 4 5 5 3Z"></path><path d="m19 17 1 2.5 2.5.5-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1 1-2.5Z"></path>'
     }
 
-    if (this.hasTabButtonTarget) {
-      // Emulate click on first tab
-      this.switchTab({ currentTarget: this.tabButtonTargets[0] })
-    }
+    // Each add-member modal has its own form with tabs; initialize them
+    // individually on the "existing" tab.
+    this.element.querySelectorAll("form[data-add-member-form]").forEach(form => {
+      this.activateTab(form, "existing")
+    })
   }
 
   // --- Live Preview ---
@@ -115,22 +118,53 @@ export default class extends Controller {
   // --- Tab Switcher ---
   switchTab(event) {
     const btn = event.currentTarget
-    const tabName = btn.dataset.tab
+    const form = btn.closest("form")
+    this.activateTab(form, btn.dataset.tab)
+  }
 
-    this.tabButtonTargets.forEach(b => {
-      if (b === btn) {
+  activateTab(form, tabName) {
+    form.querySelectorAll("[data-departament-dialogs-target~='tabButton']").forEach(b => {
+      if (b.dataset.tab === tabName) {
         b.className = "flex-1 rounded-md px-3 py-1.5 transition-colors bg-background font-medium shadow-sm text-foreground"
       } else {
         b.className = "flex-1 rounded-md px-3 py-1.5 transition-colors text-muted-foreground hover:text-foreground bg-transparent"
       }
     })
 
-    this.tabContentTargets.forEach(content => {
-      if (content.dataset.tabContent === tabName) {
-        content.classList.remove("hidden")
-      } else {
-        content.classList.add("hidden")
-      }
+    form.querySelectorAll("[data-tab-content]").forEach(content => {
+      const active = content.dataset.tabContent === tabName
+      content.classList.toggle("hidden", !active)
+      // Inputs of the hidden tab must not be submitted, otherwise both
+      // "kind" hidden fields go together and the server picks the wrong flow.
+      content.querySelectorAll("input, select, textarea").forEach(el => { el.disabled = !active })
     })
+
+    this.validateContacts(form)
+  }
+
+  // --- Contact selection validation ---
+  // With contacts available on the "existing" tab, the submit stays disabled
+  // (with a message) until at least one contact is checked. Without contacts,
+  // or on the "new" tab, the rule does not apply.
+  validateSelection(event) {
+    this.validateContacts(event.target.closest("form"))
+  }
+
+  validateContacts(form) {
+    const submit = form.querySelector("[data-departament-dialogs-target~='addSubmit']")
+    if (!submit) return
+
+    const existingTab = form.querySelector("[data-tab-content='existing']")
+    const onExistingTab = existingTab && !existingTab.classList.contains("hidden")
+    const boxes = existingTab ? Array.from(existingTab.querySelectorAll("input[name='user_ids[]']")) : []
+    const blocked = onExistingTab && boxes.length > 0 && !boxes.some(b => b.checked)
+
+    submit.disabled = blocked
+    submit.classList.toggle("opacity-50", blocked)
+    submit.classList.toggle("cursor-not-allowed", blocked)
+    submit.classList.toggle("cursor-pointer", !blocked)
+
+    const msg = form.querySelector("[data-departament-dialogs-target~='requireMsg']")
+    if (msg) msg.classList.toggle("hidden", !blocked)
   }
 }
