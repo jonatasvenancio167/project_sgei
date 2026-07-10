@@ -13,7 +13,7 @@ module Shared
   class RadioButtonComponent < ViewComponent::Base
     include LucideHelper
 
-    def initialize(name:, value:, label:, icon: nil, checked: false, disabled: false, required: false)
+    def initialize(name:, value:, label:, icon: nil, checked: false, disabled: false, required: false, input_id: nil)
       @name = name
       @value = value
       @label = label
@@ -21,14 +21,17 @@ module Shared
       @checked = checked
       @disabled = disabled
       @required = required
+      @input_id = input_id
     end
 
     private
 
     attr_reader :name, :value, :label, :icon, :checked, :disabled, :required
 
+    # Custom input_id avoids duplicated DOM ids when the same radio group
+    # appears more than once on the page (e.g. one modal per record).
     def input_id
-      "#{name}_#{value}".parameterize(separator: "_")
+      @input_id || "#{name}_#{value}".parameterize(separator: "_")
     end
   end
 end
