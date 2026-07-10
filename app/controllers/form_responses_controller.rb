@@ -3,7 +3,8 @@ class FormResponsesController < ApplicationController
 
   # GET /form_responses or /form_responses.json
   def index
-    @form_responses = FormResponse.all
+    authorize FormResponse
+    @form_responses = policy_scope(FormResponse)
   end
 
   # GET /form_responses/1 or /form_responses/1.json
@@ -13,6 +14,7 @@ class FormResponsesController < ApplicationController
   # GET /form_responses/new
   def new
     @form_response = FormResponse.new
+    authorize @form_response
   end
 
   # GET /form_responses/1/edit
@@ -22,6 +24,7 @@ class FormResponsesController < ApplicationController
   # POST /form_responses or /form_responses.json
   def create
     @form_response = FormResponse.new(form_response_params)
+    authorize @form_response
 
     respond_to do |format|
       if @form_response.save
@@ -60,7 +63,8 @@ class FormResponsesController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_form_response
-      @form_response = FormResponse.find(params.expect(:id))
+      @form_response = policy_scope(FormResponse).find(params.expect(:id))
+      authorize @form_response
     end
 
     # Only allow a list of trusted parameters through.

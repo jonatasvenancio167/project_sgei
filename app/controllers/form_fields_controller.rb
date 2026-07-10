@@ -42,6 +42,7 @@ class FormFieldsController < ApplicationController
 
   def set_form
     @form = current_user.church.forms.not_deleted.find(params[:form_id])
+    authorize @form, :update?
   end
 
   def set_field

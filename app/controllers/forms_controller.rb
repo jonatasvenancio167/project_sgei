@@ -2,6 +2,7 @@ class FormsController < ApplicationController
   before_action :set_form, only: %i[show edit update destroy builder statistics reorder_fields toggle_active]
 
   def index
+    authorize Form
     forms = current_user.church.forms.not_deleted.includes(:departament, :form_responses)
 
     unless current_user.admin?
@@ -38,6 +39,7 @@ class FormsController < ApplicationController
 
   def create
     @form = current_user.church.forms.build(form_params)
+    authorize @form
 
     if @form.save
       redirect_to builder_form_path(@form), notice: "Formulário criado! Agora configure os campos."
@@ -79,6 +81,7 @@ class FormsController < ApplicationController
 
   def set_form
     @form = current_user.church.forms.not_deleted.find(params[:id])
+    authorize @form
   end
 
   def form_params
