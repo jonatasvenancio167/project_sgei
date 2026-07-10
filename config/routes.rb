@@ -39,6 +39,12 @@ Rails.application.routes.draw do
   get  "painel/eventos", to: "events#index", as: :painel_eventos
   get  "painel/membros", to: "users#index",  as: :painel_membros
   post "painel/membros", to: "users#create", as: :painel_membros_create
+  get  "painel/aniversariantes", to: "birthdays#index", as: :painel_aniversariantes
+  get    "painel/acolhimento",            to: "welcome_records#index",         as: :painel_acolhimento
+  post   "painel/acolhimento",            to: "welcome_records#create",        as: :painel_acolhimento_create
+  patch  "painel/acolhimento/:id",        to: "welcome_records#update",        as: :painel_acolhimento_update
+  delete "painel/acolhimento/:id",        to: "welcome_records#destroy",       as: :painel_acolhimento_destroy
+  patch  "painel/acolhimento/:id/membro", to: "welcome_records#toggle_member", as: :painel_acolhimento_toggle_member
   get    "painel/escalas",          to: "schedules#index",   as: :painel_schedules
   post   "painel/escalas",          to: "schedules#create",  as: :painel_schedules_create
   patch  "painel/escalas/:id",      to: "schedules#update",  as: :painel_schedule_update
