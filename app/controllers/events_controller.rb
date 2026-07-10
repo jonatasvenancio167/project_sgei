@@ -3,12 +3,13 @@ class EventsController < ApplicationController
 
   # GET /events or /events.json
   def index
+    authorize Event
     @user = current_user
     q, events = EventQuery.new(params, user: @user).call
     per = [params[:per].to_i, 10].max
     per = Shared::PaginationComponent::PAGE_SIZE_OPTIONS.include?(per) ? per : 10
     @pagy, @events = pagy(events, limit: per)
-    @decorator = ::Events::IndexDecorator.new(q, @events, params, @user, view_context)
+    @decorator = ::Events::IndexDecorator.new(q, @events, params, @user, view_context, total_count: @pagy.count)
     @event = Event.new # For the modal form
   end
 
@@ -33,6 +34,7 @@ class EventsController < ApplicationController
     @event = Event.new(event_params)
     @event.church = current_user.church
     @event.creator = current_user
+    authorize @event
 
     respond_to do |format|
       if @event.save
@@ -71,7 +73,8 @@ class EventsController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_event
-      @event = Event.find(params[:id])
+      @event = policy_scope(Event).find(params[:id])
+      authorize @event
     end
 
     # Only allow a list of trusted parameters through.

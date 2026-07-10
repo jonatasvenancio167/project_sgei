@@ -9,10 +9,10 @@ class EventQuery
     @params[:q] ||= {}
     @params[:q][:s] ||= "start_date asc"
 
-    @q = Event.includes(:departament, :event_attendees).ransack(@params[:q])
+    # Every member sees all of the church's events; editing is policy-gated.
+    @q = @user.church.events.includes(:departament, :event_attendees).ransack(@params[:q])
     @events = @q.result(distinct: true)
 
-    apply_permission_filter
     apply_period_filter
     apply_sorting
 
@@ -20,12 +20,6 @@ class EventQuery
   end
 
   private
-
-  def apply_permission_filter
-    unless @user.admin?
-      @events = @events.where(departament_id: @user.departament_ids + [nil])
-    end
-  end
 
   def apply_period_filter
     case @params[:period]

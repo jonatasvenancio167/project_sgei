@@ -49,7 +49,7 @@
   <div class="grid gap-4 sm:grid-cols-2">
     <div class="grid gap-2">
       <%= f.label :departament_id, "Departamento", class: "text-sm font-medium" %>
-      <%= f.collection_select :departament_id, current_user.admin? ? Departament.all : current_user.departaments + [nil], :id, :name, { include_blank: "Geral" }, class: "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" %>
+      <%= f.collection_select :departament_id, current_user.admin? ? current_user.church.departaments.order(:name) : current_user.departaments, :id, :name, { include_blank: "Geral" }, class: "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" %>
     </div>
     <div class="grid gap-2">
       <%= f.label :visibility, "Visibilidade", class: "text-sm font-medium" %>

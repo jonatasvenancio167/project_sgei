@@ -3,7 +3,8 @@ class EventAttendeesController < ApplicationController
 
   # GET /event_attendees or /event_attendees.json
   def index
-    @event_attendees = EventAttendee.all
+    authorize EventAttendee
+    @event_attendees = policy_scope(EventAttendee)
   end
 
   # GET /event_attendees/1 or /event_attendees/1.json
@@ -13,6 +14,7 @@ class EventAttendeesController < ApplicationController
   # GET /event_attendees/new
   def new
     @event_attendee = EventAttendee.new
+    authorize @event_attendee
   end
 
   # GET /event_attendees/1/edit
@@ -22,6 +24,7 @@ class EventAttendeesController < ApplicationController
   # POST /event_attendees or /event_attendees.json
   def create
     @event_attendee = EventAttendee.new(event_attendee_params)
+    authorize @event_attendee
 
     respond_to do |format|
       if @event_attendee.save
@@ -60,7 +63,8 @@ class EventAttendeesController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_event_attendee
-      @event_attendee = EventAttendee.find(params.expect(:id))
+      @event_attendee = policy_scope(EventAttendee).find(params.expect(:id))
+      authorize @event_attendee
     end
 
     # Only allow a list of trusted parameters through.
