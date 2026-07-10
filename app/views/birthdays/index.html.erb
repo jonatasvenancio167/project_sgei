@@ -1,0 +1,107 @@
+<% content_for :title, "Aniversariantes" %>
+
+<%
+  url_builder = ->(page:, per:) do
+    painel_aniversariantes_path(period: @decorator.period, dept: @decorator.current_dept, page: page, per: per)
+  end
+%>
+
+<div class="mx-auto max-w-6xl p-8 lg:p-12">
+  <!-- Header -->
+  <header class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <p class="text-sm text-muted-foreground">Pessoas</p>
+      <h1 class="mt-1 flex items-center gap-3 font-serif text-4xl">
+        <%= lucide_icon("cake", class: "h-8 w-8 text-primary") %>
+        Aniversariantes
+      </h1>
+    </div>
+
+    <!-- Filtro por departamento -->
+    <%= form_with url: painel_aniversariantes_path, method: :get, local: true, class: "w-full sm:w-auto" do |f| %>
+      <%= f.hidden_field :period, value: @decorator.period %>
+      <%= f.select :dept,
+            options_for_select(@decorator.department_options, @decorator.current_dept),
+            {},
+            class: "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring sm:w-[220px]",
+            onchange: "this.form.submit()" %>
+    <% end %>
+  </header>
+
+  <!-- Resumo -->
+  <div class="mt-6 grid gap-3 sm:grid-cols-3">
+    <div class="rounded-2xl border border-border/60 bg-card p-4" style="box-shadow: var(--shadow-soft)">
+      <p class="text-xs uppercase tracking-wide text-muted-foreground">Este mês</p>
+      <p class="mt-1 font-serif text-3xl"><%= @decorator.month_count %></p>
+      <p class="text-xs text-muted-foreground">aniversariantes</p>
+    </div>
+    <div class="rounded-2xl border border-border/60 bg-card p-4" style="box-shadow: var(--shadow-soft)">
+      <p class="text-xs uppercase tracking-wide text-muted-foreground">Esta semana</p>
+      <p class="mt-1 font-serif text-3xl"><%= @decorator.week_count %></p>
+      <p class="text-xs text-muted-foreground">nos próximos 7 dias</p>
+    </div>
+    <div class="rounded-2xl border p-4 <%= @decorator.today_count > 0 ? "border-primary/70 bg-primary/5" : "border-border/60 bg-card" %>"
+         style="box-shadow: var(--shadow-soft)">
+      <p class="text-xs uppercase tracking-wide text-muted-foreground">Hoje</p>
+      <p class="mt-1 font-serif text-3xl <%= "text-primary" if @decorator.today_count > 0 %>"><%= @decorator.today_count %></p>
+      <p class="text-xs text-muted-foreground">
+        <%= @decorator.today_count == 1 ? "aniversaria hoje 🎉" : "aniversariam hoje" %>
+      </p>
+    </div>
+  </div>
+
+  <!-- Abas de período -->
+  <div class="mt-8 flex items-center justify-between gap-4">
+    <div class="flex gap-2">
+      <% @decorator.period_options.each do |value, label| %>
+        <%= link_to label,
+              painel_aniversariantes_path(period: value, dept: @decorator.current_dept),
+              class: @decorator.period_class(value) %>
+      <% end %>
+    </div>
+    <span class="text-sm text-muted-foreground"><%= @decorator.result_count_text %></span>
+  </div>
+
+  <!-- Lista -->
+  <div class="mt-6">
+    <% if @decorator.decorated_users.empty? %>
+      <div class="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-border/60 py-16 text-center text-sm text-muted-foreground">
+        <%= lucide_icon("party-popper", class: "h-6 w-6 opacity-50") %>
+        <%= @decorator.empty_message %>
+      </div>
+    <% elsif @decorator.period == "semana" %>
+      <div class="space-y-3">
+        <% @decorator.decorated_users.each do |person| %>
+          <%= render "birthdays/birthday_card", person: person %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="space-y-8">
+        <% @decorator.month_groups.each do |label, group| %>
+          <section>
+            <h2 class="mb-3 text-sm font-medium text-muted-foreground"><%= label %></h2>
+            <div class="grid gap-3 md:grid-cols-2">
+              <% group.each do |person| %>
+                <%= render "birthdays/birthday_card", person: person %>
+              <% end %>
+            </div>
+          </section>
+        <% end %>
+      </div>
+    <% end %>
+
+    <!-- Paginação -->
+    <% if @pagy.count > 0 %>
+      <div class="mt-6 rounded-2xl border border-border/60 bg-card" style="box-shadow: var(--shadow-soft)">
+        <%= render Shared::PaginationComponent.new(
+              current_page: @pagy.page,
+              total_pages:  @pagy.pages,
+              total_count:  @pagy.count,
+              page_size:    @pagy.limit,
+              url_builder:  url_builder,
+              item_label:   { singular: "aniversariante", plural: "aniversariantes" }
+            ) %>
+      </div>
+    <% end %>
+  </div>
+</div>

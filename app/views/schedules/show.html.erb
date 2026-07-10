@@ -34,6 +34,11 @@
           <%= lucide_icon("chevron-right", class: "h-4 w-4") %>
         <% end %>
       </div>
+      <%= link_to painel_schedule_month_path(@schedule, month: @month, format: :pdf),
+                  class: "inline-flex items-center gap-2 rounded-lg border border-border/60 px-4 py-2 text-sm font-medium text-foreground hover:bg-secondary transition-colors no-underline" do %>
+        <%= lucide_icon("file-down", class: "h-4 w-4") %>
+        Exportar PDF
+      <% end %>
     </div>
   </header>
 
