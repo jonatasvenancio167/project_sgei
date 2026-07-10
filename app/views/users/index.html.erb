@@ -73,7 +73,8 @@
       <!-- Department select -->
       <%= f.select :dept,
             options_for_select(
-              [["Todos os departamentos", "todos"], ["Sem departamento", "sem"]] +
+              [["Todos os departamentos", "todos"]] +
+                (current_user.admin? ? [["Sem departamento", "sem"]] : []) +
                 @departaments.map { |d| [d.name, d.id.to_s] },
               current_dept.presence || "todos"
             ),
@@ -136,21 +137,25 @@
               <%
                 initials = u.name.to_s.split.first(2).map { |p| p[0]&.upcase }.join
                 primary_dept = u.departaments.first
+                can_edit = policy(u).update?
               %>
               <tr class="border-b border-border/60 transition-colors hover:bg-muted/30">
-                <!-- Name + avatar -->
+                <!-- Name + avatar (clickable → edit modal when allowed) -->
                 <td class="px-4 py-3">
-                  <div class="flex items-center gap-3">
+                  <%= content_tag (can_edit ? :button : :div),
+                        type: (can_edit ? "button" : nil),
+                        class: "flex items-center gap-3 #{"group w-full cursor-pointer text-left" if can_edit}",
+                        onclick: (can_edit ? "document.getElementById('modal-edit-member-#{u.id}').dispatchEvent(new CustomEvent('modal:open'))" : nil) do %>
                     <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary text-xs font-medium text-secondary-foreground">
                       <%= initials.present? ? initials : "?" %>
                     </span>
                     <div class="min-w-0">
-                      <p class="truncate text-sm font-medium"><%= u.name %></p>
+                      <p class="truncate text-sm font-medium <%= "group-hover:underline" if can_edit %>"><%= u.name %></p>
                       <p class="truncate text-xs text-muted-foreground">
                         <%= u.email.present? ? u.email : "—" %>
                       </p>
                     </div>
-                  </div>
+                  <% end %>
                 </td>
 
                 <!-- Department -->
@@ -218,7 +223,7 @@
       size: :md
     ) do |modal| %>
   <% modal.with_body do %>
-    <%= form_with url: painel_membros_create_path, method: :post, local: true, class: "space-y-4" do |f| %>
+    <%= form_with url: painel_membros_create_path, scope: :user, method: :post, local: true, class: "space-y-4" do |f| %>
       <!-- Preserve current filter params so redirect lands on same page -->
       <%= hidden_field_tag :q,    current_q %>
       <%= hidden_field_tag :role, current_role %>
@@ -263,6 +268,16 @@
         </div>
       </div>
 
+      <!-- Data de nascimento -->
+      <div class="space-y-2">
+        <label for="user_birth_date" class="text-sm font-medium text-muted-foreground">
+          Data de nascimento <span class="text-xs font-normal">(opcional)</span>
+        </label>
+        <%= f.date_field :birth_date, id: "user_birth_date",
+              max: Date.current,
+              class: "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" %>
+      </div>
+
       <!-- Departamento -->
       <div class="space-y-2">
         <label for="user_departament_id" class="text-sm font-medium">Departamento</label>
@@ -296,6 +311,110 @@
         <%= f.submit "Adicionar membro",
               class: "inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors cursor-pointer" %>
       </div>
+    <% end %>
+  <% end %>
+<% end %>
+
+<!-- ── Modais: Editar Membro ───────────────────────────────────────────── -->
+<% @users.each do |u| %>
+  <% next unless policy(u).update? %>
+  <%= render Shared::ModalComponent.new(
+        id: "modal-edit-member-#{u.id}",
+        title: "Editar membro",
+        description: "Atualize os dados de #{u.name}.",
+        size: :md
+      ) do |modal| %>
+    <% modal.with_body do %>
+      <%= form_with model: u, url: user_path(u), method: :patch, local: true, class: "space-y-4" do |f| %>
+        <!-- Preserve current filter params so redirect lands on same page -->
+        <%= hidden_field_tag :q,    current_q %>
+        <%= hidden_field_tag :role, current_role %>
+        <%= hidden_field_tag :dept, current_dept %>
+        <%= hidden_field_tag :page, @page %>
+        <%= hidden_field_tag :per,  current_per %>
+
+        <!-- Nome (obrigatório) -->
+        <div class="space-y-2">
+          <label for="edit_user_name_<%= u.id %>" class="text-sm font-medium">
+            Nome <span class="text-destructive">*</span>
+          </label>
+          <%= f.text_field :name, id: "edit_user_name_#{u.id}",
+                class: "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                required: true %>
+        </div>
+
+        <!-- Telefone + Email -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="space-y-2">
+            <label for="edit_user_phone_<%= u.id %>" class="text-sm font-medium">
+              Telefone <span class="text-destructive">*</span>
+            </label>
+            <%= f.text_field :phone, id: "edit_user_phone_#{u.id}",
+                  placeholder: "(11) 91111-1111",
+                  maxlength: 15,
+                  data: {
+                    controller: "phone-mask",
+                    action: "input->phone-mask#mask",
+                    "phone-mask-target" => "input"
+                  },
+                  class: "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                  required: true %>
+          </div>
+          <div class="space-y-2">
+            <label for="edit_user_email_<%= u.id %>" class="text-sm font-medium text-muted-foreground">
+              Email <span class="text-xs font-normal">(opcional)</span>
+            </label>
+            <%= f.email_field :email, id: "edit_user_email_#{u.id}",
+                  placeholder: "joao@exemplo.com",
+                  class: "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" %>
+          </div>
+        </div>
+
+        <!-- Data de nascimento -->
+        <div class="space-y-2">
+          <label for="edit_user_birth_date_<%= u.id %>" class="text-sm font-medium text-muted-foreground">
+            Data de nascimento <span class="text-xs font-normal">(opcional)</span>
+          </label>
+          <%= f.date_field :birth_date, id: "edit_user_birth_date_#{u.id}",
+                max: Date.current,
+                class: "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" %>
+        </div>
+
+        <!-- Departamento -->
+        <div class="space-y-2">
+          <label for="edit_user_departament_id_<%= u.id %>" class="text-sm font-medium">Departamento</label>
+          <%= select_tag "user[departament_id]",
+                options_for_select(
+                  [["Sem departamento", ""]] + @departaments.map { |d| [d.name, d.id.to_s] },
+                  u.primary_department&.id.to_s
+                ),
+                id: "edit_user_departament_id_#{u.id}",
+                class: "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" %>
+        </div>
+
+        <!-- Cargo (somente admin pode alterar) -->
+        <% if current_user.admin? %>
+          <div class="space-y-2">
+            <label for="edit_user_role_<%= u.id %>" class="text-sm font-medium">Cargo</label>
+            <%= f.select :role,
+                  options_for_select([["Membro", "member"], ["Líder", "leader"], ["Admin", "admin"]], u.role),
+                  {},
+                  id: "edit_user_role_#{u.id}",
+                  class: "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" %>
+          </div>
+        <% end %>
+
+        <!-- Footer buttons -->
+        <div class="flex justify-end gap-3 border-t border-border/40 pt-4">
+          <button type="button"
+                  class="inline-flex items-center justify-center rounded-lg border border-border/60 bg-transparent px-4 py-2 text-sm font-medium text-foreground hover:bg-secondary transition-colors cursor-pointer"
+                  onclick="document.getElementById('modal-edit-member-<%= u.id %>').dispatchEvent(new CustomEvent('modal:close'))">
+            Cancelar
+          </button>
+          <%= f.submit "Salvar alterações",
+                class: "inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors cursor-pointer" %>
+        </div>
+      <% end %>
     <% end %>
   <% end %>
 <% end %>
