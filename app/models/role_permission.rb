@@ -5,6 +5,8 @@ class RolePermission < ApplicationRecord
     "departments" => "Departamentos",
     "schedules"   => "Escalas",
     "members"     => "Membros",
+    "birthdays"   => "Aniversariantes",
+    "welcome"     => "Acolhimento",
     "forms"       => "Formulários"
   }.freeze
 
