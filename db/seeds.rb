@@ -31,6 +31,7 @@ puts "Creating Users..."
 # Admin (System Owner)
 admin = User.find_or_create_by!(email: "jonatas@ekklesia.org") do |u|
   u.name = "Jonatas Venancio"
+  u.phone = "(11) 98765-4321"
   u.password = "password123"
   u.password_confirmation = "password123"
   u.role = :admin
@@ -41,6 +42,7 @@ end
 # Leader
 leader = User.find_or_create_by!(email: "ana.louvor@ekklesia.org") do |u|
   u.name = "Ana Louvor"
+  u.phone = "(11) 98765-1234"
   u.password = "password123"
   u.password_confirmation = "password123"
   u.role = :leader
@@ -51,11 +53,39 @@ end
 # Member
 member = User.find_or_create_by!(email: "membro@example.com") do |u|
   u.name = "Membro Visitante"
+  u.phone = "(11) 98765-5678"
   u.password = "password123"
   u.password_confirmation = "password123"
   u.role = :member
   u.church = church
   u.status = :active
+end
+
+# Birth dates relative to today so the birthdays page always shows data
+puts "Setting birth dates..."
+{
+  admin  => Date.current - 34.years,               # aniversário hoje
+  leader => (Date.current + 3.days) - 28.years,    # aniversário em 3 dias
+  member => Date.current.change(day: 25) - 22.years
+}.each do |user, birth_date|
+  user.update!(birth_date: birth_date) if user.birth_date.blank?
+end
+
+# Welcome records (acolhimento) — some today, some in the past
+puts "Creating Welcome Records..."
+[
+  { name: "Maria Souza",  visitor_type: :visitor, city: "Fortaleza",  service: WelcomeRecord::SERVICES.first,
+    phone: "(85) 98888-1111", notes: "Primeira visita, veio com a família.", created_at: Time.current },
+  { name: "Pedro Lima",   visitor_type: :brother, congregation: "Igreja da Paz", city: "Maracanaú",
+    service: WelcomeRecord::SERVICES.first, created_at: Time.current },
+  { name: "Carla Mendes", visitor_type: :visitor, city: "Caucaia", service: WelcomeRecord::SERVICES.second,
+    phone: "(85) 97777-2222", became_member: true, created_at: 2.weeks.ago },
+  { name: "João Batista", visitor_type: :brother, congregation: "Assembleia Central", city: "Fortaleza",
+    service: WelcomeRecord::SERVICES.third, created_at: 1.month.ago }
+].each do |attrs|
+  church.welcome_records.find_or_create_by!(name: attrs[:name]) do |record|
+    record.assign_attributes(attrs.merge(registered_by: admin))
+  end
 end
 
 # 4. Memberships (Memberchips)
