@@ -7,6 +7,11 @@ class BaseDecorator
     @view_context = view_context
   end
 
+  # The undecorated record (e.g. for Pundit's policy lookup).
+  def model
+    @object
+  end
+
   private
 
   attr_reader :object, :view_context

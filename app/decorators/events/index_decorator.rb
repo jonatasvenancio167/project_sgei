@@ -2,12 +2,13 @@ module Events
   class IndexDecorator < BaseDecorator
     attr_reader :q, :params, :user, :events
 
-    def initialize(q, events, params, user, view_context)
+    def initialize(q, events, params, user, view_context, total_count: nil)
       super(q, view_context)
       @q = q
       @events = events
       @params = params
       @user = user
+      @total_count = total_count
     end
 
     def period_options
@@ -53,15 +54,14 @@ module Events
     end
 
     def result_count_text
-      count = q.result.count
+      count = @total_count || q.result.count
       "#{count} #{count == 1 ? 'evento encontrado' : 'eventos encontrados'}"
     end
 
 
     def department_options
       options = [["Todos os departamentos", ""]]
-      depts = user.admin? ? Departament.all : user.departaments + [nil]
-      options + depts.map { |d| [d&.name || "Geral", d&.id] }
+      options + user.church.departaments.order(:name).map { |d| [d.name, d.id] }
     end
 
     def visibility_options
