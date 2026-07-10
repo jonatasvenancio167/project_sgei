@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_08_100500) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_10_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -306,12 +306,32 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_08_100500) do
     t.datetime "remember_created_at"
     t.integer "status", default: 0
     t.bigint "address_id"
+    t.date "birth_date"
+    t.index "EXTRACT(month FROM birth_date), EXTRACT(day FROM birth_date)", name: "index_users_on_birth_date_month_day"
     t.index ["address_id"], name: "index_users_on_address_id"
     t.index ["church_id"], name: "index_users_on_church_id"
     t.index ["deleted_at"], name: "index_users_on_deleted_at"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["role"], name: "index_users_on_role"
+  end
+
+  create_table "welcome_records", force: :cascade do |t|
+    t.bigint "church_id", null: false
+    t.bigint "registered_by_id"
+    t.string "name", null: false
+    t.integer "visitor_type", default: 0, null: false
+    t.string "congregation"
+    t.string "city"
+    t.string "phone"
+    t.string "service", null: false
+    t.text "notes"
+    t.boolean "became_member", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["church_id", "created_at"], name: "index_welcome_records_on_church_id_and_created_at"
+    t.index ["church_id"], name: "index_welcome_records_on_church_id"
+    t.index ["registered_by_id"], name: "index_welcome_records_on_registered_by_id"
   end
 
   add_foreign_key "audit_logs", "churches"
@@ -350,4 +370,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_08_100500) do
   add_foreign_key "user_notifications", "users"
   add_foreign_key "users", "addresses"
   add_foreign_key "users", "churches"
+  add_foreign_key "welcome_records", "churches"
+  add_foreign_key "welcome_records", "users", column: "registered_by_id"
 end
