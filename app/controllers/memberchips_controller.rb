@@ -3,7 +3,8 @@ class MemberchipsController < ApplicationController
 
   # GET /memberchips or /memberchips.json
   def index
-    @memberchips = Memberchip.all
+    authorize Memberchip
+    @memberchips = policy_scope(Memberchip)
   end
 
   # GET /memberchips/1 or /memberchips/1.json
@@ -13,6 +14,7 @@ class MemberchipsController < ApplicationController
   # GET /memberchips/new
   def new
     @memberchip = Memberchip.new
+    authorize @memberchip
   end
 
   # GET /memberchips/1/edit
@@ -22,6 +24,7 @@ class MemberchipsController < ApplicationController
   # POST /memberchips or /memberchips.json
   def create
     @memberchip = Memberchip.new(memberchip_params)
+    authorize @memberchip
 
     respond_to do |format|
       if @memberchip.save
@@ -60,7 +63,8 @@ class MemberchipsController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_memberchip
-      @memberchip = Memberchip.find(params.expect(:id))
+      @memberchip = policy_scope(Memberchip).find(params.expect(:id))
+      authorize @memberchip
     end
 
     # Only allow a list of trusted parameters through.

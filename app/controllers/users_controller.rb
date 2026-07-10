@@ -3,8 +3,16 @@ class UsersController < ApplicationController
 
   # GET /painel/membros
   def index
-    @departaments = current_user.church.departaments.order(:name)
+    authorize User
+    @departaments = visible_departaments
     scope = current_user.church.users.order(:name)
+
+    # Leaders only see members of the departments they lead
+    if current_user.leader?
+      scope = scope.joins(:memberchips)
+                   .where(memberchips: { departament_id: @departaments.select(:id) })
+                   .distinct
+    end
 
     # — Search query (name / email / phone) ——————————————————————————————
     if (q = params[:q].to_s.strip).present?
@@ -20,11 +28,13 @@ class UsersController < ApplicationController
     # — Department filter ——————————————————————————————————————————————————
     case params[:dept]
     when "sem"
-      scope = scope.left_outer_joins(:memberchips).where(memberchips: { id: nil })
+      # A leader's scope is already restricted to their departments, so
+      # "sem departamento" can never match anyone there.
+      scope = current_user.leader? ? scope.none : scope.left_outer_joins(:memberchips).where(memberchips: { id: nil })
     when "todos", "", nil
       # no filter
     else
-      dept = current_user.church.departaments.find_by(id: params[:dept])
+      dept = @departaments.find_by(id: params[:dept])
       scope = scope.joins(:memberchips).where(memberchips: { departament_id: dept&.id }) if dept
     end
 
@@ -56,11 +66,13 @@ class UsersController < ApplicationController
   def create
     password = SecureRandom.hex(8)
     @user = current_user.church.users.build(user_params)
+    authorize @user
     @user.password = password
     @user.password_confirmation = password
     @user.role ||= :member
 
     if @user.save
+      sync_departament(@user)
       redirect_to painel_membros_path(preserve_filters), notice: "#{@user.name} adicionado com sucesso."
     else
       errors = @user.errors.full_messages.to_sentence
@@ -68,16 +80,13 @@ class UsersController < ApplicationController
     end
   end
 
-  # PATCH/PUT /users/1
+  # PATCH/PUT /users/1  (used by the "Editar membro" modal on /painel/membros)
   def update
-    respond_to do |format|
-      if @user.update(user_params)
-        format.html { redirect_to @user, notice: "Membro atualizado com sucesso.", status: :see_other }
-        format.json { render :show, status: :ok, location: @user }
-      else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @user.errors, status: :unprocessable_entity }
-      end
+    if @user.update(user_params)
+      sync_departament(@user)
+      redirect_to painel_membros_path(preserve_filters), notice: "#{@user.name} atualizado com sucesso.", status: :see_other
+    else
+      redirect_to painel_membros_path(preserve_filters), alert: @user.errors.full_messages.to_sentence, status: :see_other
     end
   end
 
@@ -91,10 +100,35 @@ class UsersController < ApplicationController
 
   def set_user
     @user = current_user.church.users.find(params[:id])
+    authorize @user
+  end
+
+  # Admins see every department; leaders only the ones they belong to.
+  def visible_departaments
+    depts = current_user.church.departaments.order(:name)
+    return depts unless current_user.leader?
+
+    depts.where(id: current_user.memberchips.select(:departament_id))
   end
 
   def user_params
-    params.require(:user).permit(:name, :email, :phone, :role, :departament_id)
+    permitted = %i[name email phone birth_date]
+    permitted << :role if current_user.admin?
+    params.require(:user).permit(*permitted)
+  end
+
+  # The department select in the members modals edits the user's primary
+  # department, which lives in memberchips (users has no departament_id).
+  # Other department memberships are left untouched.
+  def sync_departament(user)
+    return unless params[:user]&.key?(:departament_id)
+
+    new_dept = current_user.church.departaments.find_by(id: params[:user][:departament_id])
+    current_dept = user.primary_department
+    return if current_dept&.id == new_dept&.id
+
+    user.memberchips.find_by(departament: current_dept)&.destroy if current_dept
+    user.memberchips.find_or_create_by(departament: new_dept) { |m| m.role = user.leader? ? :leader : :member } if new_dept
   end
 
   # Preserve current filter params when redirecting back to index

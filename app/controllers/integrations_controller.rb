@@ -3,7 +3,8 @@ class IntegrationsController < ApplicationController
 
   # GET /integrations or /integrations.json
   def index
-    @integrations = Integration.all
+    authorize Integration
+    @integrations = policy_scope(Integration)
   end
 
   # GET /integrations/1 or /integrations/1.json
@@ -13,6 +14,7 @@ class IntegrationsController < ApplicationController
   # GET /integrations/new
   def new
     @integration = Integration.new
+    authorize @integration
   end
 
   # GET /integrations/1/edit
@@ -22,6 +24,8 @@ class IntegrationsController < ApplicationController
   # POST /integrations or /integrations.json
   def create
     @integration = Integration.new(integration_params)
+    @integration.church = current_user.church
+    authorize @integration
 
     respond_to do |format|
       if @integration.save
@@ -60,7 +64,8 @@ class IntegrationsController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_integration
-      @integration = Integration.find(params.expect(:id))
+      @integration = policy_scope(Integration).find(params.expect(:id))
+      authorize @integration
     end
 
     # Only allow a list of trusted parameters through.
