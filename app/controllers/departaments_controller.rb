@@ -3,7 +3,10 @@ class DepartamentsController < ApplicationController
 
   # GET /departaments or /departaments.json
   def index
+    authorize Departament
     @departaments = current_user.church.departaments.order(:name)
+    # Non-admins only see the departments they belong to
+    @departaments = @departaments.where(id: current_user.departament_ids) unless current_user.admin?
     @church_users = current_user.church.users.order(:name)
     @new_departament = Departament.new
   end
@@ -24,6 +27,7 @@ class DepartamentsController < ApplicationController
   # POST /departaments or /departaments.json
   def create
     @departament = current_user.church.departaments.build(departament_params)
+    authorize @departament
 
     respond_to do |format|
       if @departament.save
@@ -84,6 +88,8 @@ class DepartamentsController < ApplicationController
 
     if kind == "existing"
       user_ids = Array(params[:user_ids]).map(&:to_i)
+      return redirect_to departaments_path, alert: "Selecione ao menos um contato para vincular." if user_ids.empty?
+
       added_count = 0
       user_ids.each do |u_id|
         memberchip = @departament.memberchips.build(user_id: u_id, role: :member)
@@ -98,8 +104,8 @@ class DepartamentsController < ApplicationController
       phone = params[:phone]
       make_leader = params[:make_leader] == "1" || params[:make_leader] == "true"
 
-      # Find or create user
-      user = User.find_by(id: params[:user_ids])
+      # Find or create user (within the current church only)
+      user = current_user.church.users.find_by(id: params[:user_ids])
       if user.nil?
         password = SecureRandom.hex(8)
         user = User.create!(
@@ -137,6 +143,7 @@ class DepartamentsController < ApplicationController
   # Use callbacks to share common setup or constraints between actions.
   def set_departament
     @departament = current_user.church.departaments.find(params[:id])
+    authorize @departament
   end
 
   # Only allow a list of trusted parameters through.

@@ -6,11 +6,13 @@
       <p class="text-sm text-muted-foreground">Equipes</p>
       <h1 class="mt-1 font-serif text-4xl">Departamentos</h1>
     </div>
-    <button type="button" 
-            class="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors cursor-pointer"
-            onclick="document.getElementById('modal-new-departament').dispatchEvent(new CustomEvent('modal:open'))">
-      <%= lucide_icon("plus", class: "h-4 w-4 mr-2") %> Novo departamento
-    </button>
+    <% if policy(Departament).create? %>
+      <button type="button"
+              class="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors cursor-pointer"
+              onclick="document.getElementById('modal-new-departament').dispatchEvent(new CustomEvent('modal:open'))">
+        <%= lucide_icon("plus", class: "h-4 w-4 mr-2") %> Novo departamento
+      </button>
+    <% end %>
   </header>
 
   <!-- Departments Grid -->
@@ -20,17 +22,23 @@
            style="box-shadow: var(--shadow-soft)">
         
         <!-- Edit and Delete Actions -->
-        <div class="absolute top-4 right-4 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button type="button" 
-                  class="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors cursor-pointer"
-                  title="Editar departamento"
-                  onclick="document.getElementById('modal-edit-departament-<%= d.id %>').dispatchEvent(new CustomEvent('modal:open'))">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil h-3.5 w-3.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-          </button>
-          <%= button_to d, method: :delete, data: { confirm: "Tem certeza?" }, class: "rounded-lg p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors bg-transparent border-0 cursor-pointer" do %>
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2 h-3.5 w-3.5"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
-          <% end %>
-        </div>
+        <% if policy(d).update? || policy(d).destroy? %>
+          <div class="absolute top-4 right-4 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <% if policy(d).update? %>
+              <button type="button"
+                      class="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors cursor-pointer"
+                      title="Editar departamento"
+                      onclick="document.getElementById('modal-edit-departament-<%= d.id %>').dispatchEvent(new CustomEvent('modal:open'))">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil h-3.5 w-3.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+              </button>
+            <% end %>
+            <% if policy(d).destroy? %>
+              <%= button_to d, method: :delete, data: { confirm: "Tem certeza?" }, class: "rounded-lg p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors bg-transparent border-0 cursor-pointer" do %>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2 h-3.5 w-3.5"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+              <% end %>
+            <% end %>
+          </div>
+        <% end %>
 
         <div class="flex items-center gap-3">
           <span class="grid h-11 w-11 place-items-center rounded-xl text-primary-foreground <%= d.color %> shadow-sm transition-transform group-hover:scale-105 duration-300">
@@ -71,11 +79,13 @@
                   onclick="document.getElementById('modal-view-members-<%= d.id %>').dispatchEvent(new CustomEvent('modal:open'))">
             <%= lucide_icon("users", class: "h-3.5 w-3.5 mr-1.5 text-muted-foreground") %> Ver membros
           </button>
-          <button type="button" 
-                  class="inline-flex items-center justify-center rounded-lg bg-secondary px-3 py-2 text-xs font-medium text-secondary-foreground hover:bg-secondary/80 transition-colors cursor-pointer"
-                  onclick="document.getElementById('modal-add-member-<%= d.id %>').dispatchEvent(new CustomEvent('modal:open'))">
-            <%= lucide_icon("user-plus", class: "h-3.5 w-3.5 mr-1.5") %> Adicionar
-          </button>
+          <% if policy(d).add_members? %>
+            <button type="button"
+                    class="inline-flex items-center justify-center rounded-lg bg-secondary px-3 py-2 text-xs font-medium text-secondary-foreground hover:bg-secondary/80 transition-colors cursor-pointer"
+                    onclick="document.getElementById('modal-add-member-<%= d.id %>').dispatchEvent(new CustomEvent('modal:open'))">
+              <%= lucide_icon("user-plus", class: "h-3.5 w-3.5 mr-1.5") %> Adicionar
+            </button>
+          <% end %>
         </div>
       </div>
     <% end %>
@@ -83,6 +93,7 @@
 </div>
 
 <!-- Modal: New Department -->
+<% if policy(Departament).create? %>
 <%= render Shared::ModalComponent.new(id: "modal-new-departament", title: "Novo departamento", description: "Configure a identidade e já vincule os membros iniciais.", size: :lg) do |modal| %>
   <% modal.with_body do %>
     <%= form_with(model: @new_departament, local: true, class: "grid gap-5 md:grid-cols-[1fr_1.1fr]") do |f| %>
@@ -195,6 +206,7 @@
     <% end %>
   <% end %>
 <% end %>
+<% end %>
 
 <!-- Modals for existing Departments (View Members, Add Member, Edit) -->
 <% @departaments.each do |d| %>
@@ -248,8 +260,10 @@
                     <p class="truncate text-sm font-semibold text-foreground"><%= mc.user.name %></p>
                     <p class="truncate text-xs text-muted-foreground"><%= mc.user.email %></p>
                   </div>
-                  <%= button_to memberchip_path(mc), method: :delete, data: { confirm: "Remover este membro do departamento?" }, class: "rounded-lg p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors bg-transparent border-0 cursor-pointer" do %>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2 h-3.5 w-3.5"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                  <% if policy(mc).destroy? %>
+                    <%= button_to memberchip_path(mc), method: :delete, data: { confirm: "Remover este membro do departamento?" }, class: "rounded-lg p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors bg-transparent border-0 cursor-pointer" do %>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2 h-3.5 w-3.5"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                    <% end %>
                   <% end %>
                 </div>
               <% end %>
@@ -264,19 +278,22 @@
                 onclick="document.getElementById('modal-view-members-<%= d.id %>').dispatchEvent(new CustomEvent('modal:close'))">
           Fechar
         </button>
-        <button type="button" 
-                class="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors cursor-pointer"
-                onclick="document.getElementById('modal-view-members-<%= d.id %>').dispatchEvent(new CustomEvent('modal:close')); document.getElementById('modal-add-member-<%= d.id %>').dispatchEvent(new CustomEvent('modal:open'))">
-          <%= lucide_icon("user-plus", class: "h-4 w-4 mr-2") %> Adicionar membro
-        </button>
+        <% if policy(d).add_members? %>
+          <button type="button"
+                  class="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors cursor-pointer"
+                  onclick="document.getElementById('modal-view-members-<%= d.id %>').dispatchEvent(new CustomEvent('modal:close')); document.getElementById('modal-add-member-<%= d.id %>').dispatchEvent(new CustomEvent('modal:open'))">
+            <%= lucide_icon("user-plus", class: "h-4 w-4 mr-2") %> Adicionar membro
+          </button>
+        <% end %>
       </div>
     <% end %>
   <% end %>
 
   <!-- 2. Add Member Modal -->
+  <% if policy(d).add_members? %>
   <%= render Shared::ModalComponent.new(id: "modal-add-member-#{d.id}", title: "Adicionar a #{d.name}", description: "Vincule alguém já cadastrado ou crie um novo membro diretamente neste departamento.", size: :md) do |modal| %>
     <% modal.with_body do %>
-      <%= form_with(url: add_members_departament_path(d), method: :post, local: true, class: "space-y-4") do |f| %>
+      <%= form_with(url: add_members_departament_path(d), method: :post, local: true, class: "space-y-4", data: { add_member_form: true }) do |f| %>
         
         <!-- Tab Selector -->
         <div class="flex gap-1 rounded-lg bg-muted p-1 text-sm">
@@ -320,10 +337,11 @@
                      data-target="departament-dialogs.memberRow"
                      data-member-name="<%= user.name %>"
                      data-member-email="<%= user.email %>">
-                  <input type="checkbox" 
-                         name="user_ids[]" 
-                         value="<%= user.id %>" 
-                         class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary">
+                  <input type="checkbox"
+                         name="user_ids[]"
+                         value="<%= user.id %>"
+                         class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                         data-action="change->departament-dialogs#validateSelection">
                   <div class="min-w-0 flex-1">
                     <p class="truncate text-sm font-medium text-foreground"><%= user.name %></p>
                     <p class="truncate text-xs text-muted-foreground">
@@ -371,19 +389,25 @@
           </label>
         </div>
 
-        <div class="mt-6 flex justify-end gap-3 border-t border-border/40 pt-4">
-          <button type="button" 
-                  class="inline-flex items-center justify-center rounded-lg border border-border/60 bg-transparent px-4 py-2 text-sm font-medium text-foreground hover:bg-secondary transition-colors cursor-pointer"
+        <div class="mt-6 flex items-center gap-3 border-t border-border/40 pt-4">
+          <p class="mr-auto hidden text-xs text-destructive" data-departament-dialogs-target="requireMsg">
+            Selecione ao menos um contato para vincular.
+          </p>
+          <button type="button"
+                  class="ml-auto inline-flex items-center justify-center rounded-lg border border-border/60 bg-transparent px-4 py-2 text-sm font-medium text-foreground hover:bg-secondary transition-colors cursor-pointer"
                   onclick="document.getElementById('modal-add-member-<%= d.id %>').dispatchEvent(new CustomEvent('modal:close'))">
             <%= lucide_icon("x", class: "h-4 w-4 mr-2") %> Cancelar
           </button>
-          <%= f.submit "Adicionar", class: "inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors cursor-pointer" %>
+          <%= f.submit "Adicionar", class: "inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors cursor-pointer disabled:pointer-events-none",
+                data: { "departament-dialogs-target": "addSubmit" } %>
         </div>
       <% end %>
     <% end %>
   <% end %>
+  <% end %>
 
   <!-- 3. Edit Department Modal -->
+  <% if policy(d).update? %>
   <%= render Shared::ModalComponent.new(id: "modal-edit-departament-#{d.id}", title: "Editar departamento", description: "Atualize os dados e a identidade visual do departamento.", size: :md) do |modal| %>
     <% modal.with_body do %>
       <%= form_with(model: d, local: true, class: "space-y-4") do |f| %>
@@ -419,6 +443,7 @@
         </div>
       <% end %>
     <% end %>
+  <% end %>
   <% end %>
 
 <% end %>
