@@ -1,0 +1,108 @@
+<%# record: WelcomeRecord; url/method: destino do form; decorator: IndexDecorator %>
+<%# field_prefix: string única p/ ids; registered_at_label: data/hora exibida; filter_params: Hash %>
+<%# locals: (record:, url:, method:, decorator:, field_prefix:, registered_at_label:, filter_params:) %>
+<%= form_with url: url, scope: :welcome_record, method: method, local: true, class: "space-y-4" do |f| %>
+  <!-- Preserva aba e filtros atuais no redirect -->
+  <% filter_params.each do |key, value| %>
+    <%= hidden_field_tag key, value %>
+  <% end %>
+
+  <!-- Nome (obrigatório) -->
+  <div class="space-y-2">
+    <label for="<%= field_prefix %>_name" class="text-sm font-medium">
+      Nome <span class="text-destructive">*</span>
+    </label>
+    <%= f.text_field :name, id: "#{field_prefix}_name", value: record.name,
+          placeholder: "Ex: Maria Souza",
+          class: "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+          required: true %>
+  </div>
+
+  <!-- Tipo -->
+  <div class="space-y-2">
+    <span class="text-sm font-medium">Tipo</span>
+    <div class="flex gap-2">
+      <%= render Shared::RadioButtonComponent.new(
+            name: "welcome_record[visitor_type]", value: "visitor", label: "Visitante",
+            checked: record.visitor_type_visitor?, input_id: "#{field_prefix}_visitor_type_visitor") %>
+      <%= render Shared::RadioButtonComponent.new(
+            name: "welcome_record[visitor_type]", value: "brother", label: "Irmão",
+            checked: record.visitor_type_brother?, input_id: "#{field_prefix}_visitor_type_brother") %>
+    </div>
+  </div>
+
+  <!-- Congregação + Cidade -->
+  <div class="grid grid-cols-2 gap-3">
+    <div class="space-y-2">
+      <label for="<%= field_prefix %>_congregation" class="text-sm font-medium text-muted-foreground">
+        Congregação <span class="text-xs font-normal">(opcional)</span>
+      </label>
+      <%= f.text_field :congregation, id: "#{field_prefix}_congregation", value: record.congregation,
+            placeholder: "Ex: Igreja da Paz, Maracanaú",
+            class: "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" %>
+    </div>
+    <div class="space-y-2">
+      <label for="<%= field_prefix %>_city" class="text-sm font-medium text-muted-foreground">
+        Cidade <span class="text-xs font-normal">(opcional)</span>
+      </label>
+      <%= f.text_field :city, id: "#{field_prefix}_city", value: record.city,
+            class: "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" %>
+    </div>
+  </div>
+
+  <!-- Telefone + Culto -->
+  <div class="grid grid-cols-2 gap-3">
+    <div class="space-y-2">
+      <label for="<%= field_prefix %>_phone" class="text-sm font-medium text-muted-foreground">
+        Telefone / WhatsApp <span class="text-xs font-normal">(opcional)</span>
+      </label>
+      <%= f.text_field :phone, id: "#{field_prefix}_phone", value: record.phone,
+            placeholder: "(11) 91111-1111",
+            maxlength: 15,
+            data: {
+              controller: "phone-mask",
+              action: "input->phone-mask#mask",
+              "phone-mask-target" => "input"
+            },
+            class: "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" %>
+    </div>
+    <div class="space-y-2">
+      <label for="<%= field_prefix %>_service" class="text-sm font-medium">
+        Culto <span class="text-destructive">*</span>
+      </label>
+      <%= f.select :service,
+            options_for_select(decorator.service_form_options, record.service),
+            {},
+            id: "#{field_prefix}_service",
+            class: "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" %>
+    </div>
+  </div>
+
+  <!-- Observação -->
+  <div class="space-y-2">
+    <label for="<%= field_prefix %>_notes" class="text-sm font-medium text-muted-foreground">
+      Observação <span class="text-xs font-normal">(opcional)</span>
+    </label>
+    <%= f.text_area :notes, id: "#{field_prefix}_notes", value: record.notes, rows: 3,
+          class: "flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" %>
+  </div>
+
+  <!-- Data/hora do registro (informativo) -->
+  <div class="space-y-2">
+    <span class="text-sm font-medium text-muted-foreground">Data/hora do registro</span>
+    <p class="flex h-9 w-full items-center rounded-md border border-input bg-secondary/40 px-3 text-sm text-muted-foreground">
+      <%= registered_at_label %>
+    </p>
+  </div>
+
+  <!-- Botões -->
+  <div class="flex justify-end gap-3 border-t border-border/40 pt-4">
+    <button type="button"
+            class="inline-flex items-center justify-center rounded-lg border border-border/60 bg-transparent px-4 py-2 text-sm font-medium text-foreground hover:bg-secondary transition-colors cursor-pointer"
+            onclick="this.closest('[id^=modal-]').dispatchEvent(new CustomEvent('modal:close'))">
+      Cancelar
+    </button>
+    <%= f.submit method == :post ? "Registrar" : "Salvar alterações",
+          class: "inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors cursor-pointer" %>
+  </div>
+<% end %>

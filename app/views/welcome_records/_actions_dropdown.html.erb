@@ -1,0 +1,45 @@
+<%# record: WelcomeRecords::RecordDecorator; filter_params: Hash %>
+<%# locals: (record:, filter_params:) %>
+<%
+  can_edit    = policy(record.model).update?
+  can_destroy = policy(record.model).destroy?
+%>
+<% if can_edit || can_destroy %>
+  <div class="relative" data-controller="dropdown">
+    <button type="button"
+            class="inline-grid h-9 w-9 shrink-0 place-items-center rounded-lg text-muted-foreground hover:bg-secondary transition-colors cursor-pointer"
+            data-action="click->dropdown#toggle"
+            aria-label="Opções do registro de <%= record.name %>">
+      <%= lucide_icon("ellipsis-vertical", class: "h-4 w-4") %>
+    </button>
+    <div class="hidden absolute right-0 top-full mt-1 z-20 min-w-[220px] overflow-hidden rounded-lg border border-border/60 bg-card shadow-lg"
+         data-dropdown-target="menu">
+      <% if can_edit %>
+        <button type="button"
+                class="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-secondary transition-colors cursor-pointer"
+                onclick="this.closest('[data-controller=dropdown]').querySelector('[data-dropdown-target=menu]').classList.add('hidden'); document.getElementById('modal-edit-welcome-<%= record.id %>').dispatchEvent(new CustomEvent('modal:open'))">
+          <%= lucide_icon("pencil", class: "h-4 w-4 text-muted-foreground") %>
+          Editar
+        </button>
+        <%= form_with url: painel_acolhimento_toggle_member_path(record.id, filter_params), method: :patch, local: true do %>
+          <button type="submit"
+                  class="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-secondary transition-colors cursor-pointer">
+            <%= lucide_icon("user-check", class: "h-4 w-4 text-muted-foreground") %>
+            <%= record.became_member? ? "Remover marcação de membro" : "Marcar como membro" %>
+          </button>
+        <% end %>
+      <% end %>
+      <% if can_destroy %>
+        <div class="border-t border-border/40"></div>
+        <%= form_with url: painel_acolhimento_destroy_path(record.id, filter_params), method: :delete, local: true do %>
+          <button type="submit"
+                  onclick="return confirm('Tem certeza que deseja excluir o registro de <%= j record.name %>?')"
+                  class="flex w-full items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors cursor-pointer">
+            <%= lucide_icon("trash-2", class: "h-4 w-4") %>
+            Excluir
+          </button>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+<% end %>
