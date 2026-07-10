@@ -2,14 +2,16 @@ class CalendarioController < ApplicationController
   before_action :authenticate_user!
 
   def index
+    authorize :calendar, :index?
     @user = current_user
     @date = params[:date] ? Date.parse(params[:date]) : Date.current
-    
+
     # Range for the month view
     start_of_month = @date.beginning_of_month
     end_of_month = @date.end_of_month
-    
-    @events = Event.where(start_date: start_of_month..end_of_month)
+
+    @events = @user.church.events
+                   .where(start_date: start_of_month..end_of_month)
                    .includes(:departament)
                    .order(start_date: :asc)
 
