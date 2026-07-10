@@ -3,7 +3,8 @@ class ChurchesController < ApplicationController
 
   # GET /churches or /churches.json
   def index
-    @churches = Church.all
+    authorize Church
+    @churches = policy_scope(Church)
   end
 
   # GET /churches/1 or /churches/1.json
@@ -13,6 +14,7 @@ class ChurchesController < ApplicationController
   # GET /churches/new
   def new
     @church = Church.new
+    authorize @church
   end
 
   # GET /churches/1/edit
@@ -22,6 +24,7 @@ class ChurchesController < ApplicationController
   # POST /churches or /churches.json
   def create
     @church = Church.new(church_params)
+    authorize @church
 
     respond_to do |format|
       if @church.save
@@ -60,7 +63,8 @@ class ChurchesController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_church
-      @church = Church.find(params.expect(:id))
+      @church = policy_scope(Church).find(params.expect(:id))
+      authorize @church
     end
 
     # Only allow a list of trusted parameters through.
