@@ -2,6 +2,7 @@ class SchedulesController < ApplicationController
   before_action :set_schedule, only: %i[show update destroy]
 
   def index
+    authorize Schedule
     load_index_data
     @schedule = Schedule.new
   end
@@ -32,9 +33,19 @@ class SchedulesController < ApplicationController
     scheduled = @member_counts.keys
     @scheduled_members   = @dept_members.select { |m| scheduled.include?(m.id.to_s) }
     @unscheduled_members = @dept_members.reject { |m| scheduled.include?(m.id.to_s) }
+
+    respond_to do |format|
+      format.html
+      format.pdf do
+        pdf = SchedulePdf.new(schedule: @schedule, month: @month, columns: @columns,
+                              entries: @entries, users_map: @users_map)
+        send_data pdf.render, filename: pdf.filename, type: "application/pdf", disposition: "attachment"
+      end
+    end
   end
 
   def create
+    authorize Schedule, :create?
     result = Schedules::CreateService.new(
       church: current_user.church,
       params: schedule_params,
@@ -82,6 +93,7 @@ class SchedulesController < ApplicationController
     scope = current_user.church.schedules
     scope = scope.where(departament_id: current_user.departament_ids) unless current_user.admin?
     @schedule = scope.find(params[:id])
+    authorize @schedule
   end
 
   def schedule_params

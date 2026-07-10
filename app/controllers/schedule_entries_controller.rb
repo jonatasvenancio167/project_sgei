@@ -28,5 +28,6 @@ class ScheduleEntriesController < ApplicationController
     scope = current_user.church.schedules
     scope = scope.where(departament_id: current_user.departament_ids) unless current_user.admin?
     @schedule = scope.find(params[:schedule_id])
+    authorize @schedule, :update?
   end
 end
