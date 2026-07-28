@@ -10,7 +10,8 @@ class WelcomeRecord < ApplicationRecord
     "Evento especial"
   ].freeze
 
-  belongs_to :church
+  include BaseEntity
+
   belongs_to :registered_by, class_name: "User", optional: true
 
   enum :visitor_type, { visitor: 0, brother: 1 }, prefix: true

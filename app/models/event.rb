@@ -1,5 +1,6 @@
 class Event < ApplicationRecord
-  belongs_to :church
+  include BaseEntity
+
   belongs_to :departament
   belongs_to :creator, class_name: "User", foreign_key: "created_by_id", optional: true
   has_many :event_attendees, dependent: :destroy

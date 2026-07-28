@@ -3,7 +3,9 @@
 class DepartamentPolicy < ChurchModulePolicy
   MODULE_KEY = "departments"
 
-  # Only the secretary (admin) manages departments themselves.
+  # Sede sees departments across all of its congregations; only the
+  # secretary (admin) manages departments, and only within their own church.
+  def show?    = module_allowed? && within_hierarchy?
   def create?  = admin?
   def update?  = admin? && same_church?
   def destroy? = admin? && same_church?
@@ -13,5 +15,11 @@ class DepartamentPolicy < ChurchModulePolicy
     return false unless same_church?
 
     admin? || (leader? && user.departament_ids.include?(record.id))
+  end
+
+  class Scope < ChurchModulePolicy::Scope
+    def resolve
+      scope.where(church_id: user.allowed_church_ids)
+    end
   end
 end

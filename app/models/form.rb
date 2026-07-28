@@ -1,5 +1,6 @@
 class Form < ApplicationRecord
-  belongs_to :church
+  include BaseEntity
+
   belongs_to :event, optional: true
   belongs_to :departament, optional: true
   has_many :form_fields, dependent: :destroy

@@ -10,7 +10,7 @@ class RolePermission < ApplicationRecord
     "forms"       => "Formulários"
   }.freeze
 
-  belongs_to :church
+  include BaseEntity
 
   # Admin ("Secretaria") always has full access, so only these roles are configurable.
   enum :role, { leader: 1, member: 2 }

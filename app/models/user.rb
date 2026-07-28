@@ -6,7 +6,8 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
-  belongs_to :church
+  include BaseEntity
+
   belongs_to :address, optional: true, dependent: :destroy
   has_many :memberchips, dependent: :destroy
   has_many :departaments, through: :memberchips
@@ -44,6 +45,10 @@ class User < ApplicationRecord
     when "member" then "Membro"
     else role&.capitalize
     end
+  end
+
+  def allowed_church_ids
+    church.accessible_church_ids
   end
 
   def primary_department

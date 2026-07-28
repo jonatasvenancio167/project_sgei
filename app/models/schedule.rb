@@ -1,7 +1,8 @@
 class Schedule < ApplicationRecord
   COLOR_CHOICES = Departament::COLOR_CHOICES
 
-  belongs_to :church
+  include BaseEntity
+
   belongs_to :departament
   has_many :schedule_columns, -> { order(:position) }, dependent: :destroy, inverse_of: :schedule
   has_many :schedule_entries, dependent: :destroy

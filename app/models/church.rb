@@ -48,4 +48,17 @@ class Church < ApplicationRecord
     end
   end
 
+  def sede?
+    parent_church_id.nil?
+  end
+
+  # IDs visible to this church for hierarchy-aware modules (Membros,
+  # Departamentos, Formulários, Aniversariantes): the Sede sees itself and
+  # every descendant congregation; any other unit sees only itself.
+  def accessible_church_ids
+    return [id] unless sede?
+
+    [id] + congregations.flat_map(&:accessible_church_ids)
+  end
+
 end

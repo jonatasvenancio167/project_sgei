@@ -5,7 +5,7 @@ class UsersController < ApplicationController
   def index
     authorize User
     @departaments = visible_departaments
-    scope = current_user.church.users.order(:name)
+    scope = policy_scope(User).order(:name)
 
     # Leaders only see members of the departments they lead
     if current_user.leader?
@@ -99,13 +99,14 @@ class UsersController < ApplicationController
   private
 
   def set_user
-    @user = current_user.church.users.find(params[:id])
+    @user = policy_scope(User).find(params[:id])
     authorize @user
   end
 
-  # Admins see every department; leaders only the ones they belong to.
+  # Admins see every department (own church + congregations for the Sede);
+  # leaders only the ones they belong to.
   def visible_departaments
-    depts = current_user.church.departaments.order(:name)
+    depts = policy_scope(Departament).order(:name)
     return depts unless current_user.leader?
 
     depts.where(id: current_user.memberchips.select(:departament_id))

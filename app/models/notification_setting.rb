@@ -7,7 +7,7 @@ class NotificationSetting < ApplicationRecord
     "member_birthday"   => "Aniversário de membro"
   }.freeze
 
-  belongs_to :church
+  include BaseEntity
 
   enum :channel, { email: 0, whatsapp: 1, both: 2 }, prefix: true
 

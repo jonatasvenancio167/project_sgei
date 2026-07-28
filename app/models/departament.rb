@@ -21,7 +21,8 @@ class Departament < ApplicationRecord
     "sparkles"
   ].freeze
 
-  belongs_to :church
+  include BaseEntity
+
   has_many :events, dependent: :destroy
   has_many :memberchips, dependent: :destroy
   has_many :users, through: :memberchips

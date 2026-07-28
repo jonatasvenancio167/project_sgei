@@ -4,7 +4,7 @@ class DepartamentsController < ApplicationController
   # GET /departaments or /departaments.json
   def index
     authorize Departament
-    @departaments = current_user.church.departaments.order(:name)
+    @departaments = policy_scope(Departament).order(:name)
     # Non-admins only see the departments they belong to
     @departaments = @departaments.where(id: current_user.departament_ids) unless current_user.admin?
     @church_users = current_user.church.users.order(:name)
@@ -142,7 +142,7 @@ class DepartamentsController < ApplicationController
 
   # Use callbacks to share common setup or constraints between actions.
   def set_departament
-    @departament = current_user.church.departaments.find(params[:id])
+    @departament = policy_scope(Departament).find(params[:id])
     authorize @departament
   end
 

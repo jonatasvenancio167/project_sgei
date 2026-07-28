@@ -3,6 +3,8 @@
 class FormResponsePolicy < ChurchModulePolicy
   MODULE_KEY = "forms"
 
+  def show? = module_allowed? && within_hierarchy?
+
   private
 
   def record_church_id
@@ -11,7 +13,7 @@ class FormResponsePolicy < ChurchModulePolicy
 
   class Scope < ApplicationPolicy::Scope
     def resolve
-      scope.joins(:form).where(forms: { church_id: user.church_id })
+      scope.joins(:form).where(forms: { church_id: user.allowed_church_ids })
     end
   end
 end

@@ -3,7 +3,7 @@ class FormsController < ApplicationController
 
   def index
     authorize Form
-    forms = current_user.church.forms.not_deleted.includes(:departament, :form_responses)
+    forms = policy_scope(Form).not_deleted.includes(:departament, :form_responses)
 
     unless current_user.admin?
       dept_ids = current_user.departament_ids
@@ -80,7 +80,7 @@ class FormsController < ApplicationController
   private
 
   def set_form
-    @form = current_user.church.forms.not_deleted.find(params[:id])
+    @form = policy_scope(Form).not_deleted.find(params[:id])
     authorize @form
   end
 

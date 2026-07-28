@@ -7,7 +7,8 @@ class AuditLog < ApplicationRecord
     "notifications" => "Notificações"
   }.freeze
 
-  belongs_to :church
+  include BaseEntity
+
   belongs_to :user, optional: true
 
   validates :module_key, presence: true

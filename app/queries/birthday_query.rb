@@ -31,9 +31,11 @@ class BirthdayQuery
 
   attr_reader :params, :user
 
-  # Every member sees the whole church's birthdays; access is module-gated.
+  # Every member sees birthdays across the accessible hierarchy (the Sede
+  # sees its congregations too; a congregation sees only itself); access
+  # to the page itself is module-gated.
   def base_scope
-    filter_by_departament(user.church.users.status_active.with_birth_date)
+    filter_by_departament(User.where(church_id: user.allowed_church_ids).status_active.with_birth_date)
   end
 
   # Subquery instead of join: no duplicate rows (so no DISTINCT, which would
