@@ -1,0 +1,8 @@
+pt-BR:
+  schedules:
+    create:
+      success: "Escala criada com sucesso."
+    update:
+      success: "Escala atualizada com sucesso."
+    destroy:
+      success: "Escala excluída com sucesso."

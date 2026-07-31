@@ -1,0 +1,9 @@
+pt-BR:
+  departaments:
+    members:
+      create:
+        select_contact: "Selecione ao menos um contato para vincular."
+        linked:
+          one: "1 membro vinculado com sucesso."
+          other: "%{count} membros vinculados com sucesso."
+        added: "%{name} adicionado com sucesso."

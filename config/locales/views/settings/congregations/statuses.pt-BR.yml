@@ -1,0 +1,7 @@
+pt-BR:
+  settings:
+    congregations:
+      statuses:
+        update:
+          activated: "Congregação ativada."
+          deactivated: "Congregação desativada."

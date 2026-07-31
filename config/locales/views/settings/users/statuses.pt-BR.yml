@@ -1,0 +1,7 @@
+pt-BR:
+  settings:
+    users:
+      statuses:
+        update:
+          activated: "Acesso de %{name} ativado."
+          deactivated: "Acesso de %{name} desativado."

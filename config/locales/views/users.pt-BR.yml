@@ -1,0 +1,8 @@
+pt-BR:
+  users:
+    create:
+      success: "%{name} adicionado com sucesso."
+    update:
+      success: "%{name} atualizado com sucesso."
+    destroy:
+      success: "Membro removido."

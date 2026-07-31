@@ -1,0 +1,5 @@
+pt-BR:
+  settings:
+    permissions:
+      update:
+        success: "Permissões atualizadas com sucesso."

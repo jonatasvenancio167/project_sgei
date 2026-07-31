@@ -1,0 +1,8 @@
+pt-BR:
+  departaments:
+    create:
+      success: "Departamento criado com sucesso."
+    update:
+      success: "Departamento atualizado com sucesso."
+    destroy:
+      success: "Departamento removido com sucesso."

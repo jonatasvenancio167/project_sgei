@@ -1,0 +1,8 @@
+pt-BR:
+  activerecord:
+    errors:
+      models:
+        form_field:
+          attributes:
+            label_type:
+              inclusion: "tipo inválido"

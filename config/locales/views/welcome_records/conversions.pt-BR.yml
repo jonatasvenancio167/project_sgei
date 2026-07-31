@@ -1,0 +1,6 @@
+pt-BR:
+  welcome_records:
+    conversions:
+      update:
+        marked: "%{name} marcado como membro."
+        unmarked: "Marcação de membro removida."

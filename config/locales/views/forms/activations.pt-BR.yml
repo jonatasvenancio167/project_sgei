@@ -1,0 +1,6 @@
+pt-BR:
+  forms:
+    activations:
+      update:
+        opened: "Formulário aberto."
+        closed: "Formulário encerrado."

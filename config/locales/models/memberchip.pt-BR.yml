@@ -1,0 +1,8 @@
+pt-BR:
+  activerecord:
+    errors:
+      models:
+        memberchip:
+          attributes:
+            user_id:
+              taken: "já é membro deste departamento"

@@ -1,0 +1,8 @@
+pt-BR:
+  event_attendees:
+    create:
+      success: "Inscrição no evento criada com sucesso."
+    update:
+      success: "Inscrição no evento atualizada com sucesso."
+    destroy:
+      success: "Inscrição no evento removida com sucesso."

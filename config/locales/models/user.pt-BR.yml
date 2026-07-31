@@ -1,0 +1,11 @@
+pt-BR:
+  activerecord:
+    errors:
+      models:
+        user:
+          attributes:
+            name:
+              blank: "é obrigatório"
+            phone:
+              blank: "é obrigatório"
+              invalid: "deve estar no formato (DD) 91111-1111"

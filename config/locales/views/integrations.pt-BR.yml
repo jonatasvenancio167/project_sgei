@@ -1,0 +1,8 @@
+pt-BR:
+  integrations:
+    create:
+      success: "Integração criada com sucesso."
+    update:
+      success: "Integração atualizada com sucesso."
+    destroy:
+      success: "Integração removida com sucesso."

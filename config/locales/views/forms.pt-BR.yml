@@ -1,0 +1,8 @@
+pt-BR:
+  forms:
+    create:
+      success: "Formulário criado! Agora configure os campos."
+    update:
+      success: "Formulário atualizado com sucesso."
+    destroy:
+      success: "Formulário removido com sucesso."

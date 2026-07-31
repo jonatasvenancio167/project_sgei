@@ -1,0 +1,5 @@
+pt-BR:
+  settings:
+    congregations:
+      create:
+        success: "Congregação adicionada com sucesso."

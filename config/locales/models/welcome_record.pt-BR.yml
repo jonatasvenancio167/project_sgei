@@ -1,0 +1,11 @@
+pt-BR:
+  activerecord:
+    errors:
+      models:
+        welcome_record:
+          attributes:
+            name:
+              blank: "é obrigatório"
+            service:
+              blank: "é obrigatório"
+              inclusion: "inválido"

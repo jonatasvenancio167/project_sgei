@@ -1,0 +1,5 @@
+pt-BR:
+  settings:
+    notification_settings:
+      update:
+        success: "Notificações atualizadas com sucesso."

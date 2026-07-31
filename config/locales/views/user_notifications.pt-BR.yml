@@ -1,0 +1,8 @@
+pt-BR:
+  user_notifications:
+    create:
+      success: "Notificação do usuário criada com sucesso."
+    update:
+      success: "Notificação do usuário atualizada com sucesso."
+    destroy:
+      success: "Notificação do usuário removida com sucesso."

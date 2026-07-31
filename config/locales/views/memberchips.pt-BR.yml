@@ -1,0 +1,8 @@
+pt-BR:
+  memberchips:
+    create:
+      success: "Vínculo criado com sucesso."
+    update:
+      success: "Vínculo atualizado com sucesso."
+    destroy:
+      success: "Vínculo removido com sucesso."

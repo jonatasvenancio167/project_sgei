@@ -1,0 +1,8 @@
+pt-BR:
+  notifications:
+    create:
+      success: "Notificação criada com sucesso."
+    update:
+      success: "Notificação atualizada com sucesso."
+    destroy:
+      success: "Notificação removida com sucesso."

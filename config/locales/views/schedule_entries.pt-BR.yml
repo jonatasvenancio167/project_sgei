@@ -1,0 +1,7 @@
+pt-BR:
+  schedule_entries:
+    create:
+      success: "Linha adicionada."
+      error: "Erro ao adicionar: %{message}"
+    destroy:
+      success: "Linha removida."

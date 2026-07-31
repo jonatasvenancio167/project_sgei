@@ -1,0 +1,13 @@
+pt-BR:
+  notifications:
+    schedule_reminder:
+      title: "Lembrete de escala"
+      message: "Você está escalado %{when} (%{day}) em %{schedule} como %{column}."
+      tomorrow: "amanhã"
+      in_days: "em %{days} dias"
+    schedule_assignment:
+      title: "Você foi escalado"
+      message: "Você foi escalado em %{schedule} no dia %{date} como %{column}."
+    form_submission:
+      title: "Nova inscrição em %{form}"
+      message: "%{name} (%{email}) preencheu o formulário."

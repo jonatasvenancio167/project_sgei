@@ -1,0 +1,7 @@
+pt-BR:
+  settings:
+    users:
+      create:
+        success: "%{name} convidado com sucesso."
+      destroy:
+        success: "%{name} removido."

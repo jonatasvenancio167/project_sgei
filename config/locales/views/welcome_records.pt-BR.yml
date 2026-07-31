@@ -1,0 +1,8 @@
+pt-BR:
+  welcome_records:
+    create:
+      success: "%{name} registrado com sucesso."
+    update:
+      success: "Registro atualizado com sucesso."
+    destroy:
+      success: "Registro excluído."

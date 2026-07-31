@@ -1,0 +1,8 @@
+pt-BR:
+  activerecord:
+    errors:
+      models:
+        church:
+          attributes:
+            name:
+              blank: "é obrigatório"

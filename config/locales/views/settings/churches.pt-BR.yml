@@ -1,0 +1,5 @@
+pt-BR:
+  settings:
+    churches:
+      update:
+        success: "Alterações salvas com sucesso."

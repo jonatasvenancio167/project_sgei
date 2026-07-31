@@ -1,0 +1,8 @@
+pt-BR:
+  form_responses:
+    create:
+      success: "Envio do formulário criado com sucesso."
+    update:
+      success: "Envio do formulário atualizado com sucesso."
+    destroy:
+      success: "Envio do formulário removido com sucesso."
