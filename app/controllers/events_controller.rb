@@ -38,7 +38,7 @@ class EventsController < ApplicationController
 
     respond_to do |format|
       if @event.save
-        format.html { redirect_to painel_eventos_path, notice: "Evento criado com sucesso." }
+        format.html { redirect_to panel_events_path, notice: t(".success") }
         format.turbo_stream
       else
         format.html { render :new, status: :unprocessable_entity }
@@ -51,7 +51,7 @@ class EventsController < ApplicationController
   def update
     respond_to do |format|
       if @event.update(event_params)
-        format.html { redirect_to painel_eventos_path, notice: "Evento atualizado com sucesso.", status: :see_other }
+        format.html { redirect_to panel_events_path, notice: t(".success"), status: :see_other }
         format.json { render :show, status: :ok, location: @event }
       else
         format.html { render :edit, status: :unprocessable_entity }
@@ -65,7 +65,7 @@ class EventsController < ApplicationController
     @event.destroy!
 
     respond_to do |format|
-      format.html { redirect_to painel_eventos_path, notice: "Evento removido com sucesso.", status: :see_other }
+      format.html { redirect_to panel_events_path, notice: t(".success"), status: :see_other }
       format.json { head :no_content }
     end
   end

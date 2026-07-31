@@ -23,7 +23,7 @@ class ChurchModulePolicy < ApplicationPolicy
   end
 
   def module_allowed?
-    RolePermission.allowed?(church: user.church, role: user.role, module_key: module_key)
+    RolePermissions::AllowedQuery.new(church: user.church, role: user.role, module_key: module_key).call
   end
 
   def manage?

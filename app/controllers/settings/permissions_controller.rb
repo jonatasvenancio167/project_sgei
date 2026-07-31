@@ -2,16 +2,17 @@ module Settings
   class PermissionsController < BaseController
     # PATCH /settings/permissions
     def update
-      result = Settings::PermissionUpdateService.new(
+      result = Settings::PermissionUpdateService.call(
         church: current_church,
         permissions_matrix: permissions_params,
         performed_by: current_user
-      ).call
+      )
 
-      if result.success?
-        redirect_to painel_settings_path(section: "permissions"), notice: "Permissões atualizadas com sucesso."
-      else
-        redirect_to painel_settings_path(section: "permissions"), alert: result.errors.full_messages.to_sentence
+      case result
+      in Success(_)
+        redirect_to panel_settings_path(section: "permissions"), notice: t(".success")
+      in Failure(errors)
+        redirect_to panel_settings_path(section: "permissions"), alert: errors.full_messages.to_sentence
       end
     end
 

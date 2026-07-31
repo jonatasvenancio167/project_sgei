@@ -2,7 +2,7 @@
 
 <%
   url_builder = ->(page:, per:) do
-    painel_aniversariantes_path(period: @decorator.period, dept: @decorator.current_dept, page: page, per: per)
+    panel_birthdays_path(period: @decorator.period, dept: @decorator.current_dept, page: page, per: per)
   end
 %>
 
@@ -18,7 +18,7 @@
     </div>
 
     <!-- Filtro por departamento -->
-    <%= form_with url: painel_aniversariantes_path, method: :get, local: true, class: "w-full sm:w-auto" do |f| %>
+    <%= form_with url: panel_birthdays_path, method: :get, local: true, class: "w-full sm:w-auto" do |f| %>
       <%= f.hidden_field :period, value: @decorator.period %>
       <%= f.select :dept,
             options_for_select(@decorator.department_options, @decorator.current_dept),
@@ -55,7 +55,7 @@
     <div class="flex gap-2">
       <% @decorator.period_options.each do |value, label| %>
         <%= link_to label,
-              painel_aniversariantes_path(period: value, dept: @decorator.current_dept),
+              panel_birthdays_path(period: value, dept: @decorator.current_dept),
               class: @decorator.period_class(value) %>
       <% end %>
     </div>

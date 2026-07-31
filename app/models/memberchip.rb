@@ -4,5 +4,5 @@ class Memberchip < ApplicationRecord
 
   enum :role, { member: 0, leader: 1 }
 
-  validates :user_id, uniqueness: { scope: :departament_id, message: "já é membro deste departamento" }
+  validates :user_id, uniqueness: { scope: :departament_id }
 end

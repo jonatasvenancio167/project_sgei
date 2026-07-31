@@ -28,7 +28,7 @@ class ChurchesController < ApplicationController
 
     respond_to do |format|
       if @church.save
-        format.html { redirect_to @church, notice: "Church was successfully created." }
+        format.html { redirect_to @church, notice: t(".success") }
         format.json { render :show, status: :created, location: @church }
       else
         format.html { render :new, status: :unprocessable_entity }
@@ -41,7 +41,7 @@ class ChurchesController < ApplicationController
   def update
     respond_to do |format|
       if @church.update(church_params)
-        format.html { redirect_to @church, notice: "Church was successfully updated.", status: :see_other }
+        format.html { redirect_to @church, notice: t(".success"), status: :see_other }
         format.json { render :show, status: :ok, location: @church }
       else
         format.html { render :edit, status: :unprocessable_entity }
@@ -55,7 +55,7 @@ class ChurchesController < ApplicationController
     @church.destroy!
 
     respond_to do |format|
-      format.html { redirect_to churches_path, notice: "Church was successfully destroyed.", status: :see_other }
+      format.html { redirect_to churches_path, notice: t(".success"), status: :see_other }
       format.json { head :no_content }
     end
   end

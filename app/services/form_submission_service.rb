@@ -1,4 +1,4 @@
-class FormSubmissionService
+class FormSubmissionService < BaseService
   def initialize(form, submission_params)
     @form   = form
     @params = submission_params
@@ -6,10 +6,10 @@ class FormSubmissionService
 
   def call
     response = build_response
-    return response unless response.save
+    return Failure(response) unless response.save
 
     notify_admins(response)
-    response
+    Success(response)
   end
 
   private
@@ -39,8 +39,9 @@ class FormSubmissionService
   def notify_admins(response)
     notification = Notification.create!(
       church:            form.church,
-      title:             "Nova inscrição em #{form.title}",
-      message:           "#{response.submitter_name} (#{response.submitter_email}) preencheu o formulário.",
+      title:             I18n.t("notifications.form_submission.title", form: form.title),
+      message:           I18n.t("notifications.form_submission.message",
+                                name: response.submitter_name, email: response.submitter_email),
       notification_type: :form_submission
     )
 

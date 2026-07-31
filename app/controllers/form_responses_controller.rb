@@ -28,7 +28,7 @@ class FormResponsesController < ApplicationController
 
     respond_to do |format|
       if @form_response.save
-        format.html { redirect_to @form_response, notice: "Form response was successfully created." }
+        format.html { redirect_to @form_response, notice: t(".success") }
         format.json { render :show, status: :created, location: @form_response }
       else
         format.html { render :new, status: :unprocessable_entity }
@@ -41,7 +41,7 @@ class FormResponsesController < ApplicationController
   def update
     respond_to do |format|
       if @form_response.update(form_response_params)
-        format.html { redirect_to @form_response, notice: "Form response was successfully updated.", status: :see_other }
+        format.html { redirect_to @form_response, notice: t(".success"), status: :see_other }
         format.json { render :show, status: :ok, location: @form_response }
       else
         format.html { render :edit, status: :unprocessable_entity }
@@ -55,7 +55,7 @@ class FormResponsesController < ApplicationController
     @form_response.destroy!
 
     respond_to do |format|
-      format.html { redirect_to form_responses_path, notice: "Form response was successfully destroyed.", status: :see_other }
+      format.html { redirect_to form_responses_path, notice: t(".success"), status: :see_other }
       format.json { head :no_content }
     end
   end

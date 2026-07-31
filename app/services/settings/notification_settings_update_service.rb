@@ -1,7 +1,5 @@
 module Settings
-  class NotificationSettingsUpdateService
-    Result = Struct.new(:success?, :errors, keyword_init: true)
-
+  class NotificationSettingsUpdateService < BaseService
     # settings_matrix: { "event_created" => { "active" => "1", "channel" => "email" }, ... }
     def initialize(church:, settings_matrix:, performed_by:)
       @church = church
@@ -21,13 +19,13 @@ module Settings
         end
       end
 
-      Audit::RecordService.new(
+      Audit::RecordService.call(
         church: church, user: performed_by,
         module_key: "notifications", action: "Atualizou preferências de notificação"
-      ).call
-      Result.new(success?: true)
+      )
+      Success(true)
     rescue ActiveRecord::RecordInvalid => e
-      Result.new(success?: false, errors: e.record.errors)
+      Failure(e.record.errors)
     end
 
     private

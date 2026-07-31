@@ -20,7 +20,7 @@
   <% end %>
 
   <!-- ── Filters ─────────────────────────────────────────────────────── -->
-  <%= form_with url: painel_settings_path, method: :get, local: true, id: "settings-users-filters",
+  <%= form_with url: panel_settings_path, method: :get, local: true, id: "settings-users-filters",
         class: "mb-4 flex flex-wrap items-center gap-2" do |f| %>
     <%= hidden_field_tag :section, "users" %>
 
@@ -124,7 +124,7 @@
 
               <td class="px-4 py-3 text-right">
                 <div class="inline-flex gap-1">
-                  <%= button_to toggle_status_settings_user_path(user, q: current_q, role: current_role, status: current_status),
+                  <%= button_to settings_user_status_path(user, q: current_q, role: current_role, status: current_status),
                         method: :patch, title: user.status_active? ? "Desativar acesso" : "Ativar acesso",
                         class: "cursor-pointer rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground" do %>
                     <%= lucide_icon("power", class: "h-3.5 w-3.5") %>

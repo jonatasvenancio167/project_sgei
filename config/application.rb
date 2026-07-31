@@ -23,5 +23,13 @@ module ProjectSgei
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+
+    # UI is entirely pt-BR; locale files are organized in subdirectories
+    # (models/, views/, notifications/, mailers/) per docs/design_patters.md.
+    # Rails/ActiveModel/Devise built-in translations (date formats,
+    # to_sentence connectors, default error/flash messages) come from the
+    # rails-i18n and devise-i18n gems, which ship their own pt-BR locale files.
+    config.i18n.load_path += Dir[Rails.root.join("config", "locales", "**", "*.yml")]
+    config.i18n.default_locale = :"pt-BR"
   end
 end

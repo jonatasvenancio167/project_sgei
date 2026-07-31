@@ -8,18 +8,18 @@ class ScheduleEntriesController < ApplicationController
     position = @schedule.schedule_entries.where(month: month).count
 
     entry = @schedule.schedule_entries.create!(month: month, date: date, position: position, cell_values: cell_values)
-    Schedules::AssignmentSyncService.new(entry: entry).call
+    Schedules::AssignmentSyncService.call(entry: entry)
 
-    redirect_to painel_schedule_month_path(@schedule, month: entry.month), notice: "Linha adicionada."
+    redirect_to panel_schedule_month_path(@schedule, month: entry.month), notice: t(".success")
   rescue ActiveRecord::RecordInvalid => e
-    redirect_to painel_schedule_month_path(@schedule, month: month), alert: "Erro ao adicionar: #{e.message}"
+    redirect_to panel_schedule_month_path(@schedule, month: month), alert: t(".error", message: e.message)
   end
 
   def destroy
     month = params[:month]
     entry = @schedule.schedule_entries.find(params[:id])
     entry.destroy
-    redirect_to painel_schedule_month_path(@schedule, month: month), notice: "Linha removida."
+    redirect_to panel_schedule_month_path(@schedule, month: month), notice: t(".success")
   end
 
   private

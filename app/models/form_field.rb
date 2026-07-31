@@ -29,7 +29,7 @@ class FormField < ApplicationRecord
   has_many :form_answers, dependent: :destroy
 
   validates :label, presence: true
-  validates :label_type, inclusion: { in: TYPES, message: "tipo inválido" }
+  validates :label_type, inclusion: { in: TYPES }
 
   default_scope { order(:position) }
 

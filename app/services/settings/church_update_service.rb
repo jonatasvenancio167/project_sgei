@@ -1,7 +1,5 @@
 module Settings
-  class ChurchUpdateService
-    Result = Struct.new(:success?, :church, :errors, keyword_init: true)
-
+  class ChurchUpdateService < BaseService
     def initialize(church:, params:, performed_by:)
       @church = church
       @params = params
@@ -10,14 +8,14 @@ module Settings
 
     def call
       if church.update(params)
-        Audit::RecordService.new(
+        Audit::RecordService.call(
           church: church, user: performed_by,
           module_key: "settings", action: "Atualizou os dados da instituição",
           detail: church.name
-        ).call
-        Result.new(success?: true, church: church)
+        )
+        Success(church)
       else
-        Result.new(success?: false, church: church, errors: church.errors)
+        Failure(church)
       end
     end
 

@@ -21,7 +21,7 @@
           <%= lucide_icon("pencil", class: "h-4 w-4 text-muted-foreground") %>
           Editar
         </button>
-        <%= form_with url: painel_acolhimento_toggle_member_path(record.id, filter_params), method: :patch, local: true do %>
+        <%= form_with url: panel_welcome_conversion_path(record.id, filter_params), method: :patch, local: true do %>
           <button type="submit"
                   class="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-secondary transition-colors cursor-pointer">
             <%= lucide_icon("user-check", class: "h-4 w-4 text-muted-foreground") %>
@@ -31,7 +31,7 @@
       <% end %>
       <% if can_destroy %>
         <div class="border-t border-border/40"></div>
-        <%= form_with url: painel_acolhimento_destroy_path(record.id, filter_params), method: :delete, local: true do %>
+        <%= form_with url: panel_welcome_destroy_path(record.id, filter_params), method: :delete, local: true do %>
           <button type="submit"
                   onclick="return confirm('Tem certeza que deseja excluir o registro de <%= j record.name %>?')"
                   class="flex w-full items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors cursor-pointer">

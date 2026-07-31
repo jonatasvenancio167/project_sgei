@@ -293,7 +293,7 @@
   <% if policy(d).add_members? %>
   <%= render Shared::ModalComponent.new(id: "modal-add-member-#{d.id}", title: "Adicionar a #{d.name}", description: "Vincule alguém já cadastrado ou crie um novo membro diretamente neste departamento.", size: :md) do |modal| %>
     <% modal.with_body do %>
-      <%= form_with(url: add_members_departament_path(d), method: :post, local: true, class: "space-y-4", data: { add_member_form: true }) do |f| %>
+      <%= form_with(url: departament_members_path(d), method: :post, local: true, class: "space-y-4", data: { add_member_form: true }) do |f| %>
         
         <!-- Tab Selector -->
         <div class="flex gap-1 rounded-lg bg-muted p-1 text-sm">

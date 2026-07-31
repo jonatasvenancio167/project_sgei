@@ -1,7 +1,5 @@
 module Settings
-  class UserInviteService
-    Result = Struct.new(:success?, :user, :errors, keyword_init: true)
-
+  class UserInviteService < BaseService
     def initialize(church:, params:, performed_by:)
       @church = church
       @params = params
@@ -14,14 +12,14 @@ module Settings
       user.role ||= :member
 
       if user.save
-        Audit::RecordService.new(
+        Audit::RecordService.call(
           church: church, user: performed_by,
           module_key: "users", action: "Convidou usuário",
           detail: "#{user.name} (#{user.role_label})"
-        ).call
-        Result.new(success?: true, user: user)
+        )
+        Success(user)
       else
-        Result.new(success?: false, user: user, errors: user.errors)
+        Failure(user)
       end
     end
 

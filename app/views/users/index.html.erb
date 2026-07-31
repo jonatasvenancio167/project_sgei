@@ -5,12 +5,12 @@
   current_q    = params[:q].to_s
   current_role = params[:role].to_s
   current_dept = params[:dept].to_s
-  current_per  = @per
+  current_per  = @presenter.per
   active_filters = (current_role.present? && current_role != "todos" ? 1 : 0) +
                    (current_dept.present? && current_dept != "todos" ? 1 : 0)
 
   url_builder = ->(page:, per:) do
-    painel_membros_path(q: current_q, role: current_role, dept: current_dept, page: page, per: per)
+    panel_members_path(q: current_q, role: current_role, dept: current_dept, page: page, per: per)
   end
 %>
 
@@ -46,7 +46,7 @@
   <div class="mt-8 rounded-2xl border border-border/60 bg-card" style="box-shadow: var(--shadow-soft)">
 
     <!-- ── Filters bar ────────────────────────────────────────────────── -->
-    <%= form_with url: painel_membros_path, method: :get, local: true,
+    <%= form_with url: panel_members_path, method: :get, local: true,
                   class: "flex flex-wrap items-center gap-3 border-b border-border/60 p-4" do |f| %>
 
       <!-- Search -->
@@ -75,7 +75,7 @@
             options_for_select(
               [["Todos os departamentos", "todos"]] +
                 (current_user.admin? ? [["Sem departamento", "sem"]] : []) +
-                @departaments.map { |d| [d.name, d.id.to_s] },
+                @presenter.departaments.map { |d| [d.name, d.id.to_s] },
               current_dept.presence || "todos"
             ),
             {},
@@ -85,7 +85,7 @@
       <button type="submit" class="hidden"></button>
 
       <% if active_filters > 0 || current_q.present? %>
-        <%= link_to painel_membros_path,
+        <%= link_to panel_members_path,
               class: "inline-flex items-center gap-1.5 rounded-lg border border-border/60 bg-transparent px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground" do %>
           <%= lucide_icon("x", class: "h-3.5 w-3.5") %> Limpar
         <% end %>
@@ -102,7 +102,7 @@
     <!-- Auto-submit on select change -->
     <script>
       (function() {
-        var form = document.querySelector('form[action="<%= painel_membros_path %>"]');
+        var form = document.querySelector('form[action="<%= panel_members_path %>"]');
         if (!form) return;
         form.querySelectorAll('select').forEach(function(sel) {
           sel.addEventListener('change', function() { form.submit(); });
@@ -123,7 +123,7 @@
           </tr>
         </thead>
         <tbody class="[&_tr:last-child]:border-0">
-          <% if @users.empty? %>
+          <% if @presenter.users.empty? %>
             <tr>
               <td colspan="5">
                 <div class="flex flex-col items-center gap-2 py-12 text-center text-sm text-muted-foreground">
@@ -133,7 +133,7 @@
               </td>
             </tr>
           <% else %>
-            <% @users.each do |u| %>
+            <% @presenter.users.each do |u| %>
               <%
                 initials = u.name.to_s.split.first(2).map { |p| p[0]&.upcase }.join
                 primary_dept = u.departaments.first
@@ -204,10 +204,10 @@
     <!-- ── Pagination ─────────────────────────────────────────────────── -->
     <div class="border-t border-border/60">
       <%= render Shared::PaginationComponent.new(
-            current_page: @page,
-            total_pages:  @total_pages,
-            total_count:  @total,
-            page_size:    @per,
+            current_page: @presenter.page,
+            total_pages:  @presenter.total_pages,
+            total_count:  @presenter.total,
+            page_size:    @presenter.per,
             url_builder:  url_builder,
             item_label:   { singular: "membro", plural: "membros" }
           ) %>
@@ -223,7 +223,7 @@
       size: :md
     ) do |modal| %>
   <% modal.with_body do %>
-    <%= form_with url: painel_membros_create_path, scope: :user, method: :post, local: true, class: "space-y-4" do |f| %>
+    <%= form_with url: panel_members_create_path, scope: :user, method: :post, local: true, class: "space-y-4" do |f| %>
       <!-- Preserve current filter params so redirect lands on same page -->
       <%= hidden_field_tag :q,    current_q %>
       <%= hidden_field_tag :role, current_role %>
@@ -285,7 +285,7 @@
                 class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 data-members-dialogs-target="deptSelect">
           <option value="">Sem departamento</option>
-          <% @departaments.each do |d| %>
+          <% @presenter.departaments.each do |d| %>
             <option value="<%= d.id %>"><%= d.name %></option>
           <% end %>
         </select>
@@ -316,7 +316,7 @@
 <% end %>
 
 <!-- ── Modais: Editar Membro ───────────────────────────────────────────── -->
-<% @users.each do |u| %>
+<% @presenter.users.each do |u| %>
   <% next unless policy(u).update? %>
   <%= render Shared::ModalComponent.new(
         id: "modal-edit-member-#{u.id}",
@@ -330,7 +330,7 @@
         <%= hidden_field_tag :q,    current_q %>
         <%= hidden_field_tag :role, current_role %>
         <%= hidden_field_tag :dept, current_dept %>
-        <%= hidden_field_tag :page, @page %>
+        <%= hidden_field_tag :page, @presenter.page %>
         <%= hidden_field_tag :per,  current_per %>
 
         <!-- Nome (obrigatório) -->
@@ -385,7 +385,7 @@
           <label for="edit_user_departament_id_<%= u.id %>" class="text-sm font-medium">Departamento</label>
           <%= select_tag "user[departament_id]",
                 options_for_select(
-                  [["Sem departamento", ""]] + @departaments.map { |d| [d.name, d.id.to_s] },
+                  [["Sem departamento", ""]] + @presenter.departaments.map { |d| [d.name, d.id.to_s] },
                   u.primary_department&.id.to_s
                 ),
                 id: "edit_user_departament_id_#{u.id}",
@@ -393,7 +393,7 @@
         </div>
 
         <!-- Cargo (somente admin pode alterar) -->
-        <% if current_user.admin? %>
+        <% if policy(u).update_role? %>
           <div class="space-y-2">
             <label for="edit_user_role_<%= u.id %>" class="text-sm font-medium">Cargo</label>
             <%= f.select :role,

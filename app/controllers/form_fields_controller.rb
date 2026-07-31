@@ -10,10 +10,10 @@ class FormFieldsController < ApplicationController
     respond_to do |format|
       if @field.save
         format.turbo_stream
-        format.html { redirect_to builder_form_path(@form) }
+        format.html { redirect_to form_builder_path(@form) }
       else
         format.turbo_stream { render turbo_stream: turbo_stream.replace("field_errors", partial: "form_fields/errors", locals: { field: @field }) }
-        format.html { redirect_to builder_form_path(@form), alert: @field.errors.full_messages.to_sentence }
+        format.html { redirect_to form_builder_path(@form), alert: @field.errors.full_messages.to_sentence }
       end
     end
   end
@@ -22,10 +22,10 @@ class FormFieldsController < ApplicationController
     respond_to do |format|
       if @field.update(field_params)
         format.turbo_stream
-        format.html { redirect_to builder_form_path(@form) }
+        format.html { redirect_to form_builder_path(@form) }
       else
         format.turbo_stream
-        format.html { redirect_to builder_form_path(@form), alert: @field.errors.full_messages.to_sentence }
+        format.html { redirect_to form_builder_path(@form), alert: @field.errors.full_messages.to_sentence }
       end
     end
   end
@@ -34,7 +34,7 @@ class FormFieldsController < ApplicationController
     @field.destroy
     respond_to do |format|
       format.turbo_stream { render turbo_stream: turbo_stream.remove("field_#{@field.id}") }
-      format.html { redirect_to builder_form_path(@form) }
+      format.html { redirect_to form_builder_path(@form) }
     end
   end
 

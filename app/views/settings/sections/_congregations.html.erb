@@ -40,7 +40,7 @@
 
           <div class="flex items-center gap-2">
             <%= settings_status_badge(congregation.status_active?) %>
-            <%= button_to toggle_status_settings_congregation_path(congregation), method: :patch,
+            <%= button_to settings_congregation_status_path(congregation), method: :patch,
                   class: "inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground" do %>
               <%= lucide_icon("power", class: "h-3.5 w-3.5") %>
               <%= congregation.status_active? ? "Desativar" : "Ativar" %>

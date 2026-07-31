@@ -4,7 +4,7 @@
   current_end    = params[:end_date].to_s
 
   url_builder = ->(page:, per:) do
-    painel_settings_path(section: "audit", module_key: current_module,
+    panel_settings_path(section: "audit", module_key: current_module,
                          start_date: current_start, end_date: current_end,
                          page: page, per: per)
   end
@@ -15,7 +15,7 @@
   <% card.with_description { "Histórico de ações realizadas por usuários." } %>
 
   <!-- ── Filters ─────────────────────────────────────────────────────── -->
-  <%= form_with url: painel_settings_path, method: :get, local: true, id: "settings-audit-filters",
+  <%= form_with url: panel_settings_path, method: :get, local: true, id: "settings-audit-filters",
         class: "mb-4 flex flex-wrap items-end gap-3" do |f| %>
     <%= hidden_field_tag :section, "audit" %>
 

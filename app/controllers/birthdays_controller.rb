@@ -1,7 +1,7 @@
 class BirthdaysController < ApplicationController
   include Paginatable
 
-  # GET /painel/aniversariantes
+  # GET /panel/birthdays
   def index
     authorize :birthday, :index?
 

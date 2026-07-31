@@ -1,7 +1,5 @@
 module Settings
-  class UserRemoveService
-    Result = Struct.new(:success?, :user, :errors, keyword_init: true)
-
+  class UserRemoveService < BaseService
     def initialize(user:, performed_by:)
       @user = user
       @performed_by = performed_by
@@ -10,19 +8,19 @@ module Settings
     def call
       if user == performed_by
         user.errors.add(:base, "Você não pode remover o seu próprio acesso")
-        return Result.new(success?: false, user: user, errors: user.errors)
+        return Failure(user)
       end
 
       # Soft delete keeps schedules, events and audit history consistent.
       if user.update(deleted_at: Time.current, status: :inactive)
-        Audit::RecordService.new(
+        Audit::RecordService.call(
           church: user.church, user: performed_by,
           module_key: "users", action: "Removeu usuário",
           detail: user.name
-        ).call
-        Result.new(success?: true, user: user)
+        )
+        Success(user)
       else
-        Result.new(success?: false, user: user, errors: user.errors)
+        Failure(user)
       end
     end
 

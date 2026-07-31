@@ -31,7 +31,7 @@ class Church < ApplicationRecord
 
   accepts_nested_attributes_for :address, update_only: true, reject_if: :all_blank
 
-  validates :name, presence: { message: "é obrigatório" }
+  validates :name, presence: true
   validates :cnpj, cnpj: true
 
   delegate :city_with_state, to: :address, allow_nil: true

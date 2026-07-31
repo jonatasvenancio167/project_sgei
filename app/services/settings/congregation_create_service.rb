@@ -1,7 +1,5 @@
 module Settings
-  class CongregationCreateService
-    Result = Struct.new(:success?, :congregation, :errors, keyword_init: true)
-
+  class CongregationCreateService < BaseService
     def initialize(parent_church:, params:, performed_by:)
       @parent_church = parent_church
       @params = params
@@ -16,14 +14,14 @@ module Settings
       congregation.church_type = "congregation" if congregation.type_headquarters?
 
       if congregation.save
-        Audit::RecordService.new(
+        Audit::RecordService.call(
           church: parent_church, user: performed_by,
           module_key: "congregations", action: "Criou congregação",
           detail: congregation.name
-        ).call
-        Result.new(success?: true, congregation: congregation)
+        )
+        Success(congregation)
       else
-        Result.new(success?: false, congregation: congregation, errors: congregation.errors)
+        Failure(congregation)
       end
     end
 

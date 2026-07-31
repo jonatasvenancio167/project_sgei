@@ -28,7 +28,7 @@ class MemberchipsController < ApplicationController
 
     respond_to do |format|
       if @memberchip.save
-        format.html { redirect_to @memberchip, notice: "Memberchip was successfully created." }
+        format.html { redirect_to @memberchip, notice: t(".success") }
         format.json { render :show, status: :created, location: @memberchip }
       else
         format.html { render :new, status: :unprocessable_entity }
@@ -41,7 +41,7 @@ class MemberchipsController < ApplicationController
   def update
     respond_to do |format|
       if @memberchip.update(memberchip_params)
-        format.html { redirect_to @memberchip, notice: "Memberchip was successfully updated.", status: :see_other }
+        format.html { redirect_to @memberchip, notice: t(".success"), status: :see_other }
         format.json { render :show, status: :ok, location: @memberchip }
       else
         format.html { render :edit, status: :unprocessable_entity }
@@ -55,7 +55,7 @@ class MemberchipsController < ApplicationController
     @memberchip.destroy!
 
     respond_to do |format|
-      format.html { redirect_to memberchips_path, notice: "Memberchip was successfully destroyed.", status: :see_other }
+      format.html { redirect_to memberchips_path, notice: t(".success"), status: :see_other }
       format.json { head :no_content }
     end
   end

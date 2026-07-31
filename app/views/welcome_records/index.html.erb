@@ -3,7 +3,7 @@
 <%
   filter_params = params.permit(:tab, :q, :type, :service, :start_date, :end_date, :members_only, :page, :per).to_h
   url_builder = ->(page:, per:) do
-    painel_acolhimento_path(filter_params.merge(page: page, per: per))
+    panel_welcome_path(filter_params.merge(page: page, per: per))
   end
   can_create = policy(WelcomeRecord).create?
 %>
@@ -44,7 +44,7 @@
   <!-- Abas -->
   <div class="mt-8 flex gap-2">
     <% @decorator.tab_options.each do |value, label| %>
-      <%= link_to label, painel_acolhimento_path(tab: value), class: @decorator.tab_class(value) %>
+      <%= link_to label, panel_welcome_path(tab: value), class: @decorator.tab_class(value) %>
     <% end %>
   </div>
 
@@ -90,7 +90,7 @@
     <div class="mt-6 rounded-2xl border border-border/60 bg-card" style="box-shadow: var(--shadow-soft)">
 
       <!-- Filtros -->
-      <%= form_with url: painel_acolhimento_path, method: :get, local: true,
+      <%= form_with url: panel_welcome_path, method: :get, local: true,
                     class: "flex flex-wrap items-center gap-3 border-b border-border/60 p-4" do |f| %>
         <%= f.hidden_field :tab, value: "historico" %>
         <%= f.hidden_field :per, value: @pagy.limit %>
@@ -135,7 +135,7 @@
         <button type="submit" class="hidden"></button>
 
         <% if @decorator.has_active_filters? %>
-          <%= link_to painel_acolhimento_path(tab: "historico"),
+          <%= link_to panel_welcome_path(tab: "historico"),
                 class: "inline-flex items-center gap-1.5 rounded-lg border border-border/60 bg-transparent px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground" do %>
             <%= lucide_icon("x", class: "h-3.5 w-3.5") %> Limpar
           <% end %>
@@ -145,7 +145,7 @@
       <!-- Auto-submit nos filtros -->
       <script>
         (function() {
-          var form = document.querySelector('form[action="<%= painel_acolhimento_path %>"]');
+          var form = document.querySelector('form[action="<%= panel_welcome_path %>"]');
           if (!form) return;
           form.querySelectorAll('select, input[type=date], input[type=checkbox]').forEach(function(el) {
             el.addEventListener('change', function() { form.submit(); });
@@ -248,7 +248,7 @@
     <% modal.with_body do %>
       <%= render "welcome_records/form",
             record: @new_welcome_record,
-            url: painel_acolhimento_create_path,
+            url: panel_welcome_create_path,
             method: :post,
             decorator: @decorator,
             field_prefix: "welcome_new",
@@ -270,7 +270,7 @@
     <% modal.with_body do %>
       <%= render "welcome_records/form",
             record: record.model,
-            url: painel_acolhimento_update_path(record.id),
+            url: panel_welcome_update_path(record.id),
             method: :patch,
             decorator: @decorator,
             field_prefix: "welcome_edit_#{record.id}",

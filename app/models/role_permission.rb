@@ -18,11 +18,4 @@ class RolePermission < ApplicationRecord
   validates :module_key, presence: true,
                          inclusion: { in: MODULES.keys },
                          uniqueness: { scope: %i[church_id role] }
-
-  def self.allowed?(church:, role:, module_key:)
-    return true if role.to_s == "admin"
-
-    permission = find_by(church: church, role: role, module_key: module_key)
-    permission.nil? || permission.allowed?
-  end
 end

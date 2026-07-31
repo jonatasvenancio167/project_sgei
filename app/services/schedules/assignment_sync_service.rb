@@ -1,7 +1,7 @@
 module Schedules
   # Extracts the members linked in "member"-type columns of an entry,
   # keeps schedule_assignments in sync and notifies newly assigned members.
-  class AssignmentSyncService
+  class AssignmentSyncService < BaseService
     def initialize(entry:)
       @entry = entry
       @schedule = entry.schedule
@@ -26,7 +26,7 @@ module Schedules
       end
 
       created.each { |assignment| notify(assignment) }
-      created
+      Success(created)
     end
 
     private
@@ -46,8 +46,9 @@ module Schedules
     def notify(assignment)
       notification = Notification.create!(
         church: schedule.church,
-        title: "Você foi escalado",
-        message: "Você foi escalado em #{schedule.name} no dia #{entry.date.strftime('%d/%m/%Y')} como #{assignment.schedule_column.name}.",
+        title: I18n.t("notifications.schedule_assignment.title"),
+        message: I18n.t("notifications.schedule_assignment.message",
+                        schedule: schedule.name, date: entry.date.strftime("%d/%m/%Y"), column: assignment.schedule_column.name),
         notification_type: :schedule
       )
       UserNotification.create!(user: assignment.user, notification: notification, sent_at: Time.current)

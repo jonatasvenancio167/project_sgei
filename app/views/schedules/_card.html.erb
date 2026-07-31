@@ -28,7 +28,7 @@
               <%= lucide_icon("pencil", class: "h-4 w-4 text-muted-foreground") %>
               Editar
             </button>
-            <%= form_with url: painel_schedule_destroy_path(schedule.id), method: :delete, local: true do %>
+            <%= form_with url: panel_schedule_destroy_path(schedule.id), method: :delete, local: true do %>
               <button type="submit"
                       onclick="return confirm('Tem certeza que deseja excluir a escala \"<%= schedule.name %>\"?')"
                       class="flex w-full items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors cursor-pointer">

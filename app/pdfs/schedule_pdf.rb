@@ -4,7 +4,7 @@ require "prawn"
 require "prawn/table"
 
 # Renders a schedule month grid as a downloadable PDF, mirroring the
-# painel/escalas/:id/:month table (Data + dynamic columns).
+# panel/schedules/:id/:month table (Data + dynamic columns).
 class SchedulePdf
   HEADER_BG = "F3F1EA" # sand tone used by the app's secondary surfaces
   BORDER    = "DDD8CC"

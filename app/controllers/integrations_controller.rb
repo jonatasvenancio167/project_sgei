@@ -29,7 +29,7 @@ class IntegrationsController < ApplicationController
 
     respond_to do |format|
       if @integration.save
-        format.html { redirect_to @integration, notice: "Integration was successfully created." }
+        format.html { redirect_to @integration, notice: t(".success") }
         format.json { render :show, status: :created, location: @integration }
       else
         format.html { render :new, status: :unprocessable_entity }
@@ -42,7 +42,7 @@ class IntegrationsController < ApplicationController
   def update
     respond_to do |format|
       if @integration.update(integration_params)
-        format.html { redirect_to @integration, notice: "Integration was successfully updated.", status: :see_other }
+        format.html { redirect_to @integration, notice: t(".success"), status: :see_other }
         format.json { render :show, status: :ok, location: @integration }
       else
         format.html { render :edit, status: :unprocessable_entity }
@@ -56,7 +56,7 @@ class IntegrationsController < ApplicationController
     @integration.destroy!
 
     respond_to do |format|
-      format.html { redirect_to integrations_path, notice: "Integration was successfully destroyed.", status: :see_other }
+      format.html { redirect_to integrations_path, notice: t(".success"), status: :see_other }
       format.json { head :no_content }
     end
   end

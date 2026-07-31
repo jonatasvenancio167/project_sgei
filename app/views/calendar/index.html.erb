@@ -11,13 +11,13 @@
     <div class="h-fit rounded-2xl border border-border/60 bg-card p-4" style="box-shadow: var(--shadow-soft)">
       <div class="w-full max-w-[280px]">
         <div class="flex items-center justify-between px-2 py-2">
-          <%= link_to calendario_path(date: @date.prev_month), class: "rounded-lg p-1 hover:bg-secondary transition-colors" do %>
+          <%= link_to panel_calendar_path(date: @date.prev_month), class: "rounded-lg p-1 hover:bg-secondary transition-colors" do %>
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left size-4"><path d="m15 18-6-6 6-6"/></svg>
           <% end %>
           <div class="text-sm font-medium">
             <%= I18n.l(@date, format: "%B %Y") %>
           </div>
-          <%= link_to calendario_path(date: @date.next_month), class: "rounded-lg p-1 hover:bg-secondary transition-colors" do %>
+          <%= link_to panel_calendar_path(date: @date.next_month), class: "rounded-lg p-1 hover:bg-secondary transition-colors" do %>
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right size-4"><path d="m9 18 6-6-9-6"/></svg>
           <% end %>
         </div>
@@ -33,12 +33,12 @@
         </div>
 
         <div class="mt-1 grid grid-cols-7 gap-1">
-          <% 
+          <%
             start_of_month = @date.beginning_of_month
             start_of_calendar = start_of_month.beginning_of_week(:sunday)
             end_of_month = @date.end_of_month
             end_of_calendar = end_of_month.end_of_week(:sunday)
-            
+
             days = (start_of_calendar..end_of_calendar).to_a
           %>
 
@@ -68,7 +68,7 @@
         <% end %>
 
         <% @events.each do |event| %>
-          <% color_class = @dept_colors[event.departament&.name] || "bg-primary" %>
+          <% color_class = event.departament&.color.presence || "bg-primary" %>
           <li class="flex items-center gap-4 rounded-xl border border-border/60 bg-background/40 p-4 transition-all hover:bg-background/60">
             <span class="h-12 w-1.5 shrink-0 rounded-full <%= color_class %>"></span>
             <div class="flex-1 min-w-0">

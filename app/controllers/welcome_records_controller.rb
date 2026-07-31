@@ -1,9 +1,9 @@
 class WelcomeRecordsController < ApplicationController
   include Paginatable
 
-  before_action :set_welcome_record, only: %i[update destroy toggle_member]
+  before_action :set_welcome_record, only: %i[update destroy]
 
-  # GET /painel/acolhimento
+  # GET /panel/welcome
   def index
     authorize :welcome_record, :index?
 
@@ -15,47 +15,36 @@ class WelcomeRecordsController < ApplicationController
     @new_welcome_record = WelcomeRecord.new(visitor_type: :visitor, service: WelcomeRecord::SERVICES.first)
   end
 
-  # POST /painel/acolhimento (modal "Registrar visita")
+  # POST /panel/welcome (modal "Registrar visita")
   def create
     @welcome_record = current_user.church.welcome_records.build(welcome_record_params)
     @welcome_record.registered_by = current_user
     authorize @welcome_record
 
     if @welcome_record.save
-      redirect_to painel_acolhimento_path(preserve_filters.merge(tab: "hoje")),
-                  notice: "#{@welcome_record.name} registrado com sucesso."
+      redirect_to panel_welcome_path(preserve_filters.merge(tab: "hoje")),
+                  notice: t(".success", name: @welcome_record.name)
     else
-      redirect_to painel_acolhimento_path(preserve_filters),
+      redirect_to panel_welcome_path(preserve_filters),
                   alert: @welcome_record.errors.full_messages.to_sentence
     end
   end
 
-  # PATCH /painel/acolhimento/:id (modal "Editar registro")
+  # PATCH /panel/welcome/:id (modal "Editar registro")
   def update
     if @welcome_record.update(welcome_record_params)
-      redirect_to painel_acolhimento_path(preserve_filters),
-                  notice: "Registro atualizado com sucesso.", status: :see_other
+      redirect_to panel_welcome_path(preserve_filters),
+                  notice: t(".success"), status: :see_other
     else
-      redirect_to painel_acolhimento_path(preserve_filters),
+      redirect_to panel_welcome_path(preserve_filters),
                   alert: @welcome_record.errors.full_messages.to_sentence, status: :see_other
     end
   end
 
-  # PATCH /painel/acolhimento/:id/membro
-  def toggle_member
-    @welcome_record.update!(became_member: !@welcome_record.became_member)
-    notice = if @welcome_record.became_member?
-      "#{@welcome_record.name} marcado como membro."
-    else
-      "Marcação de membro removida."
-    end
-    redirect_to painel_acolhimento_path(preserve_filters), notice: notice, status: :see_other
-  end
-
-  # DELETE /painel/acolhimento/:id
+  # DELETE /panel/welcome/:id
   def destroy
     @welcome_record.destroy!
-    redirect_to painel_acolhimento_path(preserve_filters), notice: "Registro excluído.", status: :see_other
+    redirect_to panel_welcome_path(preserve_filters), notice: t(".success"), status: :see_other
   end
 
   private

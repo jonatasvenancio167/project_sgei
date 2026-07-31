@@ -20,7 +20,7 @@
                 <p class="text-base font-medium">Nenhum evento encontrado</p>
                 <p class="text-sm">Tente ajustar seus filtros para encontrar o que procura.</p>
                 <% if decorator.has_active_filters? %>
-                  <%= link_to "Limpar filtros", painel_eventos_path, class: "mt-2 inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent focus:outline-none" %>
+                  <%= link_to "Limpar filtros", panel_events_path, class: "mt-2 inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent focus:outline-none" %>
                 <% end %>
               </div>
             </td>

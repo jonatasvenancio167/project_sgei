@@ -1,7 +1,5 @@
 module Settings
-  class PermissionUpdateService
-    Result = Struct.new(:success?, :errors, keyword_init: true)
-
+  class PermissionUpdateService < BaseService
     # permissions_matrix: { "leader" => { "events" => "1", ... }, "member" => { ... } }
     def initialize(church:, permissions_matrix:, performed_by:)
       @church = church
@@ -21,13 +19,13 @@ module Settings
         end
       end
 
-      Audit::RecordService.new(
+      Audit::RecordService.call(
         church: church, user: performed_by,
         module_key: "permissions", action: "Atualizou permissões por módulo"
-      ).call
-      Result.new(success?: true)
+      )
+      Success(true)
     rescue ActiveRecord::RecordInvalid => e
-      Result.new(success?: false, errors: e.record.errors)
+      Failure(e.record.errors)
     end
 
     private

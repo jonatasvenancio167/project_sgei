@@ -1,4 +1,4 @@
-class CalendarioController < ApplicationController
+class CalendarController < ApplicationController
   before_action :authenticate_user!
 
   def index
@@ -19,14 +19,5 @@ class CalendarioController < ApplicationController
     unless @user.admin?
       @events = @events.where(departament_id: @user.departament_ids + [nil])
     end
-
-    @dept_colors = {
-      "Louvor" => "bg-primary",
-      "Jovens" => "bg-chart-3",
-      "Geral" => "bg-primary-soft",
-      "Diaconia" => "bg-chart-4",
-      "Ensino" => "bg-chart-2",
-      "Kids" => "bg-primary-soft"
-    }
   end
 end

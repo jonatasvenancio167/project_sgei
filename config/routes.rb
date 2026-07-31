@@ -9,21 +9,17 @@ Rails.application.routes.draw do
   resources :events
   resources :memberchips
   resources :departaments do
-    member do
-      post :add_members
-    end
+    resources :members, only: :create, controller: "departaments/members"
   end
   resources :users
   resources :churches
 
   # Forms with builder and nested field management
   resources :forms do
-    member do
-      get  :builder
-      get  :statistics
-      post :reorder_fields
-      patch :toggle_active
-    end
+    resource :builder,        only: :show,   controller: "forms/builders"
+    resource :statistics,     only: :show,   controller: "forms/statistics"
+    resource :field_ordering, only: :update, controller: "forms/field_orderings"
+    resource :activation,     only: :update, controller: "forms/activations"
     resources :form_fields, only: %i[create update destroy]
   end
 
@@ -35,35 +31,35 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
   get  "overview", to: "overview#index", as: :overview
-  get  "painel/calendario", to: "calendario#index", as: :calendario
-  get  "painel/eventos", to: "events#index", as: :painel_eventos
-  get  "painel/membros", to: "users#index",  as: :painel_membros
-  post "painel/membros", to: "users#create", as: :painel_membros_create
-  get  "painel/aniversariantes", to: "birthdays#index", as: :painel_aniversariantes
-  get    "painel/acolhimento",            to: "welcome_records#index",         as: :painel_acolhimento
-  post   "painel/acolhimento",            to: "welcome_records#create",        as: :painel_acolhimento_create
-  patch  "painel/acolhimento/:id",        to: "welcome_records#update",        as: :painel_acolhimento_update
-  delete "painel/acolhimento/:id",        to: "welcome_records#destroy",       as: :painel_acolhimento_destroy
-  patch  "painel/acolhimento/:id/membro", to: "welcome_records#toggle_member", as: :painel_acolhimento_toggle_member
-  get    "painel/escalas",          to: "schedules#index",   as: :painel_schedules
-  post   "painel/escalas",          to: "schedules#create",  as: :painel_schedules_create
-  patch  "painel/escalas/:id",      to: "schedules#update",  as: :painel_schedule_update
-  delete "painel/escalas/:id",      to: "schedules#destroy", as: :painel_schedule_destroy
-  get    "painel/escalas/:id/:month",             to: "schedules#show",           as: :painel_schedule_month,          constraints: { month: /\d{4}-\d{2}/ }
-  post   "painel/escalas/:schedule_id/entradas",   to: "schedule_entries#create",  as: :painel_schedule_entries_create
-  delete "painel/escalas/:schedule_id/entradas/:id", to: "schedule_entries#destroy", as: :painel_schedule_entry_destroy
+  get  "panel/calendar", to: "calendar#index", as: :panel_calendar
+  get  "panel/events", to: "events#index", as: :panel_events
+  get  "panel/members", to: "users#index",  as: :panel_members
+  post "panel/members", to: "users#create", as: :panel_members_create
+  get  "panel/birthdays", to: "birthdays#index", as: :panel_birthdays
+  get    "panel/welcome",            to: "welcome_records#index",         as: :panel_welcome
+  post   "panel/welcome",            to: "welcome_records#create",        as: :panel_welcome_create
+  patch  "panel/welcome/:id",        to: "welcome_records#update",        as: :panel_welcome_update
+  delete "panel/welcome/:id",        to: "welcome_records#destroy",       as: :panel_welcome_destroy
+  patch  "panel/welcome/:welcome_record_id/conversion", to: "welcome_records/conversions#update", as: :panel_welcome_conversion
+  get    "panel/schedules",          to: "schedules#index",   as: :panel_schedules
+  post   "panel/schedules",          to: "schedules#create",  as: :panel_schedules_create
+  patch  "panel/schedules/:id",      to: "schedules#update",  as: :panel_schedule_update
+  delete "panel/schedules/:id",      to: "schedules#destroy", as: :panel_schedule_destroy
+  get    "panel/schedules/:id/:month",           to: "schedules#show",           as: :panel_schedule_month,          constraints: { month: /\d{4}-\d{2}/ }
+  post   "panel/schedules/:schedule_id/entries",   to: "schedule_entries#create",  as: :panel_schedule_entries_create
+  delete "panel/schedules/:schedule_id/entries/:id", to: "schedule_entries#destroy", as: :panel_schedule_entry_destroy
 
   resources :schedules, only: %i[index create show update destroy]
 
-  get "painel/configuracoes", to: "settings#show", as: :painel_settings
+  get "panel/settings", to: "settings#show", as: :panel_settings
 
   namespace :settings do
     resource :church, only: :update
     resources :congregations, only: :create do
-      member { patch :toggle_status }
+      resource :status, only: :update, controller: "congregations/statuses"
     end
     resources :users, only: %i[create destroy] do
-      member { patch :toggle_status }
+      resource :status, only: :update, controller: "users/statuses"
     end
     resource :permissions, only: :update
     resource :notification_settings, only: :update

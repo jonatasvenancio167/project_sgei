@@ -2,31 +2,17 @@ module Settings
   class CongregationsController < BaseController
     # POST /settings/congregations
     def create
-      result = Settings::CongregationCreateService.new(
+      result = Settings::CongregationCreateService.call(
         parent_church: current_church,
         params: congregation_params,
         performed_by: current_user
-      ).call
+      )
 
-      if result.success?
-        redirect_to painel_settings_path(section: "congregations"), notice: "Congregação adicionada com sucesso."
-      else
-        redirect_to painel_settings_path(section: "congregations"), alert: result.errors.full_messages.to_sentence
-      end
-    end
-
-    # PATCH /settings/congregations/:id/toggle_status
-    def toggle_status
-      result = Settings::CongregationToggleStatusService.new(
-        congregation: current_church.congregations.find(params[:id]),
-        performed_by: current_user
-      ).call
-
-      if result.success?
-        status_label = result.congregation.status_active? ? "ativada" : "desativada"
-        redirect_to painel_settings_path(section: "congregations"), notice: "Congregação #{status_label}."
-      else
-        redirect_to painel_settings_path(section: "congregations"), alert: result.errors.full_messages.to_sentence
+      case result
+      in Success(_)
+        redirect_to panel_settings_path(section: "congregations"), notice: t(".success")
+      in Failure(congregation)
+        redirect_to panel_settings_path(section: "congregations"), alert: congregation.errors.full_messages.to_sentence
       end
     end
 

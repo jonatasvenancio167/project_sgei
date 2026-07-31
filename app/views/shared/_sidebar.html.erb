@@ -21,7 +21,7 @@
 
           <% if module_allowed?("calendar") %>
           <%= render(Sidebar::MenuItemComponent.new) do %>
-            <%= render(Sidebar::MenuButtonComponent.new(is_active: controller_name == 'calendario', href: calendario_path)) do %>
+            <%= render(Sidebar::MenuButtonComponent.new(is_active: controller_name == 'calendar', href: panel_calendar_path)) do %>
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-days size-4"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
               <span>Calendário</span>
             <% end %>
@@ -31,7 +31,7 @@
 
           <% if module_allowed?("events") %>
           <%= render(Sidebar::MenuItemComponent.new) do %>
-            <%= render(Sidebar::MenuButtonComponent.new(is_active: controller_name == 'events', href: painel_eventos_path)) do %>
+            <%= render(Sidebar::MenuButtonComponent.new(is_active: controller_name == 'events', href: panel_events_path)) do %>
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar size-4"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
               <span>Eventos</span>
             <% end %>
@@ -51,7 +51,7 @@
 
           <% if module_allowed?("schedules") %>
           <%= render(Sidebar::MenuItemComponent.new) do %>
-            <%= render(Sidebar::MenuButtonComponent.new(is_active: controller_name == 'schedules', href: painel_schedules_path)) do %>
+            <%= render(Sidebar::MenuButtonComponent.new(is_active: controller_name == 'schedules', href: panel_schedules_path)) do %>
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-range size-4"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M16 18h.01"/></svg>
               <span>Escalas</span>
             <% end %>
@@ -61,7 +61,7 @@
 
           <% if module_allowed?("members") %>
           <%= render(Sidebar::MenuItemComponent.new) do %>
-            <%= render(Sidebar::MenuButtonComponent.new(is_active: request.path == painel_membros_path, href: painel_membros_path)) do %>
+            <%= render(Sidebar::MenuButtonComponent.new(is_active: request.path == panel_members_path, href: panel_members_path)) do %>
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user size-4"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
               <span>Membros</span>
             <% end %>
@@ -71,7 +71,7 @@
 
           <% if module_allowed?("birthdays") %>
           <%= render(Sidebar::MenuItemComponent.new) do %>
-            <%= render(Sidebar::MenuButtonComponent.new(is_active: controller_name == 'birthdays', href: painel_aniversariantes_path)) do %>
+            <%= render(Sidebar::MenuButtonComponent.new(is_active: controller_name == 'birthdays', href: panel_birthdays_path)) do %>
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-cake size-4"><path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"/><path d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1"/><path d="M2 21h20"/><path d="M7 8v3"/><path d="M12 8v3"/><path d="M17 8v3"/><path d="M7 4h.01"/><path d="M12 4h.01"/><path d="M17 4h.01"/></svg>
               <span>Aniversariantes</span>
             <% end %>
@@ -81,7 +81,7 @@
 
           <% if module_allowed?("welcome") %>
           <%= render(Sidebar::MenuItemComponent.new) do %>
-            <%= render(Sidebar::MenuButtonComponent.new(is_active: controller_name == 'welcome_records', href: painel_acolhimento_path)) do %>
+            <%= render(Sidebar::MenuButtonComponent.new(is_active: controller_name == 'welcome_records', href: panel_welcome_path)) do %>
               <%= lucide_icon("hand-heart", class: "size-4") %>
               <span>Acolhimento</span>
             <% end %>
@@ -104,7 +104,7 @@
         <% if current_user&.admin? %>
         <%= render(Sidebar::MenuComponent.new) do %>
           <%= render(Sidebar::MenuItemComponent.new) do %>
-            <%= render(Sidebar::MenuButtonComponent.new(is_active: controller_name == 'settings', href: painel_settings_path)) do %>
+            <%= render(Sidebar::MenuButtonComponent.new(is_active: controller_name == 'settings', href: panel_settings_path)) do %>
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings size-4"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
               <span>Configurações</span>
             <% end %>

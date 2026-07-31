@@ -16,9 +16,8 @@ class WelcomeRecord < ApplicationRecord
 
   enum :visitor_type, { visitor: 0, brother: 1 }, prefix: true
 
-  validates :name, presence: { message: "é obrigatório" }
-  validates :service, presence: { message: "é obrigatório" },
-                      inclusion: { in: SERVICES, message: "inválido" }
+  validates :name, presence: true
+  validates :service, presence: true, inclusion: { in: SERVICES }
 
   scope :registered_on, ->(date) { where(created_at: date.all_day) }
 

@@ -1,5 +1,5 @@
 class FormsController < ApplicationController
-  before_action :set_form, only: %i[show edit update destroy builder statistics reorder_fields toggle_active]
+  before_action :set_form, only: %i[show edit update destroy]
 
   def index
     authorize Form
@@ -20,14 +20,6 @@ class FormsController < ApplicationController
     @stats = build_statistics if @tab == "statistics"
   end
 
-  def builder
-    @form_fields = @form.form_fields
-  end
-
-  def statistics
-    redirect_to form_path(@form, tab: "statistics")
-  end
-
   def new
     @form = Form.new
     @departaments = available_departaments
@@ -42,7 +34,7 @@ class FormsController < ApplicationController
     authorize @form
 
     if @form.save
-      redirect_to builder_form_path(@form), notice: "Formulário criado! Agora configure os campos."
+      redirect_to form_builder_path(@form), notice: t(".success")
     else
       @departaments = available_departaments
       render :new, status: :unprocessable_entity
@@ -51,7 +43,7 @@ class FormsController < ApplicationController
 
   def update
     if @form.update(form_params)
-      redirect_to @form, notice: "Formulário atualizado com sucesso."
+      redirect_to @form, notice: t(".success")
     else
       @departaments = available_departaments
       render :edit, status: :unprocessable_entity
@@ -60,21 +52,7 @@ class FormsController < ApplicationController
 
   def destroy
     @form.update!(deleted_at: Time.current, active: false)
-    redirect_to forms_path, notice: "Formulário removido com sucesso."
-  end
-
-  def toggle_active
-    @form.update!(active: !@form.active?)
-    redirect_back fallback_location: form_path(@form),
-                  notice: "Formulário #{@form.active? ? 'aberto' : 'encerrado'}."
-  end
-
-  def reorder_fields
-    ids = params[:ids] || []
-    ids.each_with_index do |id, index|
-      @form.form_fields.where(id: id).update_all(position: index)
-    end
-    head :ok
+    redirect_to forms_path, notice: t(".success")
   end
 
   private

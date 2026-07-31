@@ -29,7 +29,7 @@ class UserNotificationsController < ApplicationController
 
     respond_to do |format|
       if @user_notification.save
-        format.html { redirect_to @user_notification, notice: "User notification was successfully created." }
+        format.html { redirect_to @user_notification, notice: t(".success") }
         format.json { render :show, status: :created, location: @user_notification }
       else
         format.html { render :new, status: :unprocessable_entity }
@@ -42,7 +42,7 @@ class UserNotificationsController < ApplicationController
   def update
     respond_to do |format|
       if @user_notification.update(user_notification_params)
-        format.html { redirect_to @user_notification, notice: "User notification was successfully updated.", status: :see_other }
+        format.html { redirect_to @user_notification, notice: t(".success"), status: :see_other }
         format.json { render :show, status: :ok, location: @user_notification }
       else
         format.html { render :edit, status: :unprocessable_entity }
@@ -56,7 +56,7 @@ class UserNotificationsController < ApplicationController
     @user_notification.destroy!
 
     respond_to do |format|
-      format.html { redirect_to user_notifications_path, notice: "User notification was successfully destroyed.", status: :see_other }
+      format.html { redirect_to user_notifications_path, notice: t(".success"), status: :see_other }
       format.json { head :no_content }
     end
   end

@@ -2,7 +2,7 @@ class SettingsController < Settings::BaseController
   SECTIONS = SettingsHelper::SECTIONS.map { |section| section[:key] }.freeze
   AUDIT_PAGE_SIZES = [10, 25, 50].freeze
 
-  # GET /painel/configuracoes
+  # GET /panel/settings
   def show
     @church = current_church
     @section = SECTIONS.include?(params[:section]) ? params[:section] : "church"

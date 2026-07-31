@@ -8,7 +8,4 @@ class ScheduleAssignment < ApplicationRecord
   has_one :schedule, through: :schedule_entry
 
   validates :user_id, uniqueness: { scope: [:schedule_entry_id, :schedule_column_id] }
-
-  scope :on_date, ->(date) { joins(:schedule_entry).where(schedule_entries: { date: date }) }
-  scope :without_reminder, ->(days) { where(REMINDERS.fetch(days) => nil) }
 end

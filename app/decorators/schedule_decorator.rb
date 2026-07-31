@@ -28,7 +28,7 @@ class ScheduleDecorator < BaseDecorator
   end
 
   def month_path
-    painel_schedule_month_path(object, month: current_month)
+    panel_schedule_month_path(object, month: current_month)
   end
 
   def color_bar_class

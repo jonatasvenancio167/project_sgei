@@ -1,5 +1,5 @@
 <% editing = schedule.persisted? %>
-<%= form_with url: editing ? painel_schedule_update_path(schedule.id) : painel_schedules_create_path,
+<%= form_with url: editing ? panel_schedule_update_path(schedule.id) : panel_schedules_create_path,
               method: editing ? :patch : :post,
               local: true,
               id: editing ? "edit_schedule_#{schedule.id}_form" : "new_schedule_form",

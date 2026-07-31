@@ -1,52 +1,18 @@
 class UsersController < ApplicationController
   before_action :set_user, only: %i[ show edit update destroy ]
 
-  # GET /painel/membros
+  # GET /panel/members
   def index
     authorize User
-    @departaments = visible_departaments
-    scope = policy_scope(User).order(:name)
+    departaments = visible_departaments
+    scope = Users::IndexQuery.new(
+      scope: policy_scope(User).order(:name),
+      user: current_user,
+      departaments: departaments,
+      params: params
+    ).call
 
-    # Leaders only see members of the departments they lead
-    if current_user.leader?
-      scope = scope.joins(:memberchips)
-                   .where(memberchips: { departament_id: @departaments.select(:id) })
-                   .distinct
-    end
-
-    # — Search query (name / email / phone) ——————————————————————————————
-    if (q = params[:q].to_s.strip).present?
-      like = "%#{q}%"
-      scope = scope.where("name ILIKE ? OR email ILIKE ? OR phone ILIKE ?", like, like, like)
-    end
-
-    # — Role filter ————————————————————————————————————————————————————————
-    if params[:role].present? && params[:role] != "todos"
-      scope = scope.where(role: params[:role])
-    end
-
-    # — Department filter ——————————————————————————————————————————————————
-    case params[:dept]
-    when "sem"
-      # A leader's scope is already restricted to their departments, so
-      # "sem departamento" can never match anyone there.
-      scope = current_user.leader? ? scope.none : scope.left_outer_joins(:memberchips).where(memberchips: { id: nil })
-    when "todos", "", nil
-      # no filter
-    else
-      dept = @departaments.find_by(id: params[:dept])
-      scope = scope.joins(:memberchips).where(memberchips: { departament_id: dept&.id }) if dept
-    end
-
-    # — Pagination ————————————————————————————————————————————————————————
-    @per       = [params[:per].to_i, 10].max.then { |v| [10, 25, 50].include?(v) ? v : 10 }
-    @page      = [params[:page].to_i, 1].max
-    @total     = scope.count
-    @total_pages = [(@total.to_f / @per).ceil, 1].max
-    @page      = [@page, @total_pages].min
-
-    @users = scope.offset((@page - 1) * @per).limit(@per)
-    @new_user = User.new
+    @presenter = Users::IndexPresenter.new(scope: scope, departaments: departaments, params: params)
   end
 
   # GET /users/1
@@ -62,7 +28,7 @@ class UsersController < ApplicationController
   def edit
   end
 
-  # POST /users  (used by the "Novo membro" modal on /painel/membros)
+  # POST /users  (used by the "Novo membro" modal on /panel/members)
   def create
     password = SecureRandom.hex(8)
     @user = current_user.church.users.build(user_params)
@@ -73,27 +39,27 @@ class UsersController < ApplicationController
 
     if @user.save
       sync_departament(@user)
-      redirect_to painel_membros_path(preserve_filters), notice: "#{@user.name} adicionado com sucesso."
+      redirect_to panel_members_path(preserve_filters), notice: t(".success", name: @user.name)
     else
       errors = @user.errors.full_messages.to_sentence
-      redirect_to painel_membros_path(preserve_filters), alert: errors
+      redirect_to panel_members_path(preserve_filters), alert: errors
     end
   end
 
-  # PATCH/PUT /users/1  (used by the "Editar membro" modal on /painel/membros)
+  # PATCH/PUT /users/1  (used by the "Editar membro" modal on /panel/members)
   def update
     if @user.update(user_params)
       sync_departament(@user)
-      redirect_to painel_membros_path(preserve_filters), notice: "#{@user.name} atualizado com sucesso.", status: :see_other
+      redirect_to panel_members_path(preserve_filters), notice: t(".success", name: @user.name), status: :see_other
     else
-      redirect_to painel_membros_path(preserve_filters), alert: @user.errors.full_messages.to_sentence, status: :see_other
+      redirect_to panel_members_path(preserve_filters), alert: @user.errors.full_messages.to_sentence, status: :see_other
     end
   end
 
   # DELETE /users/1
   def destroy
     @user.destroy!
-    redirect_to painel_membros_path, notice: "Membro removido.", status: :see_other
+    redirect_to panel_members_path, notice: t(".success"), status: :see_other
   end
 
   private

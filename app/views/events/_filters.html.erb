@@ -1,6 +1,6 @@
 <!-- Barra de filtros -->
 <div class="mt-6 flex flex-col gap-4">
-  <%= search_form_for decorator.q, url: painel_eventos_path, method: :get, class: "contents" do |f| %>
+  <%= search_form_for decorator.q, url: panel_events_path, method: :get, class: "contents" do |f| %>
     <!-- Linha 1: busca + chips de período -->
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
       <div class="relative flex-1">
@@ -13,7 +13,7 @@
       
       <div class="flex flex-wrap gap-2">
         <% decorator.period_options.each do |value, label| %>
-          <%= link_to label, painel_eventos_path(params.to_unsafe_h.merge(period: value)), class: decorator.period_class(value) %>
+          <%= link_to label, panel_events_path(params.to_unsafe_h.merge(period: value)), class: decorator.period_class(value) %>
         <% end %>
       </div>
     </div>
@@ -47,7 +47,7 @@
       <% if (search = decorator.search_query).present? %>
         <span class="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
           Busca: "<%= search %>"
-          <%= link_to painel_eventos_path(params.to_unsafe_h.deep_merge(q: { title_or_location_or_description_cont: nil })), class: "ml-1 rounded-full hover:text-foreground" do %>
+          <%= link_to panel_events_path(params.to_unsafe_h.deep_merge(q: { title_or_location_or_description_cont: nil })), class: "ml-1 rounded-full hover:text-foreground" do %>
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x h-3 w-3"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
           <% end %>
         </span>
@@ -56,7 +56,7 @@
       <% if (label = decorator.period_label).present? %>
         <span class="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
           <%= label %>
-          <%= link_to painel_eventos_path(params.to_unsafe_h.merge(period: nil)), class: "ml-1 rounded-full hover:text-foreground" do %>
+          <%= link_to panel_events_path(params.to_unsafe_h.merge(period: nil)), class: "ml-1 rounded-full hover:text-foreground" do %>
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x h-3 w-3"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
           <% end %>
         </span>
@@ -65,7 +65,7 @@
       <% if (dept = decorator.department_label).present? %>
         <span class="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
           <%= dept %>
-          <%= link_to painel_eventos_path(params.to_unsafe_h.deep_merge(q: { departament_id_eq: nil })), class: "ml-1 rounded-full hover:text-foreground" do %>
+          <%= link_to panel_events_path(params.to_unsafe_h.deep_merge(q: { departament_id_eq: nil })), class: "ml-1 rounded-full hover:text-foreground" do %>
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x h-3 w-3"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
           <% end %>
         </span>
@@ -74,13 +74,13 @@
       <% if (vis = decorator.visibility_label).present? %>
         <span class="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
           <%= vis %>
-          <%= link_to painel_eventos_path(params.to_unsafe_h.deep_merge(q: { visibility_eq: nil })), class: "ml-1 rounded-full hover:text-foreground" do %>
+          <%= link_to panel_events_path(params.to_unsafe_h.deep_merge(q: { visibility_eq: nil })), class: "ml-1 rounded-full hover:text-foreground" do %>
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x h-3 w-3"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
           <% end %>
         </span>
       <% end %>
 
-      <%= link_to "Limpar todos", painel_eventos_path, class: "ml-1 text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline" %>
+      <%= link_to "Limpar todos", panel_events_path, class: "ml-1 text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline" %>
     </div>
   <% end %>
 

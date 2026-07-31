@@ -1,7 +1,7 @@
 module Audit
   # Central place for writing audit trail entries. Failures are logged and
   # swallowed so auditing never breaks the main flow.
-  class RecordService
+  class RecordService < BaseService
     def initialize(church:, user:, module_key:, action:, detail: nil)
       @church = church
       @user = user
@@ -11,10 +11,11 @@ module Audit
     end
 
     def call
-      church.audit_logs.create!(user: user, module_key: module_key, action: action, detail: detail)
+      audit_log = church.audit_logs.create!(user: user, module_key: module_key, action: action, detail: detail)
+      Success(audit_log)
     rescue ActiveRecord::RecordInvalid => e
       Rails.logger.error("[Audit::RecordService] #{e.message}")
-      nil
+      Failure(:invalid)
     end
 
     private

@@ -1,7 +1,5 @@
 module Schedules
-  class UpdateService
-    Result = Struct.new(:success?, :schedule, :errors, keyword_init: true)
-
+  class UpdateService < BaseService
     def initialize(schedule:, params:, columns:)
       @schedule = schedule
       @params = params
@@ -16,12 +14,12 @@ module Schedules
     def call
       if columns.empty?
         schedule.errors.add(:base, "Adicione ao menos uma coluna")
-        return Result.new(success?: false, schedule: schedule, errors: schedule.errors)
+        return Failure(schedule)
       end
 
       if columns.none? { |col| col[:type] == "member" }
         schedule.errors.add(:base, "Adicione ao menos uma coluna do tipo Membro para vincular e notificar os escalados")
-        return Result.new(success?: false, schedule: schedule, errors: schedule.errors)
+        return Failure(schedule)
       end
 
       ActiveRecord::Base.transaction do
@@ -38,9 +36,9 @@ module Schedules
         existing[columns.size..]&.each(&:destroy)
       end
 
-      Result.new(success?: true, schedule: schedule)
+      Success(schedule)
     rescue ActiveRecord::RecordInvalid
-      Result.new(success?: false, schedule: schedule, errors: schedule.errors)
+      Failure(schedule)
     end
 
     private

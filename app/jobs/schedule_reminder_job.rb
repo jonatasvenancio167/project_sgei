@@ -5,10 +5,7 @@ class ScheduleReminderJob < ApplicationJob
     ScheduleAssignment::REMINDERS.each do |days, column|
       target_date = Date.current + days
 
-      ScheduleAssignment
-        .on_date(target_date)
-        .without_reminder(days)
-        .includes(:user, :schedule_column, schedule_entry: { schedule: :church })
+      ScheduleAssignments::DueForReminderQuery.new(date: target_date, days: days).call
         .find_each { |assignment| send_reminder(assignment, days, column) }
     end
   end
@@ -18,13 +15,14 @@ class ScheduleReminderJob < ApplicationJob
   def send_reminder(assignment, days, column)
     schedule = assignment.schedule_entry.schedule
     day = assignment.schedule_entry.date.strftime("%d/%m")
-    when_label = days == 1 ? "amanhã" : "em #{days} dias"
+    when_label = days == 1 ? I18n.t("notifications.schedule_reminder.tomorrow") : I18n.t("notifications.schedule_reminder.in_days", days: days)
 
     ActiveRecord::Base.transaction do
       notification = Notification.create!(
         church: schedule.church,
-        title: "Lembrete de escala",
-        message: "Você está escalado #{when_label} (#{day}) em #{schedule.name} como #{assignment.schedule_column.name}.",
+        title: I18n.t("notifications.schedule_reminder.title"),
+        message: I18n.t("notifications.schedule_reminder.message",
+                        when: when_label, day: day, schedule: schedule.name, column: assignment.schedule_column.name),
         notification_type: :schedule
       )
       UserNotification.create!(user: assignment.user, notification: notification, sent_at: Time.current)

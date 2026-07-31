@@ -24,13 +24,13 @@
         <%= @form.status_label %>
       </span>
 
-      <% if current_user.admin? || current_user.leader? %>
-        <%= button_to toggle_active_form_path(@form), method: :patch,
+      <% if policy(@form).update? %>
+        <%= button_to form_activation_path(@form), method: :patch,
               class: "inline-flex items-center justify-center rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium transition-colors hover:bg-accent" do %>
           <%= @form.active? ? "Encerrar" : "Reabrir" %>
         <% end %>
 
-        <%= link_to builder_form_path(@form),
+        <%= link_to form_builder_path(@form),
               class: "inline-flex items-center gap-1.5 rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium transition-colors hover:bg-accent" do %>
           <%= lucide_icon("pencil", class: "h-3.5 w-3.5") %>
           Editar campos
@@ -93,8 +93,8 @@
       <% if @form_fields.empty? %>
         <div class="rounded-2xl border border-dashed border-border bg-secondary/30 py-14 text-center">
           <p class="text-sm text-muted-foreground">Este formulário ainda não tem campos configurados.</p>
-          <% if current_user.admin? || current_user.leader? %>
-            <%= link_to builder_form_path(@form),
+          <% if policy(@form).update? %>
+            <%= link_to form_builder_path(@form),
                   class: "mt-3 inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90" do %>
               <%= lucide_icon("pencil", class: "h-3.5 w-3.5") %>
               Configurar campos
@@ -214,7 +214,7 @@
   </div>
 
   <%# Danger zone – admin only %>
-  <% if current_user.admin? %>
+  <% if policy(@form).destroy? %>
     <div class="mt-10 rounded-2xl border border-destructive/20 bg-card p-5">
       <h3 class="text-sm font-medium text-destructive">Zona de perigo</h3>
       <%= button_to form_path(@form), method: :delete,

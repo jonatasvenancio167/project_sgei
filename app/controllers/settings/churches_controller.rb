@@ -2,16 +2,17 @@ module Settings
   class ChurchesController < BaseController
     # PATCH /settings/church
     def update
-      result = Settings::ChurchUpdateService.new(
+      result = Settings::ChurchUpdateService.call(
         church: current_church,
         params: church_params,
         performed_by: current_user
-      ).call
+      )
 
-      if result.success?
-        redirect_to painel_settings_path(section: "church"), notice: "Alterações salvas com sucesso."
-      else
-        redirect_to painel_settings_path(section: "church"), alert: result.errors.full_messages.to_sentence
+      case result
+      in Success(_)
+        redirect_to panel_settings_path(section: "church"), notice: t(".success")
+      in Failure(church)
+        redirect_to panel_settings_path(section: "church"), alert: church.errors.full_messages.to_sentence
       end
     end
 

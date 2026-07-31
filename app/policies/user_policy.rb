@@ -11,6 +11,11 @@ class UserPolicy < ChurchModulePolicy
     admin? && same_church? && record != user
   end
 
+  # Only the secretary (admin) can promote/demote a member's role.
+  def update_role?
+    admin?
+  end
+
   class Scope < ChurchModulePolicy::Scope
     def resolve
       scope.where(church_id: user.allowed_church_ids)
