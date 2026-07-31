@@ -23,6 +23,16 @@ gem "pagy", "~> 9.3"
 gem "pundit", "~> 2.5"
 gem "prawn", "~> 2.5"
 gem "prawn-table", "~> 0.2.2"
+gem "dry-monads", "~> 1.6"
+
+# Ships Rails/ActiveSupport/ActiveModel built-in translations (date & time
+# formats, to_sentence connectors, default validation messages) in pt-BR —
+# needed because config.i18n.default_locale is pt-BR, and Rails only ships
+# those defaults in English.
+gem "rails-i18n"
+# Ships Devise's own internal translations (flash messages, error messages,
+# mailer subjects) in pt-BR, superseding config/locales/devise.en.yml.
+gem "devise-i18n"
 
 
 
