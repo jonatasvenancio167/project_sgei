@@ -1,8 +1,15 @@
-<tr id="<%= dom_id(event) %>" class="border-t border-border/60 hover:bg-muted/50 transition-colors">
+<tr id="<%= dom_id(event) %>" class="border-t border-border/60 transition-colors <%= event.highlighted_row? ? "bg-amber-50 hover:bg-amber-100/70 dark:bg-amber-950/20" : "hover:bg-muted/50" %>">
   <td class="px-5 py-4 text-muted-foreground whitespace-nowrap text-center">
     <%= event.start_date_formatted %>
   </td>
-  <td class="px-5 py-4 font-medium text-left"><%= event.title %></td>
+  <td class="px-5 py-4 text-left">
+    <div class="flex flex-wrap items-center gap-2">
+      <span class="font-medium"><%= event.title %></span>
+      <span class="rounded-full px-2 py-0.5 text-[10px] font-medium <%= event.status_badge_class %>">
+        <%= event.status_label %>
+      </span>
+    </div>
+  </td>
   <td class="px-5 py-4 text-muted-foreground text-left"><%= event.location.presence || "—" %></td>
   <td class="px-5 py-4 text-center">
     <span class="rounded-full bg-secondary px-2.5 py-0.5 text-[10px] font-medium text-secondary-foreground">
@@ -15,4 +22,45 @@
     </span>
   </td>
   <td class="px-5 py-4 font-mono text-xs text-center"><%= event.event_attendees_count %></td>
+  <td class="px-5 py-4">
+    <div class="flex items-center justify-center gap-1">
+      <%= link_to event_path(event), title: "Ver", class: "rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground" do %>
+        <%= lucide_icon("eye", class: "h-3.5 w-3.5") %>
+      <% end %>
+
+      <% if event.can?(:update) %>
+        <%= link_to edit_event_path(event), title: "Editar", class: "rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground" do %>
+          <%= lucide_icon("pencil", class: "h-3.5 w-3.5") %>
+        <% end %>
+      <% end %>
+
+      <% if event.can?(:approve) %>
+        <%= button_to event_approval_path(event), method: :post, title: "Aprovar", class: "rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-emerald-100 hover:text-emerald-700" do %>
+          <%= lucide_icon("check-circle", class: "h-3.5 w-3.5") %>
+        <% end %>
+      <% end %>
+
+      <% if event.can?(:reject) %>
+        <button type="button" title="Recusar"
+                onclick="document.getElementById('event-reason-form').action='<%= event_rejection_path(event) %>'; document.getElementById('event-reason-modal-title').textContent='Recusar evento'; document.getElementById('modal-event-reason').dispatchEvent(new CustomEvent('modal:open'))"
+                class="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-red-100 hover:text-red-700">
+          <%= lucide_icon("circle-x", class: "h-3.5 w-3.5") %>
+        </button>
+      <% end %>
+
+      <% if event.can?(:resubmit) %>
+        <%= button_to event_resubmission_path(event), method: :post, title: "Reenviar para aprovação", class: "rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground" do %>
+          <%= lucide_icon("rotate-cw", class: "h-3.5 w-3.5") %>
+        <% end %>
+      <% end %>
+
+      <% if event.can?(:cancel) %>
+        <button type="button" title="Cancelar"
+                onclick="document.getElementById('event-reason-form').action='<%= event_cancellation_path(event) %>'; document.getElementById('event-reason-modal-title').textContent='Cancelar evento'; document.getElementById('modal-event-reason').dispatchEvent(new CustomEvent('modal:open'))"
+                class="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-red-100 hover:text-red-700">
+          <%= lucide_icon("ban", class: "h-3.5 w-3.5") %>
+        </button>
+      <% end %>
+    </div>
+  </td>
 </tr>

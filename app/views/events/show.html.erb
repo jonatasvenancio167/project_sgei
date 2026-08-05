@@ -1,0 +1,75 @@
+<% content_for :title, @event.title %>
+
+<div class="mx-auto max-w-3xl p-8 lg:p-12">
+  <%= link_to panel_events_path, class: "inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground" do %>
+    <%= lucide_icon("arrow-left", class: "h-4 w-4") %> Voltar para eventos
+  <% end %>
+
+  <header class="mt-4 flex flex-wrap items-center gap-3">
+    <h1 class="font-serif text-4xl"><%= @event.title %></h1>
+    <span class="rounded-full px-2.5 py-1 text-xs font-medium <%= @decorator.status_badge_class %>">
+      <%= @decorator.status_label %>
+    </span>
+  </header>
+
+  <% if @event.rejected? && @event.rejection_reason.present? %>
+    <div class="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
+      <p class="font-medium">Recusado</p>
+      <p class="mt-1">Motivo: <%= @event.rejection_reason %></p>
+    </div>
+  <% end %>
+
+  <% if @event.cancelled? %>
+    <div class="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
+      <p class="font-medium">Cancelado<%= " por #{@event.cancelled_by.name}" if @event.cancelled_by %></p>
+      <p class="mt-1">Motivo: <%= @event.cancel_reason %></p>
+    </div>
+  <% end %>
+
+  <% if @event.approved? && @event.approved_by.present? %>
+    <div class="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-300">
+      Aprovado por <%= @event.approved_by.name %> em <%= I18n.l(@event.approved_at, format: "%d/%m/%Y %H:%M") %>
+    </div>
+  <% end %>
+
+  <%= render CardComponent.new(classes: "mt-6") do %>
+    <dl class="grid gap-4 sm:grid-cols-2">
+      <div>
+        <dt class="text-xs font-medium uppercase tracking-wide text-muted-foreground">Quando</dt>
+        <dd class="mt-1 text-sm"><%= @decorator.start_date_formatted %></dd>
+      </div>
+      <div>
+        <dt class="text-xs font-medium uppercase tracking-wide text-muted-foreground">Local</dt>
+        <dd class="mt-1 text-sm"><%= @event.location.presence || "—" %></dd>
+      </div>
+      <div>
+        <dt class="text-xs font-medium uppercase tracking-wide text-muted-foreground">Departamento</dt>
+        <dd class="mt-1 text-sm"><%= @decorator.department_name %></dd>
+      </div>
+      <div>
+        <dt class="text-xs font-medium uppercase tracking-wide text-muted-foreground">Visibilidade</dt>
+        <dd class="mt-1 text-sm"><%= @event.visibility_label %></dd>
+      </div>
+      <div>
+        <dt class="text-xs font-medium uppercase tracking-wide text-muted-foreground">Criado por</dt>
+        <dd class="mt-1 text-sm"><%= @event.creator&.name || "—" %></dd>
+      </div>
+      <div>
+        <dt class="text-xs font-medium uppercase tracking-wide text-muted-foreground">Inscritos</dt>
+        <dd class="mt-1 text-sm"><%= @event.event_attendees_count %></dd>
+      </div>
+      <% if @event.description.present? %>
+        <div class="sm:col-span-2">
+          <dt class="text-xs font-medium uppercase tracking-wide text-muted-foreground">Descrição</dt>
+          <dd class="mt-1 whitespace-pre-line text-sm"><%= @event.description %></dd>
+        </div>
+      <% end %>
+    </dl>
+  <% end %>
+
+  <% if policy(@event).update? %>
+    <div class="mt-6">
+      <%= link_to "Editar evento", edit_event_path(@event), class: "inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent" %>
+    </div>
+  <% end %>
+</div>

@@ -7,6 +7,7 @@ class User < ApplicationRecord
   include BaseEntity
 
   belongs_to :address, optional: true, dependent: :destroy
+  accepts_nested_attributes_for :address, reject_if: :all_blank
   has_many :memberchips, dependent: :destroy
   has_many :departaments, through: :memberchips
   has_many :event_attendees, dependent: :destroy
@@ -16,7 +17,7 @@ class User < ApplicationRecord
   has_many :audit_logs, dependent: :nullify
 
   enum :status, { active: 0, inactive: 1 }, prefix: true
-  enum :role, { admin: 0, leader: 1, member: 2 }
+  enum :role, { admin: 0, leader: 1, member: 2, pastor: 3, co_pastor: 4 }
 
   # ── Validations ──────────────────────────────────────────────────────────
   validates :name, presence: true
@@ -69,6 +70,8 @@ class User < ApplicationRecord
     when "admin" then "Secretaria"
     when "leader" then "Líder de Departamento"
     when "member" then "Membro"
+    when "pastor" then "Pastor"
+    when "co_pastor" then "Copastor"
     else role&.capitalize
     end
   end

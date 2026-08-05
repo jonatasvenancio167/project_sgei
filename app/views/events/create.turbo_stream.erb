@@ -1,14 +1,10 @@
 <%= turbo_stream.append "events_table_body" do %>
-  <%= render partial: "events/event_row", locals: { event: EventDecorator.new(@event, view_context) } %>
+  <%= render partial: "events/event_row", locals: { event: EventDecorator.new(@event, self) } %>
 <% end %>
 
 
 <%= turbo_stream.replace "new_event_form" do %>
   <%= render partial: "events/form", locals: { event: Event.new } %>
-<% end %>
-
-<%= turbo_stream.append "body" do %>
-  <div data-controller="modal" data-modal-target="container" data-action="connect->modal#close"></div>
 <% end %>
 
 <!-- Close the modal -->

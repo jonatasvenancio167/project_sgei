@@ -1,4 +1,4 @@
-<%= form_with(model: event, id: "new_event_form", class: "grid gap-6") do |f| %>
+<%= form_with(model: event, id: dom_id(event, "form"), class: "grid gap-6") do |f| %>
   <% if event.errors.any? %>
     <div id="error_explanation" class="rounded-lg bg-destructive/10 p-3 text-xs text-destructive">
       <h2 class="font-semibold"><%= pluralize(event.errors.count, "erro") %> impediram a criação:</h2>
@@ -17,7 +17,8 @@
 
   <div class="grid gap-2">
     <%= f.label :slug, "Slug", class: "text-sm font-medium" %>
-    <%= f.text_field :slug, class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50", placeholder: "gerado-automaticamente", maxlength: 80 %>
+    <%= f.text_field :slug, readonly: true, class: "flex h-10 w-full cursor-not-allowed rounded-md border border-input bg-muted/50 px-3 py-2 text-sm text-muted-foreground ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2", placeholder: "gerado automaticamente a partir do título", maxlength: 80 %>
+    <p class="text-xs text-muted-foreground">Gerado automaticamente a partir do título — não é editável.</p>
   </div>
 
   <div class="grid gap-2">
@@ -37,12 +38,18 @@
 
   <div class="grid gap-4 sm:grid-cols-2">
     <div class="grid gap-2">
-      <%= f.label :start_date, "Início *", class: "text-sm font-medium" %>
-      <%= f.datetime_local_field :start_date, class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50", required: true %>
+      <%= f.label :start_date, "Data de início *", class: "text-sm font-medium" %>
+      <div class="grid grid-cols-2 gap-2">
+        <%= f.date_field :start_date, class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50", required: true %>
+        <%= f.time_field :start_time, class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" %>
+      </div>
     </div>
     <div class="grid gap-2">
-      <%= f.label :end_date, "Término", class: "text-sm font-medium" %>
-      <%= f.datetime_local_field :end_date, class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" %>
+      <%= f.label :end_date, "Data de término *", class: "text-sm font-medium" %>
+      <div class="grid grid-cols-2 gap-2">
+        <%= f.date_field :end_date, class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50", required: true %>
+        <%= f.time_field :end_time, class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" %>
+      </div>
     </div>
   </div>
 
@@ -58,11 +65,15 @@
   </div>
 
   <div class="mt-4 flex flex-col-reverse sm:flex-row sm:justify-end sm:gap-3">
-    <button type="button" 
-            class="mt-2 sm:mt-0 inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            data-action="click->modal#close">
-      Cancelar
-    </button>
-    <%= f.submit "Criar evento", class: "inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" %>
+    <% if local_assigns[:cancel_url] %>
+      <%= link_to "Cancelar", cancel_url, class: "mt-2 sm:mt-0 inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" %>
+    <% else %>
+      <button type="button"
+              class="mt-2 sm:mt-0 inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              data-action="click->modal#close">
+        Cancelar
+      </button>
+    <% end %>
+    <%= f.submit(event.persisted? ? "Salvar alterações" : "Criar evento", class: "inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2") %>
   </div>
 <% end %>

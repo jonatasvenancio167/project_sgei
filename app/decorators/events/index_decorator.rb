@@ -49,6 +49,11 @@ module Events
       { "0" => "Privada", "1" => "Membros", "2" => "Pública" }[q.visibility_eq.to_s]
     end
 
+    def status_label
+      return nil unless q.status_eq.present?
+      Event.new(status: q.status_eq.to_i).status_label
+    end
+
     def decorated_events
       events.map { |e| EventDecorator.new(e, view_context) }
     end
@@ -66,6 +71,10 @@ module Events
 
     def visibility_options
       [["Todas as visibilidades", ""], ["Privada", 0], ["Membros", 1], ["Pública", 2]]
+    end
+
+    def status_options
+      [ [ "Todos os status", "" ] ] + Event.statuses.map { |key, value| [ Event.new(status: key).status_label, value ] }
     end
 
     def sort_options

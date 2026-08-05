@@ -9,8 +9,10 @@ class EventQuery
     @params[:q] ||= {}
     @params[:q][:s] ||= "start_date asc"
 
-    # Every member sees all of the church's events; editing is policy-gated.
-    @q = @user.church.events.includes(:departament, :event_attendees).ransack(@params[:q])
+    # Tenant scoping sempre via Pundit (docs/arquitetura/arquitetura.md) — nunca
+    # church_id hardcodado; editing continua policy-gated por ação.
+    scope = EventPolicy::Scope.new(@user, Event.all).resolve
+    @q = scope.includes(:departament, :event_attendees).ransack(@params[:q])
     @events = @q.result(distinct: true)
 
     apply_period_filter

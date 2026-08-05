@@ -9,3 +9,5 @@ pt-BR:
             phone:
               blank: "é obrigatório"
               invalid: "deve estar no formato (DD) 91111-1111"
+            base:
+              terms_not_accepted: "É necessário aceitar os Termos de Uso e a Política de Privacidade."

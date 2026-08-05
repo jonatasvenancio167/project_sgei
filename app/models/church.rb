@@ -9,6 +9,14 @@ class Church < ApplicationRecord
 
   PRIMARY_COLORS = %w[#4f6e5d #2f5233 #1d4ed8 #7c3aed #b45309 #be123c].freeze
 
+  CHURCH_TYPE_LABELS = {
+    "headquarters"    => "Sede",
+    "congregation"    => "Congregação",
+    "preaching_point" => "Ponto de Pregação"
+  }.freeze
+
+  has_one_attached :logo
+
   belongs_to :address, optional: true, dependent: :destroy
   belongs_to :parent_church, class_name: "Church", optional: true
   has_many :congregations, class_name: "Church", foreign_key: :parent_church_id,
@@ -41,11 +49,16 @@ class Church < ApplicationRecord
   end
 
   def church_type_label
-    case church_type
-    when "headquarters"    then "Sede"
-    when "congregation"    then "Congregação"
-    when "preaching_point" then "Ponto de Pregação"
-    end
+    CHURCH_TYPE_LABELS[church_type]
+  end
+
+  # Generates a URL-safe, unique slug from a name, appending a random
+  # suffix on collision (used for self-service church creation).
+  def self.generate_unique_slug(name)
+    base = name.to_s.parameterize.presence || "igreja"
+    slug = base
+    slug = "#{base}-#{SecureRandom.hex(2)}" while Church.exists?(slug: slug)
+    slug
   end
 
   def sede?

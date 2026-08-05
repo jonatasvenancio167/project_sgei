@@ -4,5 +4,3 @@ pt-BR:
       success: "Evento criado com sucesso."
     update:
       success: "Evento atualizado com sucesso."
-    destroy:
-      success: "Evento removido com sucesso."

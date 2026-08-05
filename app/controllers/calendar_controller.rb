@@ -10,8 +10,10 @@ class CalendarController < ApplicationController
     start_of_month = @date.beginning_of_month
     end_of_month = @date.end_of_month
 
-    @events = @user.church.events
-                   .where(start_date: start_of_month..end_of_month)
+    # Só aprovados (e arquivados, somente leitura) entram no calendário —
+    # rascunho/aguardando aprovação/recusado/cancelado nunca aparecem (§8).
+    @events = policy_scope(Event)
+                   .where(start_date: start_of_month..end_of_month, status: %i[approved archived])
                    .includes(:departament)
                    .order(start_date: :asc)
 

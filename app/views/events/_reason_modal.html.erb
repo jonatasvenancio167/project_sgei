@@ -1,0 +1,28 @@
+<%# Modal compartilhado por todas as linhas para Recusar/Cancelar — a linha que
+    disparou o clique define o action do form e o título antes de abrir (ver _event_row.html.erb). %>
+<%= render Shared::ModalComponent.new(id: "modal-event-reason", size: :sm) do |modal| %>
+  <% modal.with_header do %>
+    <h3 id="event-reason-modal-title" class="font-serif text-2xl leading-none tracking-tight">Motivo</h3>
+  <% end %>
+
+  <% modal.with_body do %>
+    <%= form_with url: "#", method: :post, id: "event-reason-form", class: "space-y-4" do %>
+      <div class="grid gap-2">
+        <label for="event_reason_textarea" class="text-sm font-medium">Motivo <span class="text-destructive">*</span></label>
+        <textarea id="event_reason_textarea" name="reason" rows="3" required
+                  class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"></textarea>
+      </div>
+      <div class="flex flex-col-reverse sm:flex-row sm:justify-end sm:gap-3">
+        <button type="button"
+                class="mt-2 sm:mt-0 inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                data-action="click->modal#close">
+          Voltar
+        </button>
+        <button type="submit"
+                class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+          Confirmar
+        </button>
+      </div>
+    <% end %>
+  <% end %>
+<% end %>

@@ -1,0 +1,5 @@
+pt-BR:
+  events:
+    resubmissions:
+      create:
+        success: "Evento \"%{title}\" reenviado para aprovação."

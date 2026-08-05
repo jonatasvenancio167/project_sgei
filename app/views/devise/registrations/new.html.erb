@@ -1,65 +1,429 @@
-<div class="min-h-screen grid place-items-center bg-background px-4">
-  <div class="w-full max-w-sm">
-    <a href="/" class="mb-8 flex items-center justify-center gap-2 group">
-      <span class="grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm transition-transform group-hover:scale-110">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-church">
-          <path d="m18 7 4 2v11a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9l4-2" />
-          <path d="M14 22v-4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v4" />
-          <path d="M18 5v17" />
-          <path d="M6 5v17" />
-          <circle cx="12" cy="9" r="2" />
-          <path d="M12 2v5" />
-          <path d="M10 4h4" />
-        </svg>
+<% input_classes = "flex h-11 w-full rounded-xl border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50" %>
+<% label_classes = "text-sm font-medium leading-none text-foreground" %>
+<% section_title_classes = "text-xs font-semibold uppercase tracking-wider text-muted-foreground" %>
+<% all_errors = @user.errors.full_messages + @church.errors.full_messages %>
+
+<div class="min-h-screen bg-background px-4 py-10">
+  <div class="mx-auto w-full max-w-2xl">
+    <%= link_to root_path, class: "mb-8 flex items-center justify-center gap-2" do %>
+      <span class="grid h-9 w-9 place-items-center rounded-lg bg-primary text-primary-foreground">
+        <%= lucide_icon("church", class: "h-5 w-5") %>
       </span>
-      <span class="font-serif text-3xl tracking-tight text-foreground">Ekklesia</span>
-    </a>
-
-    <%= render(CardComponent.new(classes: "border-border/60 p-2")) do |c| %>
-      <% c.with_title do %>
-        <h1 class="font-serif text-4xl text-foreground mt-2 leading-none">Criar conta</h1>
-      <% end %>
-      
-      <% c.with_description do %>
-        <p class="mt-1 text-sm text-muted-foreground">
-          Cadastre-se para acessar o painel.
-        </p>
-      <% end %>
-
-      <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { class: "mt-8 space-y-4" }) do |f| %>
-        <%= render "devise/shared/error_messages", resource: resource %>
-
-        <div class="space-y-2">
-          <%= f.label :email, class: "text-sm font-medium leading-none text-foreground" %>
-          <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "flex h-11 w-full rounded-xl border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50" %>
-        </div>
-
-        <div class="space-y-2">
-          <%= f.label :password, "Senha", class: "text-sm font-medium leading-none text-foreground" %>
-          <% if @minimum_password_length %>
-            <em class="text-[10px] text-muted-foreground">(<%= @minimum_password_length %> caracteres no mínimo)</em>
-          <% end %>
-          <%= f.password_field :password, autocomplete: "new-password", class: "flex h-11 w-full rounded-xl border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50" %>
-        </div>
-
-        <div class="space-y-2">
-          <%= f.label :password_confirmation, "Confirmar Senha", class: "text-sm font-medium leading-none text-foreground" %>
-          <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "flex h-11 w-full rounded-xl border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50" %>
-        </div>
-
-        <div class="pt-2">
-          <%= f.submit "Cadastrar", class: "inline-flex h-11 w-full items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 cursor-pointer" %>
-        </div>
-      <% end %>
-
-      <% c.with_footer do %>
-        <div class="w-full text-center">
-          <p class="text-sm text-muted-foreground">
-            Já tem uma conta? 
-            <%= link_to "Entrar", new_session_path(resource_name), class: "font-semibold text-foreground hover:underline" %>
-          </p>
-        </div>
-      <% end %>
+      <span class="font-serif text-2xl">Ekklesia</span>
     <% end %>
+
+    <div class="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm" data-controller="registration-wizard">
+      <div class="border-b border-border/60 px-6 py-6">
+        <div class="flex items-center">
+          <% [[1, "Seus dados"], [2, "Sua igreja"], [3, "Assinatura"]].each do |step, label| %>
+            <div class="flex flex-1 items-center last:flex-none">
+              <div class="flex flex-col items-center gap-2">
+                <span class="grid h-9 w-9 place-items-center rounded-full border border-border/60 text-sm font-medium text-muted-foreground/60 transition-colors" data-registration-wizard-target="stepDot">
+                  <span data-registration-wizard-target="stepDotNumber"><%= step %></span>
+                  <span data-registration-wizard-target="stepDotCheck" hidden><%= lucide_icon("check", class: "h-4 w-4") %></span>
+                </span>
+                <span class="whitespace-nowrap text-xs text-muted-foreground/60" data-registration-wizard-target="stepLabel"><%= label %></span>
+              </div>
+              <% unless step == 3 %>
+                <span class="mx-2 -mt-6 h-px flex-1 bg-border transition-colors" data-registration-wizard-target="stepLine"></span>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <% if all_errors.any? %>
+        <div class="mx-6 mt-6 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive" data-turbo-temporary>
+          <p class="font-medium"><%= pluralize(all_errors.count, "erro encontrado", "erros encontrados") %>:</p>
+          <ul class="mt-1 list-disc space-y-0.5 pl-5">
+            <% all_errors.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <%= form_for(@user, as: :user, url: registration_path(resource_name), html: { multipart: true }) do |f| %>
+        <div class="space-y-8 px-6 py-8">
+
+          <fieldset class="space-y-8" data-registration-wizard-target="step">
+            <div>
+              <h1 class="font-serif text-3xl">Seus dados</h1>
+              <p class="mt-1 text-sm text-muted-foreground">Comece criando o seu acesso pessoal ao Ekklesia.</p>
+            </div>
+
+            <section class="space-y-4">
+              <h2 class="<%= section_title_classes %>">Identificação</h2>
+              <div class="space-y-2">
+                <%= f.label :name, "Nome completo", class: label_classes %>
+                <%= f.text_field :name, placeholder: "Seu nome completo", class: input_classes, required: true %>
+              </div>
+              <div class="space-y-2">
+                <%= f.label :birth_date, "Data de nascimento", class: label_classes %>
+                <%= f.date_field :birth_date, class: input_classes, required: true %>
+              </div>
+            </section>
+
+            <section class="space-y-4">
+              <h2 class="<%= section_title_classes %>">Contato</h2>
+              <div class="space-y-2">
+                <%= f.label :email, "E-mail", class: label_classes %>
+                <%= f.email_field :email, placeholder: "voce@email.com", class: input_classes, required: true, autocomplete: "email" %>
+              </div>
+              <div class="space-y-2">
+                <%= f.label :phone, "Telefone / WhatsApp", class: label_classes %>
+                <%= f.telephone_field :phone, placeholder: "(85) 99999-9999", class: input_classes, required: true,
+                      data: { controller: "phone-mask", action: "input->phone-mask#mask", "phone-mask-target": "input" } %>
+              </div>
+            </section>
+
+            <section class="space-y-4">
+              <h2 class="<%= section_title_classes %>">Endereço</h2>
+              <%= f.fields_for :address do |af| %>
+                <div class="grid gap-4 sm:grid-cols-2">
+                  <div class="space-y-2">
+                    <%= af.label :zip_code, "CEP", class: label_classes %>
+                    <%= af.text_field :zip_code, placeholder: "60000-000", class: input_classes, required: true,
+                          data: { controller: "mask", mask_type_value: "cep", action: "input->mask#mask" } %>
+                  </div>
+                </div>
+                <div class="grid gap-4 sm:grid-cols-3">
+                  <div class="space-y-2 sm:col-span-2">
+                    <%= af.label :street, "Logradouro", class: label_classes %>
+                    <%= af.text_field :street, placeholder: "Rua, avenida...", class: input_classes, required: true %>
+                  </div>
+                  <div class="space-y-2">
+                    <%= af.label :number, "Número", class: label_classes %>
+                    <%= af.text_field :number, placeholder: "123", class: input_classes, required: true %>
+                  </div>
+                </div>
+                <div class="space-y-2">
+                  <%= af.label :complement, "Complemento (opcional)", class: label_classes %>
+                  <%= af.text_field :complement, class: input_classes %>
+                </div>
+                <div class="space-y-2">
+                  <%= af.label :neighborhood, "Bairro", class: label_classes %>
+                  <%= af.text_field :neighborhood, class: input_classes, required: true %>
+                </div>
+                <div class="grid gap-4 sm:grid-cols-2">
+                  <div class="space-y-2">
+                    <%= af.label :city, "Cidade", class: label_classes %>
+                    <%= af.text_field :city, class: input_classes, required: true %>
+                  </div>
+                  <div class="space-y-2">
+                    <%= af.label :state, "Estado (UF)", class: label_classes %>
+                    <%= af.text_field :state, placeholder: "CE", maxlength: 2, class: "#{input_classes} uppercase", required: true %>
+                  </div>
+                </div>
+              <% end %>
+            </section>
+
+            <section class="space-y-4">
+              <h2 class="<%= section_title_classes %>">Acesso</h2>
+              <div class="space-y-2">
+                <%= f.label :password, "Senha (mín. 8 caracteres)", class: label_classes %>
+                <%= f.password_field :password, minlength: 8, autocomplete: "new-password", required: true, class: input_classes,
+                      data: { registration_wizard_target: "passwordInput", action: "input->registration-wizard#updatePasswordStrength" } %>
+                <div class="mt-2 flex gap-1.5">
+                  <% 4.times do %>
+                    <span class="h-1.5 flex-1 rounded-full bg-border transition-colors" data-registration-wizard-target="passwordBar"></span>
+                  <% end %>
+                </div>
+                <p class="text-xs text-muted-foreground" data-registration-wizard-target="passwordLabel"></p>
+              </div>
+              <div class="space-y-2">
+                <%= f.label :password_confirmation, "Confirmar senha", class: label_classes %>
+                <%= f.password_field :password_confirmation, autocomplete: "new-password", required: true, class: input_classes %>
+              </div>
+            </section>
+
+            <button type="button" class="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
+                    data-action="registration-wizard#next">
+              Continuar <%= lucide_icon("arrow-right", class: "h-4 w-4") %>
+            </button>
+            <p class="text-center text-sm text-muted-foreground">
+              Já tem uma conta?
+              <%= link_to "Entrar", new_session_path(resource_name), class: "font-medium text-foreground hover:underline" %>
+            </p>
+          </fieldset>
+
+          <fieldset class="space-y-8" hidden disabled data-registration-wizard-target="step">
+            <div>
+              <h1 class="font-serif text-3xl">Sua igreja</h1>
+              <p class="mt-1 text-sm text-muted-foreground">Configure a instituição que você vai administrar.</p>
+            </div>
+
+            <%= fields_for :church, @church do |cf| %>
+              <section class="space-y-4">
+                <h2 class="<%= section_title_classes %>">Identidade</h2>
+                <div class="space-y-2">
+                  <%= cf.label :name, "Nome da instituição", class: label_classes %>
+                  <%= cf.text_field :name, class: input_classes, required: true %>
+                </div>
+                <div class="space-y-2">
+                  <%= cf.label :display_name, "Nome exibido no sistema", class: label_classes %>
+                  <%= cf.text_field :display_name, class: input_classes, required: true %>
+                </div>
+                <div class="grid gap-4 sm:grid-cols-2">
+                  <div class="space-y-2">
+                    <%= cf.label :church_type, "Tipo", class: label_classes %>
+                    <%= cf.select :church_type, Church::CHURCH_TYPE_LABELS.map { |value, label| [label, value] },
+                          { include_blank: "Selecione" }, { class: input_classes, required: true } %>
+                  </div>
+                  <div class="space-y-2">
+                    <%= cf.label :cnpj, "CNPJ (opcional)", class: label_classes %>
+                    <%= cf.text_field :cnpj, placeholder: "00.000.000/0000-00", class: input_classes,
+                          data: { controller: "mask", mask_type_value: "cnpj", action: "input->mask#mask" } %>
+                  </div>
+                </div>
+                <div class="space-y-2">
+                  <%= cf.label :founded_at, "Data de fundação (opcional)", class: label_classes %>
+                  <%= cf.date_field :founded_at, class: input_classes %>
+                </div>
+              </section>
+
+              <section class="space-y-4">
+                <h2 class="<%= section_title_classes %>">Contato institucional</h2>
+                <div class="grid gap-4 sm:grid-cols-2">
+                  <div class="space-y-2">
+                    <%= cf.label :email, "E-mail institucional", class: label_classes %>
+                    <%= cf.email_field :email, class: input_classes, required: true %>
+                  </div>
+                  <div class="space-y-2">
+                    <%= cf.label :phone, "Telefone", class: label_classes %>
+                    <%= cf.telephone_field :phone, placeholder: "(85) 99999-9999", class: input_classes, required: true,
+                          data: { controller: "phone-mask", action: "input->phone-mask#mask", "phone-mask-target": "input" } %>
+                  </div>
+                </div>
+                <div class="space-y-2">
+                  <%= cf.label :website, "Site (opcional)", class: label_classes %>
+                  <%= cf.text_field :website, placeholder: "https://", class: input_classes %>
+                </div>
+              </section>
+
+              <section class="space-y-4">
+                <h2 class="<%= section_title_classes %>">Endereço da igreja</h2>
+                <%= cf.fields_for :address do |af| %>
+                  <div class="space-y-2">
+                    <%= af.label :zip_code, "CEP", class: label_classes %>
+                    <%= af.text_field :zip_code, placeholder: "60000-000", class: input_classes, required: true,
+                          data: { controller: "mask", mask_type_value: "cep", action: "input->mask#mask" } %>
+                  </div>
+                  <div class="grid gap-4 sm:grid-cols-3">
+                    <div class="space-y-2 sm:col-span-2">
+                      <%= af.label :street, "Logradouro", class: label_classes %>
+                      <%= af.text_field :street, class: input_classes, required: true %>
+                    </div>
+                    <div class="space-y-2">
+                      <%= af.label :number, "Número", class: label_classes %>
+                      <%= af.text_field :number, class: input_classes, required: true %>
+                    </div>
+                  </div>
+                  <div class="space-y-2">
+                    <%= af.label :complement, "Complemento (opcional)", class: label_classes %>
+                    <%= af.text_field :complement, class: input_classes %>
+                  </div>
+                  <div class="space-y-2">
+                    <%= af.label :neighborhood, "Bairro", class: label_classes %>
+                    <%= af.text_field :neighborhood, class: input_classes, required: true %>
+                  </div>
+                  <div class="grid gap-4 sm:grid-cols-2">
+                    <div class="space-y-2">
+                      <%= af.label :city, "Cidade", class: label_classes %>
+                      <%= af.text_field :city, class: input_classes, required: true %>
+                    </div>
+                    <div class="space-y-2">
+                      <%= af.label :state, "Estado (UF)", class: label_classes %>
+                      <%= af.text_field :state, placeholder: "CE", maxlength: 2, class: "#{input_classes} uppercase", required: true %>
+                    </div>
+                  </div>
+                <% end %>
+              </section>
+
+              <section class="space-y-4">
+                <h2 class="<%= section_title_classes %>">Logo</h2>
+                <div data-controller="file-preview">
+                  <%= cf.file_field :logo, accept: "image/png,image/jpeg,image/svg+xml", class: "hidden",
+                        data: { file_preview_target: "input", action: "change->file-preview#show" } %>
+
+                  <button type="button"
+                          class="flex w-full flex-col items-center gap-2 rounded-xl border-2 border-dashed border-border bg-muted/30 px-6 py-10 text-center transition-colors hover:border-primary/50 hover:bg-muted/50"
+                          data-file-preview-target="placeholder"
+                          data-action="click->file-preview#trigger dragover->file-preview#dragOver drop->file-preview#drop">
+                    <span class="grid h-10 w-10 place-items-center rounded-full bg-primary/10 text-primary">
+                      <%= lucide_icon("upload", class: "h-5 w-5") %>
+                    </span>
+                    <span class="text-sm font-medium">Clique para enviar a logo</span>
+                    <span class="text-xs text-muted-foreground">PNG, JPG ou SVG · Máx. 2 MB · Recomendado 400×400 px</span>
+                  </button>
+
+                  <div class="flex items-center gap-4 rounded-xl border border-border/60 bg-muted/30 p-4" hidden data-file-preview-target="previewBox">
+                    <img class="h-16 w-16 rounded-lg border border-border/60 object-contain" alt="Pré-visualização da logo da igreja" data-file-preview-target="image">
+                    <div class="min-w-0 flex-1">
+                      <p class="truncate text-sm font-medium" data-file-preview-target="fileName"></p>
+                      <p class="text-xs text-muted-foreground">Logo carregada com sucesso.</p>
+                    </div>
+                    <button type="button" class="inline-flex h-9 items-center justify-center rounded-xl border border-input px-3 text-sm font-medium shadow-sm hover:bg-muted/50 cursor-pointer" data-action="click->file-preview#trigger">
+                      Trocar
+                    </button>
+                  </div>
+                </div>
+              </section>
+
+              <section class="space-y-4">
+                <h2 class="<%= section_title_classes %>">Responsável</h2>
+                <div class="space-y-2">
+                  <%= cf.label :responsible_name, "Nome do responsável / pastor", class: label_classes %>
+                  <%= cf.text_field :responsible_name, class: input_classes, required: true %>
+                </div>
+                <div class="space-y-2">
+                  <%= cf.label :timezone, "Fuso horário", class: label_classes %>
+                  <%= cf.select :timezone, Church::TIMEZONES.map { |value, label| [label, value] },
+                        { selected: "America/Fortaleza" }, { class: input_classes, required: true } %>
+                </div>
+              </section>
+            <% end %>
+
+            <div class="flex gap-3">
+              <button type="button" class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-input shadow-sm hover:bg-muted/50 cursor-pointer" aria-label="Voltar" data-action="registration-wizard#back">
+                <%= lucide_icon("arrow-left", class: "h-4 w-4") %>
+              </button>
+              <button type="button" class="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow transition-colors hover:bg-primary/90 cursor-pointer" data-action="registration-wizard#next">
+                Continuar <%= lucide_icon("arrow-right", class: "h-4 w-4") %>
+              </button>
+            </div>
+          </fieldset>
+
+          <fieldset class="space-y-8" hidden disabled data-registration-wizard-target="step">
+            <div>
+              <h1 class="font-serif text-3xl">Assinatura</h1>
+              <p class="mt-1 text-sm text-muted-foreground">Garanta seu acesso durante o período Beta.</p>
+            </div>
+
+            <div class="rounded-xl bg-gradient-to-br from-primary to-primary/70 p-5 text-primary-foreground">
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-primary-foreground/15 px-2.5 py-1 text-xs font-semibold tracking-wide">
+                <%= lucide_icon("rocket", class: "h-3.5 w-3.5") %> BETA
+              </span>
+              <h3 class="mt-3 font-serif text-2xl">Acesso gratuito durante o Beta</h3>
+              <p class="mt-2 text-sm opacity-90">
+                Durante o período Beta, o Ekklesia está disponível sem custo. Registre um cartão para
+                garantir continuidade quando os planos forem lançados — você não será cobrado agora.
+              </p>
+            </div>
+
+            <div class="rounded-xl border border-primary/40 bg-primary/5 p-5">
+              <span class="inline-block rounded-full border border-primary/30 bg-background px-2.5 py-1 text-xs font-medium text-primary">Plano atual</span>
+              <h3 class="mt-3 font-serif text-2xl">Beta Gratuito</h3>
+              <p class="text-sm text-muted-foreground">R$ 0 / mês durante o beta</p>
+              <ul class="mt-4 space-y-2 text-sm">
+                <% ["Membros ilimitados", "Todos os módulos disponíveis", "Escalas, eventos e formulários", "Acolhimento e aniversariantes", "Suporte por e-mail"].each do |feature| %>
+                  <li class="flex items-center gap-2"><%= lucide_icon("check", class: "h-4 w-4 text-primary") %> <%= feature %></li>
+                <% end %>
+              </ul>
+            </div>
+
+            <div class="rounded-xl bg-gradient-to-br from-primary/90 to-primary/60 p-5 text-primary-foreground">
+              <%= lucide_icon("credit-card", class: "h-7 w-7") %>
+              <p class="mt-6 font-mono text-lg tracking-widest" data-registration-wizard-target="cardNumberPreview">•••• •••• •••• ••••</p>
+              <div class="mt-4 flex items-end justify-between gap-4 text-xs">
+                <div class="min-w-0">
+                  <p class="opacity-70">Titular</p>
+                  <p class="truncate text-sm font-medium uppercase" data-registration-wizard-target="cardNamePreview">NOME DO TITULAR</p>
+                </div>
+                <div class="text-right">
+                  <p class="opacity-70">Validade</p>
+                  <p class="text-sm font-medium" data-registration-wizard-target="cardExpPreview">MM/AA</p>
+                </div>
+              </div>
+            </div>
+
+            <section class="space-y-4">
+              <h2 class="<%= section_title_classes %>">Dados do cartão</h2>
+              <p class="text-xs text-muted-foreground">
+                Esses dados ficam só no seu navegador nesta pré-visualização — nenhuma cobrança é feita durante o Beta.
+              </p>
+              <div class="space-y-2">
+                <label class="<%= label_classes %>">Nome no cartão</label>
+                <input type="text" class="<%= input_classes %>" autocomplete="off"
+                       data-registration-wizard-target="cardNameInput" data-action="input->registration-wizard#updateCardPreview">
+              </div>
+              <div class="space-y-2">
+                <label class="<%= label_classes %>">Número do cartão</label>
+                <input type="text" inputmode="numeric" placeholder="4111 1111 1111 1111" class="<%= input_classes %>" autocomplete="off"
+                       data-controller="mask" data-mask-type-value="card"
+                       data-registration-wizard-target="cardNumberInput"
+                       data-action="input->mask#mask input->registration-wizard#updateCardPreview">
+              </div>
+              <div class="grid gap-4 sm:grid-cols-2">
+                <div class="space-y-2">
+                  <label class="<%= label_classes %>">Validade</label>
+                  <input type="text" inputmode="numeric" placeholder="MM/AA" class="<%= input_classes %>" autocomplete="off"
+                         data-controller="mask" data-mask-type-value="expiry"
+                         data-registration-wizard-target="cardExpInput"
+                         data-action="input->mask#mask input->registration-wizard#updateCardPreview">
+                </div>
+                <div class="space-y-2">
+                  <label class="<%= label_classes %>">CVV</label>
+                  <input type="text" inputmode="numeric" placeholder="123" maxlength="4" class="<%= input_classes %>" autocomplete="off">
+                </div>
+              </div>
+            </section>
+
+            <section class="space-y-4">
+              <h2 class="<%= section_title_classes %>">CPF/CNPJ do titular</h2>
+              <div class="grid gap-4 sm:grid-cols-2">
+                <div class="space-y-2">
+                  <label class="<%= label_classes %>">Tipo</label>
+                  <select class="<%= input_classes %>" data-action="change->registration-wizard#toggleBillingDocMask">
+                    <option value="cpf">CPF</option>
+                    <option value="cnpj">CNPJ</option>
+                  </select>
+                </div>
+                <div class="space-y-2">
+                  <label class="<%= label_classes %>">Número</label>
+                  <input type="text" placeholder="000.000.000-00" class="<%= input_classes %>" autocomplete="off"
+                         data-controller="mask" data-mask-type-value="cpf" data-registration-wizard-target="billingDocInput"
+                         data-action="input->mask#mask">
+                </div>
+              </div>
+            </section>
+
+            <section class="space-y-4">
+              <h2 class="<%= section_title_classes %>">Endereço de cobrança</h2>
+              <div class="flex gap-3 rounded-xl border border-border/60 bg-muted/40 p-4 text-sm text-muted-foreground">
+                <%= lucide_icon("info", class: "mt-0.5 h-4 w-4 shrink-0 text-primary") %>
+                <p>Se o endereço de cobrança for o mesmo que o endereço pessoal cadastrado, você pode pular esta seção.</p>
+              </div>
+              <div class="space-y-2">
+                <label class="<%= label_classes %>">CEP</label>
+                <input type="text" placeholder="60000-000" class="<%= input_classes %>" autocomplete="off"
+                       data-controller="mask" data-mask-type-value="cep" data-action="input->mask#mask">
+              </div>
+            </section>
+
+            <div class="flex items-start gap-3 rounded-xl border border-border/60 p-4">
+              <%= check_box_tag :terms_accepted, "1", false, class: "mt-1", required: true %>
+              <label for="terms_accepted" class="text-sm font-normal leading-relaxed text-muted-foreground">
+                Li e aceito os <span class="font-medium text-foreground underline">Termos de Uso</span> e a
+                <span class="font-medium text-foreground underline">Política de Privacidade</span> do Ekklesia.
+                Entendo que não serei cobrado durante o período beta.
+              </label>
+            </div>
+
+            <div class="flex gap-3">
+              <button type="button" class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-input shadow-sm hover:bg-muted/50 cursor-pointer" aria-label="Voltar" data-action="registration-wizard#back">
+                <%= lucide_icon("arrow-left", class: "h-4 w-4") %>
+              </button>
+              <button type="submit"
+                      class="inline-flex h-11 flex-1 items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow transition-colors hover:bg-primary/90 cursor-pointer"
+                      data-action="click->registration-wizard#validateBeforeSubmit">
+                Ativar conta gratuita
+              </button>
+            </div>
+          </fieldset>
+
+        </div>
+      <% end %>
+    </div>
   </div>
 </div>

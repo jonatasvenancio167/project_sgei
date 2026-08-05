@@ -1,0 +1,5 @@
+pt-BR:
+  events:
+    approvals:
+      create:
+        success: "Evento \"%{title}\" aprovado."

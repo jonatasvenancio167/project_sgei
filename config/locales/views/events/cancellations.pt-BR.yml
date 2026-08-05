@@ -1,0 +1,5 @@
+pt-BR:
+  events:
+    cancellations:
+      create:
+        success: "Evento \"%{title}\" cancelado."

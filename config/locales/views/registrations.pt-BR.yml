@@ -1,0 +1,4 @@
+pt-BR:
+  registrations:
+    create:
+      success: "Conta criada com sucesso! Bem-vindo(a) ao Ekklesia."

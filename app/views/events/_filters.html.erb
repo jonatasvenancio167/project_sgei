@@ -29,7 +29,11 @@
           class: "h-8 w-auto rounded-full border-border/60 bg-secondary px-3 text-xs font-medium text-secondary-foreground hover:bg-secondary/80 focus:outline-none",
           onchange: "this.form.submit()" %>
 
-      <%= f.select :visibility_eq, options_for_select(decorator.visibility_options, decorator.q.visibility_eq), {}, 
+      <%= f.select :visibility_eq, options_for_select(decorator.visibility_options, decorator.q.visibility_eq), {},
+          class: "h-8 w-auto rounded-full border-border/60 bg-secondary px-3 text-xs font-medium text-secondary-foreground hover:bg-secondary/80 focus:outline-none",
+          onchange: "this.form.submit()" %>
+
+      <%= f.select :status_eq, options_for_select(decorator.status_options, decorator.q.status_eq), {},
           class: "h-8 w-auto rounded-full border-border/60 bg-secondary px-3 text-xs font-medium text-secondary-foreground hover:bg-secondary/80 focus:outline-none",
           onchange: "this.form.submit()" %>
 
@@ -75,6 +79,15 @@
         <span class="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
           <%= vis %>
           <%= link_to panel_events_path(params.to_unsafe_h.deep_merge(q: { visibility_eq: nil })), class: "ml-1 rounded-full hover:text-foreground" do %>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x h-3 w-3"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          <% end %>
+        </span>
+      <% end %>
+
+      <% if (st = decorator.status_label).present? %>
+        <span class="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
+          <%= st %>
+          <%= link_to panel_events_path(params.to_unsafe_h.deep_merge(q: { status_eq: nil })), class: "ml-1 rounded-full hover:text-foreground" do %>
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x h-3 w-3"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
           <% end %>
         </span>

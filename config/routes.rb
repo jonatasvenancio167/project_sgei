@@ -1,12 +1,17 @@
 Rails.application.routes.draw do
   get "components/index"
-  devise_for :users
+  devise_for :users, controllers: { registrations: "registrations" }
   resources :notifications
   resources :form_responses
   resources :integrations
   resources :user_notifications
   resources :event_attendees
-  resources :events
+  resources :events, except: :destroy do
+    resource :approval,     only: :create, controller: "events/approvals"
+    resource :rejection,    only: :create, controller: "events/rejections"
+    resource :cancellation, only: :create, controller: "events/cancellations"
+    resource :resubmission, only: :create, controller: "events/resubmissions"
+  end
   resources :memberchips
   resources :departaments do
     resources :members, only: :create, controller: "departaments/members"

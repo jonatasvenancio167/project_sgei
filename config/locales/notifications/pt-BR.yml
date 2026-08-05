@@ -11,3 +11,15 @@ pt-BR:
     form_submission:
       title: "Nova inscrição em %{form}"
       message: "%{name} (%{email}) preencheu o formulário."
+    event_submitted:
+      title: "Novo evento aguardando aprovação"
+      message: "Novo evento aguardando aprovação: %{title}"
+    event_approved:
+      title: "Evento aprovado"
+      message: "Seu evento '%{title}' foi aprovado e está no calendário."
+    event_rejected:
+      title: "Evento recusado"
+      message: "Seu evento '%{title}' foi recusado. Motivo: %{reason}. Você pode editar e reenviar."
+    event_cancelled:
+      title: "Evento cancelado"
+      message: "O evento '%{title}' foi cancelado."

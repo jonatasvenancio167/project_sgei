@@ -19,8 +19,10 @@ class ApplicationPolicy
 
   private
 
-  def admin?  = user.admin?
-  def leader? = user.leader?
+  def admin?     = user.admin?
+  def leader?    = user.leader?
+  def pastor?    = user.pastor?
+  def co_pastor? = user.co_pastor?
 
   # Tenant isolation: the record must belong to the user's church.
   def same_church?

@@ -1,0 +1,14 @@
+<% content_for :title, "Editar #{@event.title}" %>
+
+<div class="mx-auto max-w-2xl p-8 lg:p-12">
+  <%= link_to panel_events_path, class: "inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground" do %>
+    <%= lucide_icon("arrow-left", class: "h-4 w-4") %> Voltar para eventos
+  <% end %>
+
+  <h1 class="mt-4 font-serif text-3xl">Editar evento</h1>
+  <p class="mt-1 text-sm text-muted-foreground">Campos com * são obrigatórios.</p>
+
+  <div class="mt-8">
+    <%= render "events/form", event: @event, cancel_url: panel_events_path %>
+  </div>
+</div>
