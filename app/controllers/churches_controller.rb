@@ -1,5 +1,5 @@
 class ChurchesController < ApplicationController
-  before_action :set_church, only: %i[ show edit update destroy ]
+  before_action :set_church, only: %i[ show edit update ]
 
   # GET /churches or /churches.json
   def index
@@ -50,15 +50,10 @@ class ChurchesController < ApplicationController
     end
   end
 
-  # DELETE /churches/1 or /churches/1.json
-  def destroy
-    @church.destroy!
-
-    respond_to do |format|
-      format.html { redirect_to churches_path, notice: t(".success"), status: :see_other }
-      format.json { head :no_content }
-    end
-  end
+  # Sem exclusão física: uma Church carrega toda a cadeia do tenant
+  # (departamentos, usuários, eventos, escalas...) via dependent: :destroy —
+  # desativar uma congregação é feito por Settings::CongregationToggleStatusService.
+  # ChurchPolicy#destroy? já era sempre false; a ação nem era alcançável.
 
   private
     # Use callbacks to share common setup or constraints between actions.

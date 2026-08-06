@@ -7,7 +7,6 @@
   <%= render partial: "events/form", locals: { event: Event.new } %>
 <% end %>
 
-<!-- Close the modal -->
-<script>
-  document.getElementById("modal-new-event").dispatchEvent(new CustomEvent("modal:close"));
-</script>
+<%= turbo_stream.append "modal-new-event" do %>
+  <div data-controller="close-modal" data-close-modal-modal-id-value="modal-new-event"></div>
+<% end %>

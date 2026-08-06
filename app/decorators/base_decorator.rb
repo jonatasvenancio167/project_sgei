@@ -12,6 +12,14 @@ class BaseDecorator
     @object
   end
 
+  # ActiveSupport define Object#to_param (-> to_s) direto no Kernel, então
+  # method_missing nunca é chamado pra isso — sem este override, qualquer
+  # helper de rota (ex: event_path(decorator)) gera "/events/#<EventDecorator:0x...>"
+  # em vez do id real.
+  def to_param
+    @object.to_param
+  end
+
   private
 
   attr_reader :object, :view_context

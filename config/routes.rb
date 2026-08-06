@@ -17,7 +17,7 @@ Rails.application.routes.draw do
     resources :members, only: :create, controller: "departaments/members"
   end
   resources :users
-  resources :churches
+  resources :churches, except: :destroy
 
   # Forms with builder and nested field management
   resources :forms do

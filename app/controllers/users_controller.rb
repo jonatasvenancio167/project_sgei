@@ -57,9 +57,17 @@ class UsersController < ApplicationController
   end
 
   # DELETE /users/1
+  # Soft delete (mesmo caminho de Settings::UserRemoveService) — nunca
+  # apaga fisicamente o membro, preserva histórico de escalas/eventos/auditoria.
   def destroy
-    @user.destroy!
-    redirect_to panel_members_path, notice: t(".success"), status: :see_other
+    result = Settings::UserRemoveService.call(user: @user, performed_by: current_user)
+
+    case result
+    in Success(user)
+      redirect_to panel_members_path, notice: t(".success"), status: :see_other
+    in Failure(user)
+      redirect_to panel_members_path, alert: user.errors.full_messages.to_sentence, status: :see_other
+    end
   end
 
   private

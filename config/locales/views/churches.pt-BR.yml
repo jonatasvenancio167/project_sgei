@@ -4,5 +4,3 @@ pt-BR:
       success: "Igreja criada com sucesso."
     update:
       success: "Igreja atualizada com sucesso."
-    destroy:
-      success: "Igreja removida com sucesso."
