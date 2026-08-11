@@ -16,8 +16,11 @@ class User < ApplicationRecord
   has_many :schedule_entries, through: :schedule_assignments
   has_many :audit_logs, dependent: :nullify
 
-  enum :status, { active: 0, inactive: 1 }, prefix: true
+  # pending: self-registered via Convite de Membro, awaiting secretary/pastor approval
+  enum :status, { active: 0, inactive: 1, pending: 2 }, prefix: true
   enum :role, { admin: 0, leader: 1, member: 2, pastor: 3, co_pastor: 4 }
+
+  has_many :created_member_invites, class_name: "MemberInvite", foreign_key: :created_by_id, dependent: :destroy, inverse_of: :created_by
 
   # ── Validations ──────────────────────────────────────────────────────────
   validates :name, presence: true
@@ -78,6 +81,16 @@ class User < ApplicationRecord
 
   def allowed_church_ids
     church.accessible_church_ids
+  end
+
+  # Convite de Membro: secretary/pastor approves or rejects a self-registration
+  # (docs/Ekklesia/telas/membros.md §7.6).
+  def approve_registration!
+    update!(status: :active)
+  end
+
+  def reject_registration!
+    update!(status: :inactive)
   end
 
   def primary_department

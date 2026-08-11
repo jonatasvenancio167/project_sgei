@@ -1,0 +1,5 @@
+pt-BR:
+  members:
+    rejections:
+      create:
+        success: "Cadastro de %{name} recusado."

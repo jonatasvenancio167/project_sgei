@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_08_05_191845) do
+ActiveRecord::Schema[8.0].define(version: 2026_08_07_200639) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -227,6 +227,24 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_05_191845) do
     t.index ["church_id"], name: "index_integrations_on_church_id"
   end
 
+  create_table "member_invites", force: :cascade do |t|
+    t.bigint "church_id", null: false
+    t.bigint "created_by_id", null: false
+    t.string "token", null: false
+    t.string "note"
+    t.integer "max_uses", default: 1, null: false
+    t.integer "uses_count", default: 0, null: false
+    t.integer "status", default: 0, null: false
+    t.datetime "expires_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["church_id"], name: "index_member_invites_on_church_id"
+    t.index ["created_by_id"], name: "index_member_invites_on_created_by_id"
+    t.index ["expires_at"], name: "index_member_invites_on_expires_at"
+    t.index ["status"], name: "index_member_invites_on_status"
+    t.index ["token"], name: "index_member_invites_on_token", unique: true
+  end
+
   create_table "memberchips", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "departament_id", null: false
@@ -400,6 +418,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_05_191845) do
   add_foreign_key "forms", "departaments"
   add_foreign_key "forms", "events"
   add_foreign_key "integrations", "churches"
+  add_foreign_key "member_invites", "churches"
+  add_foreign_key "member_invites", "users", column: "created_by_id"
   add_foreign_key "memberchips", "departaments"
   add_foreign_key "memberchips", "users"
   add_foreign_key "notification_settings", "churches"

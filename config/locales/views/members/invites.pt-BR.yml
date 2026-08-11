@@ -1,0 +1,7 @@
+pt-BR:
+  members:
+    invites:
+      create:
+        success: "Link de convite gerado: %{link}"
+      destroy:
+        success: "Convite desativado."

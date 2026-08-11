@@ -21,11 +21,19 @@
       <p class="text-sm text-muted-foreground">Pessoas</p>
       <h1 class="mt-1 font-serif text-4xl">Membros</h1>
     </div>
-    <button type="button"
-            class="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors cursor-pointer"
-            onclick="document.getElementById('modal-new-member').dispatchEvent(new CustomEvent('modal:open'))">
-      <%= lucide_icon("plus", class: "h-4 w-4 mr-2") %> Novo membro
-    </button>
+    <div class="flex items-center gap-3">
+      <% if policy(MemberInvite).create? %>
+        <%= link_to panel_member_invites_path,
+              class: "inline-flex items-center justify-center rounded-lg border border-border/60 bg-transparent px-4 py-2 text-sm font-medium text-foreground hover:bg-secondary transition-colors" do %>
+          <%= lucide_icon("link", class: "h-4 w-4 mr-2") %> Convite de Membro
+        <% end %>
+      <% end %>
+      <button type="button"
+              class="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors cursor-pointer"
+              onclick="document.getElementById('modal-new-member').dispatchEvent(new CustomEvent('modal:open'))">
+        <%= lucide_icon("plus", class: "h-4 w-4 mr-2") %> Novo membro
+      </button>
+    </div>
   </header>
 
   <!-- Flash messages -->
@@ -120,12 +128,13 @@
             <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Cargo</th>
             <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground hidden md:table-cell">Telefone</th>
             <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground hidden lg:table-cell">Desde</th>
+            <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
           </tr>
         </thead>
         <tbody class="[&_tr:last-child]:border-0">
           <% if @presenter.users.empty? %>
             <tr>
-              <td colspan="5">
+              <td colspan="6">
                 <div class="flex flex-col items-center gap-2 py-12 text-center text-sm text-muted-foreground">
                   <%= lucide_icon("users", class: "h-6 w-6 opacity-50") %>
                   Nenhum membro encontrado com esses filtros.
@@ -193,6 +202,33 @@
                 <!-- Joined at -->
                 <td class="hidden px-4 py-3 text-xs text-muted-foreground lg:table-cell">
                   <%= u.created_at.strftime("%d/%m/%Y") %>
+                </td>
+
+                <!-- Status (Convite de Membro — docs/Ekklesia/telas/membros.md §3.3) -->
+                <td class="px-4 py-3">
+                  <% if u.status_pending? %>
+                    <div class="flex items-center gap-2">
+                      <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                        <%= lucide_icon("info", class: "h-3 w-3") %> Pendente
+                      </span>
+                      <% if policy(u).approve? %>
+                        <%= button_to "Aprovar", user_approval_path(u), method: :post,
+                              class: "rounded-md border border-border/60 px-2 py-1 text-xs font-medium hover:bg-secondary transition-colors cursor-pointer" %>
+                        <%= button_to "Recusar", user_rejection_path(u), method: :post,
+                              params: { reason: "Cadastro recusado pela secretaria" },
+                              class: "rounded-md border border-destructive/40 px-2 py-1 text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors cursor-pointer",
+                              form: { data: { turbo_confirm: "Recusar este cadastro?" } } %>
+                      <% end %>
+                    </div>
+                  <% elsif u.status_inactive? %>
+                    <span class="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+                      Inativo
+                    </span>
+                  <% else %>
+                    <span class="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                      Ativo
+                    </span>
+                  <% end %>
                 </td>
               </tr>
             <% end %>

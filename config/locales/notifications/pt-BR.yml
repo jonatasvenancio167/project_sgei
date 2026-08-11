@@ -23,3 +23,6 @@ pt-BR:
     event_cancelled:
       title: "Evento cancelado"
       message: "O evento '%{title}' foi cancelado."
+    member_invite_submitted:
+      title: "Novo cadastro pendente"
+      message: "%{name} solicitou ser membro."

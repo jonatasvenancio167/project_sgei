@@ -1,0 +1,15 @@
+<% content_for :title, "Cadastro enviado – #{@invite.church.display_name_or_default}" %>
+
+<div class="min-h-screen bg-secondary/30 flex items-center justify-center px-4">
+  <div class="mx-auto max-w-sm text-center">
+    <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+      <%= lucide_icon("circle-check", class: "h-8 w-8") %>
+    </div>
+
+    <h1 class="font-serif text-3xl">Cadastro enviado com sucesso!</h1>
+    <p class="mt-3 text-sm text-muted-foreground">
+      Suas informações foram recebidas e estão aguardando aprovação da liderança de
+      <strong><%= @invite.church.display_name_or_default %></strong>. Em breve você receberá uma confirmação.
+    </p>
+  </div>
+</div>

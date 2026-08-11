@@ -16,7 +16,10 @@ Rails.application.routes.draw do
   resources :departaments do
     resources :members, only: :create, controller: "departaments/members"
   end
-  resources :users
+  resources :users do
+    resource :approval,  only: :create, controller: "members/approvals"
+    resource :rejection, only: :create, controller: "members/rejections"
+  end
   resources :churches, except: :destroy
 
   # Forms with builder and nested field management
@@ -33,6 +36,11 @@ Rails.application.routes.draw do
   post "/f/:slug",          to: "public/forms#submit",  as: :public_form_submit
   get  "/f/:slug/obrigado", to: "public/forms#success", as: :public_form_success
 
+  # Public Convite de Membro form - no authentication required
+  get  "/i/:token",          to: "public/member_invites#show",    as: :public_member_invite
+  post "/i/:token",          to: "public/member_invites#create",  as: :public_member_invite_submit
+  get  "/i/:token/obrigado", to: "public/member_invites#success", as: :public_member_invite_success
+
   get "up" => "rails/health#show", as: :rails_health_check
 
   get  "overview", to: "overview#index", as: :overview
@@ -40,6 +48,9 @@ Rails.application.routes.draw do
   get  "panel/events", to: "events#index", as: :panel_events
   get  "panel/members", to: "users#index",  as: :panel_members
   post "panel/members", to: "users#create", as: :panel_members_create
+  get    "panel/members/invites",     to: "members/invites#index",   as: :panel_member_invites
+  post   "panel/members/invites",     to: "members/invites#create",  as: :panel_member_invites_create
+  delete "panel/members/invites/:id", to: "members/invites#destroy", as: :panel_member_invite_destroy
   get  "panel/birthdays", to: "birthdays#index", as: :panel_birthdays
   get    "panel/welcome",            to: "welcome_records#index",         as: :panel_welcome
   post   "panel/welcome",            to: "welcome_records#create",        as: :panel_welcome_create

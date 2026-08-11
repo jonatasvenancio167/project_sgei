@@ -33,6 +33,7 @@ class Church < ApplicationRecord
   has_many :notification_settings, dependent: :destroy
   has_many :audit_logs, dependent: :destroy
   has_many :welcome_records, dependent: :destroy
+  has_many :member_invites, dependent: :destroy
 
   enum :church_type, { headquarters: 0, congregation: 1, preaching_point: 2 }, prefix: :type
   enum :status, { active: 0, inactive: 1 }, prefix: true
