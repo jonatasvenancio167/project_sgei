@@ -54,6 +54,9 @@ RUN bundle exec bootsnap precompile -j 1 app/ lib/
 # Tailwind CSS v4 — compiled to app/assets/builds/tailwind.css (Propshaft)
 RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails tailwindcss:build
 
+# Precompile assets (Propshaft) so public/assets is ready at runtime, no DB needed
+RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
+
 # Final stage for app image
 FROM base
 
