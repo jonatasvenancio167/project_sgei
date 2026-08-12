@@ -88,15 +88,17 @@
           <% @users.each do |user| %>
             <tr class="border-b border-border/60 transition-colors hover:bg-muted/30">
               <td class="px-4 py-3">
-                <div class="flex items-center gap-3">
+                <button type="button"
+                        class="group flex w-full cursor-pointer items-center gap-3 text-left"
+                        onclick="document.getElementById('modal-edit-user-<%= user.id %>').dispatchEvent(new CustomEvent('modal:open'))">
                   <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary text-xs font-medium text-secondary-foreground">
                     <%= user.name.to_s.split.first(2).map { |part| part[0]&.upcase }.join.presence || "?" %>
                   </span>
                   <div class="min-w-0">
-                    <p class="truncate text-sm font-medium"><%= user.name %></p>
+                    <p class="truncate text-sm font-medium group-hover:underline"><%= user.name %></p>
                     <p class="truncate text-xs text-muted-foreground"><%= user.email.presence || "—" %></p>
                   </div>
-                </div>
+                </button>
               </td>
 
               <td class="px-4 py-3">
@@ -210,6 +212,78 @@
         <%= f.submit "Convidar",
               class: "inline-flex cursor-pointer items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90" %>
       </div>
+    <% end %>
+  <% end %>
+<% end %>
+
+<!-- ── Modais: Editar usuário ───────────────────────────────────────────── -->
+<% @users.each do |user| %>
+  <%= render Shared::ModalComponent.new(
+        id: "modal-edit-user-#{user.id}",
+        title: "Editar usuário",
+        description: "Atualize os dados de acesso de #{user.name}.",
+        size: :md
+      ) do |modal| %>
+    <% modal.with_body do %>
+      <%= form_with model: user, url: settings_user_path(user), method: :patch, local: true, class: "space-y-4" do |f| %>
+        <%= hidden_field_tag :q, current_q %>
+        <%= hidden_field_tag :role, current_role %>
+        <%= hidden_field_tag :status, current_status %>
+
+        <div class="space-y-2">
+          <label for="edit_user_name_<%= user.id %>" class="text-sm font-medium">Nome completo <span class="text-destructive">*</span></label>
+          <%= f.text_field :name, id: "edit_user_name_#{user.id}", required: true, class: settings_input_classes %>
+        </div>
+
+        <div class="space-y-2">
+          <label for="edit_user_email_<%= user.id %>" class="text-sm font-medium">Email <span class="text-destructive">*</span></label>
+          <%= f.email_field :email, id: "edit_user_email_#{user.id}", required: true, class: settings_input_classes %>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="space-y-2">
+            <label for="edit_user_password_<%= user.id %>" class="text-sm font-medium">Nova senha</label>
+            <%= f.password_field :password, id: "edit_user_password_#{user.id}",
+                  placeholder: "Deixe em branco para manter", autocomplete: "new-password", class: settings_input_classes %>
+          </div>
+          <div class="space-y-2">
+            <label for="edit_user_password_confirmation_<%= user.id %>" class="text-sm font-medium">Confirmar senha</label>
+            <%= f.password_field :password_confirmation, id: "edit_user_password_confirmation_#{user.id}",
+                  autocomplete: "new-password", class: settings_input_classes %>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <label for="edit_user_role_<%= user.id %>" class="text-sm font-medium">Perfil</label>
+          <%= f.select :role,
+                options_for_select([["Membro", "member"], ["Líder de Departamento", "leader"], ["Secretaria", "admin"]], user.role),
+                {}, id: "edit_user_role_#{user.id}", class: settings_input_classes %>
+        </div>
+
+        <div class="space-y-2">
+          <span class="text-sm font-medium">Status</span>
+          <div class="flex flex-wrap gap-2">
+            <%= render Shared::RadioButtonComponent.new(
+                  name: "user[status]", value: "active",
+                  label: "Ativo", icon: "circle-check", checked: user.status_active?,
+                  input_id: "edit_user_status_active_#{user.id}") %>
+            <%= render Shared::RadioButtonComponent.new(
+                  name: "user[status]", value: "inactive",
+                  label: "Inativo", icon: "power", checked: !user.status_active?,
+                  input_id: "edit_user_status_inactive_#{user.id}") %>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-3 border-t border-border/40 pt-4">
+          <button type="button"
+                  class="inline-flex cursor-pointer items-center justify-center rounded-lg border border-border/60 bg-transparent px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+                  onclick="document.getElementById('modal-edit-user-<%= user.id %>').dispatchEvent(new CustomEvent('modal:close'))">
+            Cancelar
+          </button>
+          <%= f.submit "Salvar alterações",
+                class: "inline-flex cursor-pointer items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90" %>
+        </div>
+      <% end %>
     <% end %>
   <% end %>
 <% end %>

@@ -16,6 +16,22 @@ module Settings
       end
     end
 
+    # PATCH /settings/users/:id
+    def update
+      result = Settings::UserUpdateService.call(
+        user: set_user,
+        params: user_params,
+        performed_by: current_user
+      )
+
+      case result
+      in Success(user)
+        redirect_to users_section_path, notice: t(".success", name: user.name)
+      in Failure(user)
+        redirect_to users_section_path, alert: user.errors.full_messages.to_sentence
+      end
+    end
+
     # DELETE /settings/users/:id
     def destroy
       result = Settings::UserRemoveService.call(

@@ -74,7 +74,7 @@ Rails.application.routes.draw do
     resources :congregations, only: :create do
       resource :status, only: :update, controller: "congregations/statuses"
     end
-    resources :users, only: %i[create destroy] do
+    resources :users, only: %i[create update destroy] do
       resource :status, only: :update, controller: "users/statuses"
     end
     resource :permissions, only: :update
