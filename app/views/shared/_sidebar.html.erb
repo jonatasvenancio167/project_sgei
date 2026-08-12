@@ -1,12 +1,22 @@
 <%= render(Sidebar::ProviderComponent.new) do %>
   <%= render(Sidebar::SidebarComponent.new(variant: :sidebar)) do %>
     <%= render(Sidebar::HeaderComponent.new) do %>
-      <%= link_to root_path, class: "flex items-center gap-3 px-2 py-4 no-underline" do %>
-        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-church size-6"><path d="M10 20v-5h4v5"/><path d="M7 20h10a2 2 0 0 0 2-2V8l-7-5-7 5v10a2 2 0 0 0 2 2Z"/><path d="M12 7v4"/><path d="M10 9h4"/></svg>
-        </div>
-        <span class="text-2xl font-serif text-sidebar-foreground">Ekklesia</span>
-      <% end %>
+      <div class="flex items-center justify-between px-2 py-4">
+        <%= link_to root_path, class: "flex items-center gap-3 no-underline" do %>
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-church size-6"><path d="M10 20v-5h4v5"/><path d="M7 20h10a2 2 0 0 0 2-2V8l-7-5-7 5v10a2 2 0 0 0 2 2Z"/><path d="M12 7v4"/><path d="M10 9h4"/></svg>
+          </div>
+          <span class="text-2xl font-serif text-sidebar-foreground">Ekklesia</span>
+        <% end %>
+        <button
+          type="button"
+          data-action="click->sidebar#closeMobile"
+          class="inline-flex items-center justify-center rounded-md p-2 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground md:hidden"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x size-5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          <span class="sr-only">Fechar menu</span>
+        </button>
+      </div>
     <% end %>
 
     <%= render(Sidebar::ContentComponent.new) do %>

@@ -1,28 +1,40 @@
 <div
   data-sidebar-target="sidebar"
   data-state="expanded"
+  data-mobile-state="closed"
   data-collapsible="<%= @collapsible %>"
   data-variant="<%= @variant %>"
   data-side="<%= @side %>"
-  class="group peer hidden md:block text-sidebar-foreground"
+  class="group peer text-sidebar-foreground"
 >
   <!-- Sidebar Gap (Desktop) -->
   <div
-    class="duration-200 relative h-svh w-[var(--sidebar-width)] bg-transparent transition-[width] ease-linear
+    class="hidden duration-200 relative h-svh w-[var(--sidebar-width)] bg-transparent transition-[width] ease-linear md:block
            group-data-[state=collapsed]:w-0
            group-data-[side=right]:rotate-180"
   ></div>
 
+  <!-- Mobile Overlay Backdrop -->
   <div
-    class="duration-200 fixed inset-y-0 z-10 hidden h-svh w-[var(--sidebar-width)] transition-[left,right,width] ease-linear md:flex
-           group-data-[side=left]:left-0 
-           group-data-[side=right]:right-0 
-           group-data-[state=collapsed]:group-data-[side=left]:-left-[var(--sidebar-width)]
-           group-data-[state=collapsed]:group-data-[side=right]:-right-[var(--sidebar-width)]
-           group-data-[state=collapsed]:group-data-[collapsible=icon]:w-[var(--sidebar-width-icon)]
-           group-data-[state=collapsed]:group-data-[collapsible=icon]:left-0
-           group-data-[state=collapsed]:group-data-[collapsible=icon]:right-0
-           group-data-[variant=floating]:p-2 
+    data-action="click->sidebar#closeMobile"
+    class="fixed inset-0 z-20 hidden bg-black/50 transition-opacity duration-200 md:hidden
+           group-data-[mobile-state=open]:block"
+  ></div>
+
+  <div
+    class="duration-200 fixed inset-y-0 z-30 flex h-svh w-[var(--sidebar-width)] -translate-x-full transition-transform ease-linear
+           group-data-[mobile-state=open]:translate-x-0
+           group-data-[side=left]:left-0
+           group-data-[side=right]:right-0
+           group-data-[side=right]:translate-x-full
+           group-data-[side=right]:group-data-[mobile-state=open]:translate-x-0
+           md:z-10 md:translate-x-0 md:transition-[left,right,width]
+           md:group-data-[state=collapsed]:group-data-[side=left]:-left-[var(--sidebar-width)]
+           md:group-data-[state=collapsed]:group-data-[side=right]:-right-[var(--sidebar-width)]
+           md:group-data-[state=collapsed]:group-data-[collapsible=icon]:w-[var(--sidebar-width-icon)]
+           md:group-data-[state=collapsed]:group-data-[collapsible=icon]:left-0
+           md:group-data-[state=collapsed]:group-data-[collapsible=icon]:right-0
+           group-data-[variant=floating]:p-2
            group-data-[variant=inset]:p-2"
   >
     <div

@@ -8,25 +8,43 @@ export default class extends Controller {
 
   connect() {
     this.state = this.getCookie("sidebar_state")
-    
+
     if (this.state === null) {
       this.state = this.defaultOpenValue ? "expanded" : "collapsed"
     }
 
+    this.mobileState = "closed"
+
     this.updateState()
+    this.updateMobileState()
     this.addKeyboardShortcut()
   }
 
   toggle() {
+    if (this.isMobile()) {
+      this.mobileState = this.mobileState === "open" ? "closed" : "open"
+      this.updateMobileState()
+      return
+    }
+
     this.state = this.state === "expanded" ? "collapsed" : "expanded"
     this.setCookie("sidebar_state", this.state, 7)
     this.updateState()
   }
 
+  closeMobile() {
+    this.mobileState = "closed"
+    this.updateMobileState()
+  }
+
+  isMobile() {
+    return window.matchMedia("(max-width: 767px)").matches
+  }
+
   updateState() {
     // Update provider state
     this.element.setAttribute("data-state", this.state)
-    
+
     // Update sidebar target state
     if (this.hasSidebarTarget) {
       this.sidebarTarget.setAttribute("data-state", this.state)
@@ -34,6 +52,16 @@ export default class extends Controller {
 
     // Dispatch event for other components if needed
     this.dispatch("state-change", { detail: { state: this.state } })
+  }
+
+  updateMobileState() {
+    this.element.setAttribute("data-mobile-state", this.mobileState)
+
+    if (this.hasSidebarTarget) {
+      this.sidebarTarget.setAttribute("data-mobile-state", this.mobileState)
+    }
+
+    this.dispatch("mobile-state-change", { detail: { mobileState: this.mobileState } })
   }
 
   addKeyboardShortcut() {
