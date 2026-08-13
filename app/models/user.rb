@@ -59,6 +59,10 @@ class User < ApplicationRecord
 
   scope :order_by_birth_day, -> { order(Arel.sql("EXTRACT(DAY FROM birth_date) ASC"), :name) }
 
+  # Members awaiting approval (self-registered via Convite de Membro) always
+  # sort first, so managers spot new arrivals without hunting through the list.
+  scope :order_pending_first, -> { order(Arel.sql("(status = #{statuses[:pending]}) DESC"), :name) }
+
   # Make email optional (Devise requires email by default; override here)
   def email_required?
     false

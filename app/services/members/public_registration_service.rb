@@ -25,8 +25,6 @@ module Members
     attr_reader :invite, :params
 
     def build_user
-      password = SecureRandom.hex(8)
-
       invite.church.users.build(
         name: params[:name],
         phone: params[:phone],
@@ -36,8 +34,8 @@ module Members
         birth_date: params[:birth_date].presence,
         role: :member,
         status: :pending,
-        password: password,
-        password_confirmation: password
+        password: params[:password],
+        password_confirmation: params[:password_confirmation]
       )
     end
 

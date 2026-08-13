@@ -6,7 +6,7 @@ class UsersController < ApplicationController
     authorize User
     departaments = visible_departaments
     scope = Users::IndexQuery.new(
-      scope: policy_scope(User).order(:name),
+      scope: policy_scope(User).order_pending_first,
       user: current_user,
       departaments: departaments,
       params: params

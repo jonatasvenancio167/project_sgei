@@ -44,7 +44,7 @@ module Public
     end
 
     def registration_params
-      params.require(:user).permit(:name, :phone, :email, :birth_date)
+      params.require(:user).permit(:name, :phone, :email, :birth_date, :password, :password_confirmation)
     end
   end
 end

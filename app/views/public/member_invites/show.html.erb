@@ -51,6 +51,38 @@
           <%= f.date_field :birth_date, value: @user.birth_date, max: Date.current,
                 class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" %>
         </div>
+
+        <div class="grid gap-1.5">
+          <label class="text-sm font-medium">Senha *</label>
+          <div class="relative" data-controller="password-toggle">
+            <%= f.password_field :password, required: true, minlength: 6, autocomplete: "new-password",
+                  data: { "password-toggle-target" => "input" },
+                  class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 pr-10 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring",
+                  placeholder: "Mínimo de 6 caracteres" %>
+            <button type="button"
+                    class="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+                    data-action="password-toggle#toggle" aria-label="Mostrar senha">
+              <span data-password-toggle-target="eyeIcon"><%= lucide_icon("eye", class: "h-4 w-4") %></span>
+              <span data-password-toggle-target="eyeOffIcon" class="hidden"><%= lucide_icon("eye-off", class: "h-4 w-4") %></span>
+            </button>
+          </div>
+        </div>
+
+        <div class="grid gap-1.5">
+          <label class="text-sm font-medium">Confirmar senha *</label>
+          <div class="relative" data-controller="password-toggle">
+            <%= f.password_field :password_confirmation, required: true, minlength: 6, autocomplete: "new-password",
+                  data: { "password-toggle-target" => "input" },
+                  class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 pr-10 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring",
+                  placeholder: "Repita a senha" %>
+            <button type="button"
+                    class="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+                    data-action="password-toggle#toggle" aria-label="Mostrar senha">
+              <span data-password-toggle-target="eyeIcon"><%= lucide_icon("eye", class: "h-4 w-4") %></span>
+              <span data-password-toggle-target="eyeOffIcon" class="hidden"><%= lucide_icon("eye-off", class: "h-4 w-4") %></span>
+            </button>
+          </div>
+        </div>
       </div>
 
       <button type="submit"
