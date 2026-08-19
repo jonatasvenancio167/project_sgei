@@ -34,11 +34,25 @@
 
         <div class="space-y-2">
           <%= f.label :password, "Senha", class: "text-sm font-medium leading-none text-foreground" %>
-          <%= f.password_field :password, 
-                autocomplete: "current-password", 
-                placeholder: "teste",
-                required: true,
-                class: "flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50" %>
+          <div class="relative" data-controller="password-toggle">
+            <%= f.password_field :password,
+                  autocomplete: "current-password",
+                  placeholder: "teste",
+                  required: true,
+                  data: { "password-toggle-target" => "input" },
+                  class: "flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-1 pr-10 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50" %>
+            <button type="button"
+                    class="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+                    data-action="password-toggle#toggle" aria-label="Mostrar senha">
+              <span data-password-toggle-target="eyeIcon"><%= lucide_icon("eye", class: "h-4 w-4") %></span>
+              <span data-password-toggle-target="eyeOffIcon" class="hidden"><%= lucide_icon("eye-off", class: "h-4 w-4") %></span>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <%= f.check_box :remember_me, class: "h-4 w-4 rounded border-input text-primary focus:ring-primary" %>
+          <%= f.label :remember_me, "Permanecer logado", class: "text-sm font-medium leading-none text-foreground" %>
         </div>
 
         <% if alert %>
