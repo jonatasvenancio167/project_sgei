@@ -6,7 +6,7 @@
   end
 %>
 
-<div class="mx-auto max-w-6xl p-8 lg:p-12">
+<div class="app-page mx-auto max-w-6xl p-4 sm:p-6 lg:p-12">
   <!-- Header -->
   <header class="flex flex-wrap items-end justify-between gap-4">
     <div>
@@ -51,8 +51,8 @@
   </div>
 
   <!-- Abas de período -->
-  <div class="mt-8 flex items-center justify-between gap-4">
-    <div class="flex gap-2">
+  <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+    <div class="flex gap-2 overflow-x-auto pb-1">
       <% @decorator.period_options.each do |value, label| %>
         <%= link_to label,
               panel_birthdays_path(period: value, dept: @decorator.current_dept),

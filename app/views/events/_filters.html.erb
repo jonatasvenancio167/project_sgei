@@ -11,7 +11,7 @@
             onchange: "this.form.submit()" %>
       </div>
       
-      <div class="flex flex-wrap gap-2">
+      <div class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
         <% decorator.period_options.each do |value, label| %>
           <%= link_to label, panel_events_path(params.to_unsafe_h.merge(period: value)), class: decorator.period_class(value) %>
         <% end %>
@@ -19,27 +19,27 @@
     </div>
 
     <!-- Linha 2: filtros avançados + ordenação -->
-    <div class="flex flex-wrap items-center gap-3">
+    <div class="flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center">
       <div class="flex items-center gap-1.5 text-sm text-muted-foreground">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-days h-4 w-4"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
         <span>Filtros:</span>
       </div>
 
       <%= f.select :departament_id_eq, options_for_select(decorator.department_options, decorator.q.departament_id_eq), {}, 
-          class: "h-8 w-auto rounded-full border-border/60 bg-secondary px-3 text-xs font-medium text-secondary-foreground hover:bg-secondary/80 focus:outline-none",
+          class: "h-10 w-full rounded-full border-border/60 bg-secondary px-3 text-xs font-medium text-secondary-foreground hover:bg-secondary/80 focus:outline-none sm:h-8 sm:w-auto",
           onchange: "this.form.submit()" %>
 
       <%= f.select :visibility_eq, options_for_select(decorator.visibility_options, decorator.q.visibility_eq), {},
-          class: "h-8 w-auto rounded-full border-border/60 bg-secondary px-3 text-xs font-medium text-secondary-foreground hover:bg-secondary/80 focus:outline-none",
+          class: "h-10 w-full rounded-full border-border/60 bg-secondary px-3 text-xs font-medium text-secondary-foreground hover:bg-secondary/80 focus:outline-none sm:h-8 sm:w-auto",
           onchange: "this.form.submit()" %>
 
       <%= f.select :status_eq, options_for_select(decorator.status_options, decorator.q.status_eq), {},
-          class: "h-8 w-auto rounded-full border-border/60 bg-secondary px-3 text-xs font-medium text-secondary-foreground hover:bg-secondary/80 focus:outline-none",
+          class: "h-10 w-full rounded-full border-border/60 bg-secondary px-3 text-xs font-medium text-secondary-foreground hover:bg-secondary/80 focus:outline-none sm:h-8 sm:w-auto",
           onchange: "this.form.submit()" %>
 
-      <div class="ml-auto flex items-center gap-2">
+      <div class="flex w-full items-center gap-2 sm:ml-auto sm:w-auto">
         <%= f.select :s, options_for_select(decorator.sort_options, decorator.q.s), {}, 
-            class: "h-8 w-auto rounded-full border-border/60 bg-secondary px-3 text-xs font-medium text-secondary-foreground hover:bg-secondary/80 focus:outline-none",
+            class: "h-10 w-full rounded-full border-border/60 bg-secondary px-3 text-xs font-medium text-secondary-foreground hover:bg-secondary/80 focus:outline-none sm:h-8 sm:w-auto",
             onchange: "this.form.submit()" %>
       </div>
     </div>

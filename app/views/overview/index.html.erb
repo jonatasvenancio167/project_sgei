@@ -1,4 +1,4 @@
-<div class="mx-auto max-w-6xl p-8 lg:p-12">
+<div class="app-page mx-auto max-w-6xl p-4 sm:p-6 lg:p-12">
   <header class="flex flex-wrap items-end justify-between gap-4">
     <div>
       <p class="text-sm text-muted-foreground">Bem-vindo de volta</p>
@@ -46,11 +46,11 @@
         <% @upcoming_events.each do |e| %>
           <li class="flex items-center gap-3 rounded-xl border border-border/60 bg-background/40 p-3">
             <span class="h-12 w-1.5 rounded-full <%= e.departament&.name == 'Louvor & Adoração' ? 'bg-primary' : 'bg-chart-3' %>"></span>
-            <div class="flex-1">
+            <div class="min-w-0 flex-1">
               <p class="text-sm font-medium"><%= e.title %></p>
               <p class="text-xs text-muted-foreground"><%= I18n.l(e.start_date, format: :short) %> · <%= e.location %></p>
             </div>
-            <span class="rounded-full bg-secondary px-3 py-1 text-xs text-secondary-foreground"><%= e.departament&.name || "Geral" %></span>
+            <span class="shrink-0 rounded-full bg-secondary px-3 py-1 text-xs text-secondary-foreground"><%= e.departament&.name || "Geral" %></span>
           </li>
         <% end %>
       </ul>

@@ -1,6 +1,6 @@
 <% content_for :title, "Calendário" %>
 
-<div class="mx-auto max-w-6xl p-8 lg:p-12">
+<div class="app-page mx-auto max-w-6xl p-4 sm:p-6 lg:p-12">
   <header>
     <p class="text-sm text-muted-foreground">Agenda</p>
     <h1 class="mt-1 font-serif text-4xl">Calendário</h1>
@@ -77,7 +77,7 @@
                 <%= I18n.l(event.start_date, format: "%A, %d de %B").downcase %>
               </p>
             </div>
-            <div class="shrink-0 rounded-full bg-secondary px-3 py-1 text-[10px] font-medium text-secondary-foreground">
+            <div class="hidden shrink-0 rounded-full bg-secondary px-3 py-1 text-[10px] font-medium text-secondary-foreground sm:block">
               <%= event.departament&.name || "Geral" %>
             </div>
           </li>

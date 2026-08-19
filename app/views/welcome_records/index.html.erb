@@ -8,7 +8,7 @@
   can_create = policy(WelcomeRecord).create?
 %>
 
-<div class="mx-auto max-w-6xl p-8 lg:p-12">
+<div class="app-page mx-auto max-w-6xl p-4 sm:p-6 lg:p-12">
   <!-- Header -->
   <header class="flex flex-wrap items-end justify-between gap-4">
     <div>
@@ -42,7 +42,7 @@
   <% end %>
 
   <!-- Abas -->
-  <div class="mt-8 flex gap-2">
+  <div class="mt-8 flex gap-2 overflow-x-auto pb-1">
     <% @decorator.tab_options.each do |value, label| %>
       <%= link_to label, panel_welcome_path(tab: value), class: @decorator.tab_class(value) %>
     <% end %>
