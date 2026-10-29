@@ -5,7 +5,7 @@ class SettingsUserQuery
   end
 
   def call
-    scope = church.users.where(deleted_at: nil).order(:name)
+    scope = User.where(id: church.church_memberships.select(:user_id)).where(deleted_at: nil).order(:name)
     scope = filter_by_term(scope)
     scope = filter_by_role(scope)
     filter_by_status(scope)
@@ -25,9 +25,10 @@ class SettingsUserQuery
 
   def filter_by_role(scope)
     role = filters[:role].to_s
-    return scope if role.blank? || role == "all" || User.roles.exclude?(role)
+    return scope if role.blank? || role == "all"
 
-    scope.where(role: role)
+    scope.where(id: ProfileAssignment.joins(:church_membership, :access_profile)
+      .where(church_id: church.id, access_profiles: { key: role }).select("church_memberships.user_id"))
   end
 
   def filter_by_status(scope)

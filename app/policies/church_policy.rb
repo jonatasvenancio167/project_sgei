@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 class ChurchPolicy < ApplicationPolicy
-  def index?   = admin?
-  def show?    = admin? && own_church?
+  def index?   = user.can_access?("settings", action: "manage")
+  def show?    = user.can_access?("settings", action: "manage") && own_church?
   def create?  = false
-  def update?  = admin? && own_church?
+  def update?  = user.can_access?("settings", action: "manage") && own_church?
   def destroy? = false
 
   private
@@ -16,7 +16,7 @@ class ChurchPolicy < ApplicationPolicy
 
   class Scope < ApplicationPolicy::Scope
     def resolve
-      return scope.none unless user.admin?
+      return scope.none unless user.can_access?("settings", action: "manage")
 
       scope.where(id: user.church_id).or(scope.where(parent_church_id: user.church_id))
     end

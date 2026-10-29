@@ -1,0 +1,45 @@
+<% membership = member&.persisted? ? member.church_memberships.find_by(church: current_user.church) : nil %>
+<% can_grant = current_user.can_access?("access", action: "manage") %>
+<div class="space-y-2">
+  <%= form.label :position, "Cargo ou função", for: "#{prefix}_position", class: "text-sm font-medium" %>
+  <%= form.text_field :position, id: "#{prefix}_position", class: settings_input_classes, placeholder: "Ex.: diácono, músico, recepcionista" %>
+  <p class="text-xs text-muted-foreground">Cargo e participação em ministério não concedem acesso ao sistema.</p>
+</div>
+<% if can_grant %>
+  <fieldset class="space-y-3 rounded-lg border p-3">
+    <legend class="px-1 text-sm font-medium">Perfis de acesso</legend>
+    <%= hidden_field_tag "user[access_profile_ids][]", "", id: nil %>
+    <% selected_ids = membership ? membership.access_profiles.pluck(:id) : current_user.church.access_profiles.where(key: "member").pluck(:id) %>
+    <% current_user.church.access_profiles.order(:name).each do |profile| %>
+      <label class="flex items-start gap-2 text-sm">
+        <%= check_box_tag "user[access_profile_ids][]", profile.id, selected_ids.include?(profile.id), id: "#{prefix}_profile_#{profile.id}" %>
+        <span><span class="font-medium"><%= profile.name %></span><span class="block text-xs text-muted-foreground"><%= profile.description %></span></span>
+      </label>
+    <% end %>
+  </fieldset>
+  <fieldset class="space-y-2 rounded-lg border p-3">
+    <legend class="px-1 text-sm font-medium">Ministérios sob liderança</legend>
+    <p class="text-xs text-muted-foreground">Obrigatório para o perfil Líder de ministério. Participação e liderança são vínculos distintos.</p>
+    <%= hidden_field_tag "user[led_departament_ids][]", "", id: nil %>
+    <% led_ids = member&.persisted? ? member.memberchips.where(role: :leader).pluck(:departament_id) : [] %>
+    <% current_user.church.departaments.order(:name).each do |department| %>
+      <label class="flex items-center gap-2 text-sm"><%= check_box_tag "user[led_departament_ids][]", department.id, led_ids.include?(department.id), id: "#{prefix}_led_#{department.id}" %><%= department.name %></label>
+    <% end %>
+  </fieldset>
+  <div class="space-y-2">
+    <%= form.label :status, "Situação cadastral", for: "#{prefix}_status", class: "text-sm font-medium" %>
+    <%= form.select :status, [["Ativo", "active"], ["Inativo", "inactive"], ["Pendente", "pending"]], { selected: membership && !membership.active? ? "inactive" : member&.status || "active" }, id: "#{prefix}_status", class: settings_input_classes %>
+  </div>
+  <fieldset class="space-y-2 rounded-lg border p-3">
+    <legend class="px-1 text-sm font-medium">Acesso ao sistema</legend>
+    <%= hidden_field_tag "user[access_enabled]", "0", id: nil %>
+    <label class="flex items-center gap-2 text-sm"><%= check_box_tag "user[access_enabled]", "1", membership&.access_enabled?, id: "#{prefix}_access_enabled" %> Habilitar acesso ao sistema</label>
+    <p class="text-xs text-muted-foreground">Cadastrar o membro não cria acesso automaticamente. Para habilitar um novo acesso, informe uma senha.</p>
+    <%= form.label :password, "Senha de acesso", for: "#{prefix}_password", class: "text-sm font-medium" %>
+    <%= form.password_field :password, id: "#{prefix}_password", autocomplete: "new-password", class: settings_input_classes %>
+    <%= form.label :password_confirmation, "Confirmar senha", for: "#{prefix}_password_confirmation", class: "text-sm font-medium" %>
+    <%= form.password_field :password_confirmation, id: "#{prefix}_password_confirmation", autocomplete: "new-password", class: settings_input_classes %>
+  </fieldset>
+<% else %>
+  <p class="text-sm text-muted-foreground">Perfil base: Membro. Somente responsáveis pela gestão de acessos podem alterar perfis.</p>
+<% end %>

@@ -8,11 +8,30 @@ class ApplicationController < ActionController::Base
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
   before_action :authenticate_user!
+  before_action :set_access_context
 
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
   rescue_from ActiveRecord::RecordNotFound, with: :not_found
 
   private
+
+  def set_access_context
+    return unless current_user
+    memberships = current_user.church_memberships.where(active: true, access_enabled: true)
+    church_id = session[:current_church_id] || current_user[:church_id]
+    membership = memberships.find_by(church_id: church_id) || memberships.order(:id).first
+    unless membership && current_user.status_active? && current_user.deleted_at.nil?
+      sign_out current_user
+      session.delete(:current_church_id)
+      respond_to do |format|
+        format.html { redirect_to new_user_session_path, alert: "Seu acesso foi revogado ou está inativo." }
+        format.any { head :unauthorized }
+      end
+      return
+    end
+    current_user.authorization_church = membership.church
+    session[:current_church_id] = membership.church_id
+  end
 
   def user_not_authorized
     respond_to do |format|

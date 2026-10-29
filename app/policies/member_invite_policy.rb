@@ -1,22 +1,11 @@
-# frozen_string_literal: true
-
-# Convite de Membro is restricted to the secretary (admin) and the pastor —
-# unlike the rest of the Membros module, it is never opened to leaders via
-# the RolePermission matrix (docs/Ekklesia/telas/membros.md §7.2).
-class MemberInvitePolicy < ApplicationPolicy
-  def index?   = can_manage?
-  def create?  = can_manage?
-  def destroy? = can_manage? && same_church?
-
-  private
-
-  def can_manage?
-    admin? || pastor?
-  end
-
+class MemberInvitePolicy < ChurchModulePolicy
+  MODULE_KEY = "members"
+  def index? = user.can_access?(MODULE_KEY, action: "manage") && Access::PermissionQuery.new(user: user).scopes(MODULE_KEY, action: "manage").include?("church")
+  def create? = index?
+  def destroy? = index? && same_church?
   class Scope < ApplicationPolicy::Scope
     def resolve
-      scope.where(church_id: user.church_id)
+      Access::PermissionQuery.new(user: user).scopes("members", action: "manage").include?("church") ? scope.where(church_id: user.church_id) : scope.none
     end
   end
 end

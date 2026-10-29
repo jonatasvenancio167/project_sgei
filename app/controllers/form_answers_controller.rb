@@ -69,6 +69,6 @@ class FormAnswersController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def form_answer_params
-      params.fetch(:form_answer, {})
+      params.require(:form_answer).permit(:form_id, :form_field_id, :form_response_id, :value)
     end
 end

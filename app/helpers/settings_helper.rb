@@ -11,6 +11,17 @@ module SettingsHelper
     { key: "integrations",  label: "Integrações",         icon: "plug",         description: "Serviços externos" }
   ].freeze
 
+  def access_scope_options(module_key)
+    options = [["Própria igreja", "church"]]
+    options << ["Próprios registros", "own"] if %w[members schedules].include?(module_key)
+    if %w[departments schedules members events].include?(module_key)
+      options += [["Equipes participantes", "team"], ["Ministérios liderados", "led"]]
+    end
+    options << ["Sede e congregações", "hierarchy"] if %w[members departments forms birthdays].include?(module_key)
+    options << ["Eventos publicados para membros", "audience"] if %w[calendar events].include?(module_key)
+    options
+  end
+
   def settings_input_classes(extra = nil)
     [INPUT_CLASSES, extra].compact.join(" ")
   end

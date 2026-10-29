@@ -32,7 +32,7 @@ class EventsController < ApplicationController
 
   # POST /events or /events.json
   def create
-    authorize Event
+    authorize current_user.church.events.build(event_params), :create?
 
     result = Events::CreateService.call(church: current_user.church, creator: current_user, params: event_params)
 

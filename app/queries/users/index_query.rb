@@ -10,7 +10,7 @@ module Users
     end
 
     def call
-      scope = leader_scoped(@scope)
+      scope = @scope
       scope = filter_by_term(scope)
       scope = filter_by_role(scope)
       filter_by_departament(scope)
@@ -19,15 +19,6 @@ module Users
     private
 
     attr_reader :user, :departaments, :params
-
-    # Leaders only see members of the departments they lead
-    def leader_scoped(scope)
-      return scope unless user.leader?
-
-      scope.joins(:memberchips)
-           .where(memberchips: { departament_id: departaments.select(:id) })
-           .distinct
-    end
 
     def filter_by_term(scope)
       term = params[:q].to_s.strip
@@ -40,7 +31,7 @@ module Users
     def filter_by_role(scope)
       return scope unless params[:role].present? && params[:role] != "todos"
 
-      scope.where(role: params[:role])
+      scope.where(id: ProfileAssignment.joins(:access_profile, :church_membership).where(access_profiles: { key: params[:role] }, church_memberships: { church_id: user.church_id }).select("church_memberships.user_id"))
     end
 
     def filter_by_departament(scope)
@@ -48,7 +39,7 @@ module Users
       when "sem"
         # A leader's scope is already restricted to their departments, so
         # "sem departamento" can never match anyone there.
-        user.leader? ? scope.none : scope.left_outer_joins(:memberchips).where(memberchips: { id: nil })
+        scope.left_outer_joins(:memberchips).where(memberchips: { id: nil })
       when "todos", "", nil
         scope
       else

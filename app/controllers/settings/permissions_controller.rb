@@ -1,26 +1,17 @@
 module Settings
   class PermissionsController < BaseController
-    # PATCH /settings/permissions
     def update
-      result = Settings::PermissionUpdateService.call(
-        church: current_church,
-        permissions_matrix: permissions_params,
-        performed_by: current_user
-      )
-
+      profile = policy_scope(AccessProfile).find(params[:profile_id])
+      authorize profile, :update?
+      permitted = RolePermission::MODULES.keys.index_with { %w[read manage read_scope manage_scope] }
+      result = PermissionUpdateService.call(church: current_church, profile: profile,
+        permissions: params.fetch(:permissions, ActionController::Parameters.new).permit(permitted), performed_by: current_user)
       case result
       in Success(_)
-        redirect_to panel_settings_path(section: "permissions"), notice: t(".success")
+        redirect_to panel_settings_path(section: "permissions", profile_id: profile.id), notice: t(".success"), status: :see_other
       in Failure(errors)
-        redirect_to panel_settings_path(section: "permissions"), alert: errors.full_messages.to_sentence
+        redirect_to panel_settings_path(section: "permissions", profile_id: profile.id), alert: errors.full_messages.to_sentence, status: :see_other
       end
-    end
-
-    private
-
-    def permissions_params
-      params.fetch(:permissions, ActionController::Parameters.new)
-            .permit(RolePermission.roles.keys.index_with { RolePermission::MODULES.keys })
     end
   end
 end

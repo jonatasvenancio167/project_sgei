@@ -47,7 +47,10 @@ module Members
         notification_type: :system
       )
 
-      invite.church.users.where(role: %i[admin pastor]).find_each do |recipient|
+      recipient_ids = ProfileAssignment.joins(:access_profile, :church_membership)
+        .where(church_id: invite.church_id, access_profiles: { key: %w[admin secretary pastor] })
+        .select("church_memberships.user_id")
+      User.where(id: recipient_ids).find_each do |recipient|
         UserNotification.create!(user: recipient, notification: notification, sent_at: Time.current)
       end
     end

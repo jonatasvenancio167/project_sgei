@@ -304,6 +304,7 @@
                   data-departament-dialogs-target="tabButton">
             Membros existentes
           </button>
+          <% if policy(User).create? %>
           <button type="button" 
                   class="flex-1 rounded-md px-3 py-1.5 transition-colors text-muted-foreground hover:text-foreground"
                   data-tab="new"
@@ -311,6 +312,7 @@
                   data-departament-dialogs-target="tabButton">
             Novo membro
           </button>
+          <% end %>
         </div>
 
         <!-- Tab 1: Existing Members -->

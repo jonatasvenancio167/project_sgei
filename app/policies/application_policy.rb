@@ -39,6 +39,10 @@ class ApplicationPolicy
   end
 
   def record_church_id
+    return user.church_id if record.is_a?(User) && record.church_memberships.where(church_id: user.church_id).exists?
+    return record.form.church_id if record.respond_to?(:form) && record.form
+    return record.event.church_id if record.respond_to?(:event) && record.event
+    return record.departament.church_id if record.is_a?(Memberchip)
     record.respond_to?(:church_id) ? record.church_id : nil
   end
 

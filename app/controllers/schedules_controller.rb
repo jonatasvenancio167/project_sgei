@@ -23,7 +23,7 @@ class SchedulesController < ApplicationController
   end
 
   def create
-    authorize Schedule, :create?
+    authorize current_user.church.schedules.build(schedule_params), :create?
     result = Schedules::CreateService.call(
       church: current_user.church,
       params: schedule_params,
@@ -70,8 +70,7 @@ class SchedulesController < ApplicationController
   end
 
   def set_schedule
-    scope = current_user.church.schedules
-    scope = scope.where(departament_id: current_user.departament_ids) unless current_user.admin?
+    scope = policy_scope(Schedule)
     @schedule = scope.find(params[:id])
     authorize @schedule
   end

@@ -17,9 +17,5 @@ class CalendarController < ApplicationController
                    .includes(:departament)
                    .order(start_date: :asc)
 
-    # Filter events based on user permissions
-    unless @user.admin?
-      @events = @events.where(departament_id: @user.departament_ids + [nil])
-    end
   end
 end

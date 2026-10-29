@@ -4,13 +4,13 @@ module Settings
       # PATCH /settings/users/:user_id/status
       def update
         result = Settings::UserToggleStatusService.call(
-          user: current_church.users.find(params[:user_id]),
+          user: User.where(id: current_church.church_memberships.select(:user_id)).find(params[:user_id]),
           performed_by: current_user
         )
 
         case result
         in Success(user)
-          notice = user.status_active? ? t(".activated", name: user.name) : t(".deactivated", name: user.name)
+          notice = user.church_memberships.find_by!(church: current_church).active? ? t(".activated", name: user.name) : t(".deactivated", name: user.name)
           redirect_to users_section_path, notice: notice
         in Failure(user)
           redirect_to users_section_path, alert: user.errors.full_messages.to_sentence

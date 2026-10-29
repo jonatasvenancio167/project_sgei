@@ -1,5 +1,6 @@
 class AuditLog < ApplicationRecord
   MODULES = {
+    "access"        => "Perfis e acessos",
     "settings"      => "Configurações",
     "congregations" => "Congregações",
     "users"         => "Usuários",

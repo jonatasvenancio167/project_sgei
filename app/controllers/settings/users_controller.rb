@@ -50,11 +50,12 @@ module Settings
     private
 
     def set_user
-      current_church.users.find(params[:id])
+      User.where(id: current_church.church_memberships.select(:user_id)).find(params[:id])
     end
 
     def user_params
-      params.require(:user).permit(:name, :email, :phone, :role, :status, :password, :password_confirmation)
+      params.require(:user).permit(:name, :email, :phone, :position, :birth_date, :role, :status,
+        :access_enabled, :password, :password_confirmation, access_profile_ids: [], led_departament_ids: [])
     end
 
     def users_section_path

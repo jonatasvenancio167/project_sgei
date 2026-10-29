@@ -35,7 +35,7 @@ class BirthdayQuery
   # sees its congregations too; a congregation sees only itself); access
   # to the page itself is module-gated.
   def base_scope
-    filter_by_departament(User.where(church_id: user.allowed_church_ids).status_active.with_birth_date)
+    filter_by_departament(Access::ScopeQuery.new(user: user, scope: User.all, module_key: "birthdays").call.status_active.with_birth_date)
   end
 
   # Subquery instead of join: no duplicate rows (so no DISTINCT, which would

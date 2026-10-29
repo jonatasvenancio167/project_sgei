@@ -6,6 +6,37 @@ class User < ApplicationRecord
 
   include BaseEntity
 
+  has_many :church_memberships, dependent: :restrict_with_error
+  attr_accessor :authorization_church
+  after_create { Access::MigrateService.migrate_user!(self) }
+  around_update :preserve_administrators
+
+  # The primary church remains persisted; only the authenticated request changes context.
+  def church
+    authorization_church || super
+  end
+
+  def church_id
+    authorization_church&.id || self[:church_id]
+  end
+
+  def access_profiles
+    Access::PermissionQuery.new(user: self).profiles
+  end
+
+  def can_access?(module_key, action: "read", record: nil)
+    Access::PermissionQuery.new(user: self).allowed?(module_key, action: action, record: record)
+  end
+
+  def admin? = access_profiles.exists?(key: "admin")
+  def leader? = access_profiles.exists?(key: "leader")
+  def pastor? = access_profiles.exists?(key: "pastor")
+  def co_pastor? = false
+
+  def active_for_authentication?
+    super && status_active? && deleted_at.nil? && church_memberships.where(active: true, access_enabled: true).exists?
+  end
+
   belongs_to :address, optional: true, dependent: :destroy
   accepts_nested_attributes_for :address, reject_if: :all_blank
   has_many :memberchips, dependent: :destroy
@@ -69,18 +100,12 @@ class User < ApplicationRecord
   end
 
   def password_required?
-    encrypted_password.blank? ? new_record? : false
+    password.present? || password_confirmation.present?
   end
 
-  def role_label
-    case role
-    when "admin" then "Secretaria"
-    when "leader" then "Líder de Departamento"
-    when "member" then "Membro"
-    when "pastor" then "Pastor"
-    when "co_pastor" then "Copastor"
-    else role&.capitalize
-    end
+  def role_label(church: self.church)
+    membership = church_memberships.find_by(church: church)
+    membership&.access_profiles&.map(&:name)&.join(", ").presence || "Membro"
   end
 
   def allowed_church_ids
@@ -130,6 +155,13 @@ class User < ApplicationRecord
   end
 
   private
+
+  def preserve_administrators(&block)
+    Access::Integrity.guard_many(church_memberships.pluck(:church_id), &block)
+  rescue Access::Integrity::Violation => e
+    errors.add(:base, e.message)
+    raise ActiveRecord::RecordInvalid, self
+  end
 
   def birthday_in_year(year)
     Date.new(year, birth_date.month, birth_date.day)

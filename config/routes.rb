@@ -69,7 +69,10 @@ Rails.application.routes.draw do
 
   get "panel/settings", to: "settings#show", as: :panel_settings
 
+  resource :church_context, only: :update
+
   namespace :settings do
+    resources :access_profiles, only: %i[create update]
     resource :church, only: :update
     resources :congregations, only: :create do
       resource :status, only: :update, controller: "congregations/statuses"

@@ -30,31 +30,15 @@ class UsersController < ApplicationController
 
   # POST /users  (used by the "Novo membro" modal on /panel/members)
   def create
-    password = SecureRandom.hex(8)
-    @user = current_user.church.users.build(user_params)
+    @user = current_user.church.users.build
     authorize @user
-    @user.password = password
-    @user.password_confirmation = password
-    @user.role ||= :member
-
-    if @user.save
-      sync_departament(@user)
-      redirect_to panel_members_path(preserve_filters), notice: t(".success", name: @user.name)
-    else
-      errors = @user.errors.full_messages.to_sentence
-      redirect_to panel_members_path(preserve_filters), alert: errors
-    end
+    save_member
   end
 
-  # PATCH/PUT /users/1  (used by the "Editar membro" modal on /panel/members)
   def update
-    if @user.update(user_params)
-      sync_departament(@user)
-      redirect_to panel_members_path(preserve_filters), notice: t(".success", name: @user.name), status: :see_other
-    else
-      redirect_to panel_members_path(preserve_filters), alert: @user.errors.full_messages.to_sentence, status: :see_other
-    end
+    save_member
   end
+
 
   # DELETE /users/1
   # Soft delete (mesmo caminho de Settings::UserRemoveService) — nunca
@@ -80,30 +64,24 @@ class UsersController < ApplicationController
   # Admins see every department (own church + congregations for the Sede);
   # leaders only the ones they belong to.
   def visible_departaments
-    depts = policy_scope(Departament).order(:name)
-    return depts unless current_user.leader?
-
-    depts.where(id: current_user.memberchips.select(:departament_id))
+    policy_scope(Departament).order(:name)
   end
 
   def user_params
-    permitted = %i[name email phone birth_date]
-    permitted << :role if current_user.admin?
-    params.require(:user).permit(*permitted)
+    params.require(:user).permit(:name, :email, :phone, :birth_date, :position, :status,
+      :departament_id, :access_enabled, :password, :password_confirmation, :role,
+      access_profile_ids: [], led_departament_ids: [])
   end
 
-  # The department select in the members modals edits the user's primary
-  # department, which lives in memberchips (users has no departament_id).
-  # Other department memberships are left untouched.
-  def sync_departament(user)
-    return unless params[:user]&.key?(:departament_id)
-
-    new_dept = current_user.church.departaments.find_by(id: params[:user][:departament_id])
-    current_dept = user.primary_department
-    return if current_dept&.id == new_dept&.id
-
-    user.memberchips.find_by(departament: current_dept)&.destroy if current_dept
-    user.memberchips.find_or_create_by(departament: new_dept) { |m| m.role = user.leader? ? :leader : :member } if new_dept
+  def save_member
+    result = Access::MemberSaveService.call(church: current_user.church, params: user_params,
+      performed_by: current_user, user: @user)
+    case result
+    in Success(user)
+      redirect_to panel_members_path(preserve_filters), notice: "Membro salvo com sucesso.", status: :see_other
+    in Failure(user)
+      redirect_to panel_members_path(preserve_filters), alert: user.errors.full_messages.to_sentence, status: :see_other
+    end
   end
 
   # Preserve current filter params when redirecting back to index

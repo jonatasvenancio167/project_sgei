@@ -32,7 +32,7 @@ RSpec.describe "Member registration approvals", type: :request do
       post "/users/#{pending_user.id}/approval"
 
       expect(pending_user.reload.status).to eq("pending")
-      expect(response).to redirect_to(root_path)
+      expect(response).to have_http_status(:not_found)
     end
   end
 

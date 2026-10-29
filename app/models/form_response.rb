@@ -1,4 +1,9 @@
 class FormResponse < ApplicationRecord
+  validate do
+    if user && form && !user.church_memberships.exists?(church_id: form.church_id)
+      errors.add(:user, "deve pertencer à igreja do formulário")
+    end
+  end
   belongs_to :form
   belongs_to :user, optional: true
   has_many :form_answers, dependent: :destroy

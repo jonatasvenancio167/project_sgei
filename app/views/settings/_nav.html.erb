@@ -1,5 +1,6 @@
 <nav class="flex h-fit flex-col gap-1 rounded-xl border border-border/60 bg-card p-2">
   <% SettingsHelper::SECTIONS.each do |section| %>
+    <% next unless current_user.can_access?(%w[permissions users].include?(section[:key]) ? "access" : "settings", action: "manage") %>
     <% active = section[:key] == @section %>
     <%= link_to panel_settings_path(section: section[:key]),
           class: class_names(

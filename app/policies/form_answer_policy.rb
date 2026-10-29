@@ -1,19 +1,4 @@
-# frozen_string_literal: true
-
 class FormAnswerPolicy < ChurchModulePolicy
   MODULE_KEY = "forms"
-
-  def show? = module_allowed? && within_hierarchy?
-
-  private
-
-  def record_church_id
-    record.form&.church_id
-  end
-
-  class Scope < ApplicationPolicy::Scope
-    def resolve
-      scope.joins(:form).where(forms: { church_id: user.allowed_church_ids })
-    end
-  end
+  def create? = record.form_response && record.form_response.user_id == user.id && user.can_access?("forms", action: "manage", record: record.form_response)
 end

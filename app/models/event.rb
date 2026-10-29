@@ -1,4 +1,7 @@
 class Event < ApplicationRecord
+  validate do
+    errors.add(:departament, "deve pertencer à mesma igreja") if departament && departament.church_id != church_id
+  end
   include BaseEntity
 
   belongs_to :departament, optional: true

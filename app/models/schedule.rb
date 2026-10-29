@@ -1,4 +1,7 @@
 class Schedule < ApplicationRecord
+  validate do
+    errors.add(:departament, "deve pertencer à mesma igreja") if departament && departament.church_id != church_id
+  end
   COLOR_CHOICES = Departament::COLOR_CHOICES
 
   include BaseEntity

@@ -12,13 +12,13 @@ module Schedules
       @decorator = ScheduleDecorator.new(schedule, view_context)
       @columns = schedule.schedule_columns.order(:position)
       @entries = schedule.schedule_entries.where(month: month).order(:date, :position)
-      remap_orphaned_entries
+      remap_orphaned_entries if view_context.policy(schedule).update?
 
-      @dept_members = department_or_church_members(church)
+      @dept_members = department_or_church_members(church).where(id: view_context.policy_scope(User).select(:id))
 
       member_col_ids = columns.select { |c| c.column_type == "member" }.map { |c| c.id.to_s }
       @member_counts = build_member_counts(member_col_ids)
-      @users_map = member_col_ids.any? ? User.where(id: member_counts.keys).index_by { |u| u.id.to_s } : {}
+      @users_map = member_col_ids.any? ? view_context.policy_scope(User).where(id: member_counts.keys).index_by { |u| u.id.to_s } : {}
 
       scheduled = member_counts.keys
       @scheduled_members = dept_members.select { |m| scheduled.include?(m.id.to_s) }

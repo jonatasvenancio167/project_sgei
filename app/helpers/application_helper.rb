@@ -6,10 +6,6 @@ module ApplicationHelper
   def module_allowed?(module_key)
     return false unless current_user
 
-    RolePermissions::AllowedQuery.new(
-      church: current_user.church,
-      role: current_user.role,
-      module_key: module_key
-    ).call
+    current_user.can_access?(module_key)
   end
 end

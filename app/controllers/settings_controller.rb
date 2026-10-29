@@ -27,7 +27,9 @@ class SettingsController < Settings::BaseController
   end
 
   def load_permissions
-    @permissions = @church.role_permissions.index_by { |p| [p.role, p.module_key] }
+    @profiles = policy_scope(AccessProfile).order(:name)
+    @selected_profile = @profiles.find_by(id: params[:profile_id]) if params[:profile_id].present?
+    @profile_form = AccessProfile.new
   end
 
   def load_notifications

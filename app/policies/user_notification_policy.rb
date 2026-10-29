@@ -3,7 +3,7 @@
 class UserNotificationPolicy < ApplicationPolicy
   def index?   = true
   def show?    = own?
-  def create?  = admin?
+  def create?  = user.can_access?("settings", action: "manage")
   def update?  = own?
   def destroy? = own?
 

@@ -17,7 +17,7 @@ module Schedules
     end
 
     def department_options
-      scope = user.admin? ? user.church.departaments : user.departaments
+      scope = DepartamentPolicy::Scope.new(user, Departament).resolve
       scope.order(:name)
     end
 

@@ -6,8 +6,7 @@ class DepartamentsController < ApplicationController
     authorize Departament
     @departaments = policy_scope(Departament).order(:name)
     # Non-admins only see the departments they belong to
-    @departaments = @departaments.where(id: current_user.departament_ids) unless current_user.admin?
-    @church_users = current_user.church.users.order(:name)
+    @church_users = policy_scope(User).where(id: current_user.church.church_memberships.select(:user_id)).order(:name)
     @new_departament = Departament.new
   end
 
@@ -32,7 +31,8 @@ class DepartamentsController < ApplicationController
       church: current_user.church,
       params: departament_params,
       member_ids: params[:member_ids],
-      leader_id: params[:leader_id]
+      leader_id: params[:leader_id],
+      performed_by: current_user
     )
 
     respond_to do |format|
@@ -42,7 +42,7 @@ class DepartamentsController < ApplicationController
         format.json { render :show, status: :created, location: departament }
       in Failure(departament)
         @departaments = current_user.church.departaments.order(:name)
-        @church_users = current_user.church.users.order(:name)
+        @church_users = policy_scope(User).where(id: current_user.church.church_memberships.select(:user_id)).order(:name)
         @new_departament = departament
         format.html { render :index, status: :unprocessable_entity }
         format.json { render json: departament.errors, status: :unprocessable_entity }

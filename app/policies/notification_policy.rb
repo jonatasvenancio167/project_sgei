@@ -3,9 +3,9 @@
 class NotificationPolicy < ApplicationPolicy
   def index?   = true
   def show?    = same_church?
-  def create?  = admin?
-  def update?  = admin? && same_church?
-  def destroy? = admin? && same_church?
+  def create?  = user.can_access?("settings", action: "manage")
+  def update?  = user.can_access?("settings", action: "manage") && same_church?
+  def destroy? = user.can_access?("settings", action: "manage") && same_church?
 
   class Scope < ApplicationPolicy::Scope
     def resolve

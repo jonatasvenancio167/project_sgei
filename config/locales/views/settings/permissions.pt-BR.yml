@@ -3,3 +3,4 @@ pt-BR:
     permissions:
       update:
         success: "Permissões atualizadas com sucesso."
+        select_role: "Selecione um perfil válido antes de salvar as permissões."

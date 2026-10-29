@@ -25,7 +25,7 @@ module Birthdays
     end
 
     def department_name
-      primary_department_name
+      object.departaments.where(church_id: view_context.current_user.allowed_church_ids).first&.name || "Geral"
     end
 
     private

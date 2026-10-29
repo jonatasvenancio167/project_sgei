@@ -5,19 +5,17 @@ class FormsController < ApplicationController
     authorize Form
     forms = policy_scope(Form).not_deleted.includes(:departament, :form_responses)
 
-    unless current_user.admin?
-      dept_ids = current_user.departament_ids
-      forms = forms.where(departament_id: dept_ids + [nil])
-    end
-
     @pagy, @forms = pagy(forms.order(created_at: :desc), limit: 8)
   end
 
   def show
     @tab = params[:tab] || "overview"
     @form_fields = @form.form_fields
-    @pagy, @responses = pagy(@form.form_responses.order(created_at: :desc), limit: 20)
-    @stats = build_statistics if @tab == "statistics"
+    @pagy, @responses = pagy(policy_scope(FormResponse).where(form: @form).order(created_at: :desc), limit: 20)
+    if @tab == "statistics"
+      authorize @form, :statistics?
+      @stats = build_statistics
+    end
   end
 
   def new
@@ -67,7 +65,7 @@ class FormsController < ApplicationController
   end
 
   def available_departaments
-    current_user.admin? ? current_user.church.departaments : current_user.departaments
+    policy_scope(Departament)
   end
 
   def build_statistics

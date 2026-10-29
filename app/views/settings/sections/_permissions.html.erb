@@ -1,53 +1,76 @@
 <%= render CardComponent.new do |card| %>
   <% card.with_title { "Perfis e Permissões" } %>
-  <% card.with_description do %>
-    Controle de acesso por módulo. O perfil <b>Secretaria</b> sempre possui acesso total.
-  <% end %>
+  <% card.with_description { "Selecione um perfil para definir os menus e as ações disponíveis na sua igreja." } %>
 
-  <%= form_with url: settings_permissions_path, method: :patch, local: true do %>
-    <div class="overflow-x-auto rounded-lg border border-border/60">
-      <table class="w-full caption-bottom text-sm">
-        <thead>
-          <tr class="border-b border-border/60">
-            <th class="h-10 w-[200px] px-4 text-left align-middle font-medium text-muted-foreground">Módulo</th>
-            <th class="h-10 px-4 text-center align-middle">
-              <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                <%= lucide_icon("crown", class: "h-3 w-3") %> Líder de Departamento
-              </span>
-            </th>
-            <th class="h-10 px-4 text-center align-middle">
-              <span class="inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground">Membro</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody class="[&_tr:last-child]:border-0">
-          <% RolePermission::MODULES.each do |module_key, module_label| %>
-            <tr class="border-b border-border/60 transition-colors hover:bg-muted/30">
-              <td class="px-4 py-3 font-medium"><%= module_label %></td>
-              <% RolePermission.roles.each_key do |role| %>
-                <% permission = @permissions[[role, module_key]] %>
-                <% allowed = permission.nil? || permission.allowed? %>
-                <td class="px-4 py-3 text-center">
-                  <label class="relative inline-flex cursor-pointer items-center">
-                    <input type="hidden" name="permissions[<%= role %>][<%= module_key %>]" value="0">
-                    <input type="checkbox" name="permissions[<%= role %>][<%= module_key %>]" value="1"
-                           class="peer sr-only" <%= "checked" if allowed %>>
-                    <span class="h-5 w-9 rounded-full bg-input transition-colors peer-checked:bg-primary peer-focus-visible:ring-1 peer-focus-visible:ring-ring"></span>
-                    <span class="absolute left-0.5 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-background shadow transition-transform peer-checked:translate-x-4"></span>
-                  </label>
+  <div class="mb-6 flex flex-wrap items-end gap-3">
+    <%= form_with url: panel_settings_path, method: :get, local: true, class: "flex flex-1 flex-wrap items-end gap-3" do %>
+      <%= hidden_field_tag :section, "permissions" %>
+      <div class="min-w-48 flex-1 space-y-2">
+        <%= label_tag :profile_id, "Perfil", class: "text-sm font-medium" %>
+        <%= select_tag :profile_id, options_from_collection_for_select(@profiles, :id, :name, @selected_profile&.id),
+              prompt: "Selecione um perfil", required: true, class: settings_input_classes %>
+      </div>
+      <%= submit_tag "Selecionar perfil", name: nil, class: "h-9 cursor-pointer rounded-lg border px-4 text-sm" %>
+    <% end %>
+    <button type="button" class="h-9 cursor-pointer rounded-lg bg-primary px-4 text-sm text-primary-foreground"
+            onclick="document.getElementById('modal-create-profile').dispatchEvent(new CustomEvent('modal:open'))">
+      Cadastrar perfil
+    </button>
+  </div>
+
+  <% if @selected_profile %>
+    <p class="mb-4 text-sm text-muted-foreground"><%= @selected_profile.description %></p>
+    <%= form_with url: settings_access_profile_path(@selected_profile), scope: :access_profile, method: :patch, class: "mb-6 grid gap-3" do |f| %>
+      <%= f.label :name, "Nome do perfil", class: "text-sm font-medium" %>
+      <%= f.text_field :name, value: @selected_profile.name, required: true, class: settings_input_classes %>
+      <%= f.label :description, "Descrição", class: "text-sm font-medium" %>
+      <%= f.text_area :description, value: @selected_profile.description, required: true, class: settings_input_classes("h-20") %>
+      <%= f.submit "Salvar dados do perfil", class: "justify-self-end cursor-pointer rounded-lg border px-4 py-2 text-sm" %>
+    <% end %>
+    <%= form_with url: settings_permissions_path, method: :patch, local: true do %>
+      <%= hidden_field_tag :profile_id, @selected_profile.id %>
+      <div class="overflow-x-auto rounded-lg border border-border/60">
+        <table class="w-full text-sm">
+          <caption class="p-3 text-left font-medium">Permissões de <%= @selected_profile.name %></caption>
+          <thead><tr class="border-b"><th scope="col" class="p-3 text-left">Menu</th><th scope="col" class="p-3">Consultar</th><th scope="col" class="p-3">Gerenciar</th><th scope="col" class="p-3 text-left">Alcance da consulta</th><th scope="col" class="p-3 text-left">Alcance da gestão</th></tr></thead>
+          <tbody>
+            <% RolePermission::MODULES.each do |mod, label| %>
+              <% read_permission = @selected_profile.permission(mod, "read") %>
+              <tr class="border-b">
+                <th scope="row" class="p-3 text-left font-medium"><%= label %></th>
+                <% RolePermission::ACTIONS.each do |action| %>
+                  <% permission = @selected_profile.permission(mod, action) %>
+                  <td class="p-3 text-center">
+                    <%= hidden_field_tag "permissions[#{mod}][#{action}]", "0", id: nil %>
+                    <%= check_box_tag "permissions[#{mod}][#{action}]", "1", permission&.allowed?, aria: { label: "#{action == 'read' ? 'Consultar' : 'Gerenciar'} #{label}" } %>
+                  </td>
+                <% end %>
+                <td class="p-3">
+                  <%= select_tag "permissions[#{mod}][read_scope]", options_for_select(access_scope_options(mod), read_permission&.scope_key || "church"), aria: { label: "Alcance de #{label}" }, class: settings_input_classes %>
                 </td>
-              <% end %>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-    </div>
+                <td class="p-3">
+                  <%= select_tag "permissions[#{mod}][manage_scope]", options_for_select(access_scope_options(mod).select { |_, key| %w[own led church].include?(key) }, @selected_profile.permission(mod, "manage")&.scope_key || "church"), aria: { label: "Alcance da gestão de #{label}" }, class: settings_input_classes %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      <p class="mt-3 text-xs text-muted-foreground">Gerenciar permite alterações na própria igreja ou nos ministérios liderados. A consulta à hierarquia não concede edição nas congregações.</p>
+      <%= submit_tag "Salvar permissões", class: "mt-4 cursor-pointer rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground" %>
+    <% end %>
+  <% else %>
+    <p class="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">Selecione um perfil para configurar suas permissões.</p>
+  <% end %>
+<% end %>
 
-    <div class="mt-4 flex justify-end border-t border-border/60 pt-4">
-      <button type="submit"
-              class="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90">
-        <%= lucide_icon("save", class: "h-4 w-4") %> Salvar permissões
-      </button>
-    </div>
+<%= render Shared::ModalComponent.new(id: "modal-create-profile", title: "Cadastrar perfil", description: "Crie um perfil único para esta igreja. Ele começa com os acessos básicos de Membro.", size: :md) do |modal| %>
+  <% modal.with_body do %>
+    <%= form_with scope: :access_profile, url: settings_access_profiles_path, class: "space-y-4" do |f| %>
+      <% if @profile_form&.errors&.any? %><p role="alert" class="text-sm text-destructive"><%= @profile_form.errors.full_messages.to_sentence %></p><% end %>
+      <div class="space-y-2"><%= f.label :name, "Nome", class: "text-sm font-medium" %><%= f.text_field :name, value: @profile_form&.name, required: true, class: settings_input_classes %></div>
+      <div class="space-y-2"><%= f.label :description, "Descrição", class: "text-sm font-medium" %><%= f.text_area :description, value: @profile_form&.description, required: true, class: settings_input_classes("h-20") %></div>
+      <%= f.submit "Cadastrar perfil", class: "cursor-pointer rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground" %>
+    <% end %>
   <% end %>
 <% end %>

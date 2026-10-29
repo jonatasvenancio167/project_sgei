@@ -22,6 +22,10 @@ class Church < ApplicationRecord
   has_many :congregations, class_name: "Church", foreign_key: :parent_church_id,
                            inverse_of: :parent_church, dependent: :nullify
 
+  has_many :access_profiles, dependent: :restrict_with_error
+  has_many :church_memberships, dependent: :restrict_with_error
+  after_create { Access::ProvisionService.call(church: self) }
+
   has_many :departaments, dependent: :destroy
   has_many :users, dependent: :destroy
   has_many :events, dependent: :destroy

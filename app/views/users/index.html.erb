@@ -69,12 +69,7 @@
 
       <!-- Role select -->
       <%= f.select :role,
-            options_for_select([
-              ["Todos os cargos", "todos"],
-              ["Admin", "admin"],
-              ["Líder", "leader"],
-              ["Membro", "member"]
-            ], current_role.presence || "todos"),
+            options_for_select([["Todos os perfis", "todos"]] + current_user.church.access_profiles.order(:name).map { |p| [p.name, p.key] }, current_role.presence || "todos"),
             {},
             class: "flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring w-[170px]" %>
 
@@ -125,7 +120,7 @@
           <tr class="border-b border-border/60 transition-colors hover:bg-muted/50">
             <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Membro</th>
             <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Departamento</th>
-            <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Cargo</th>
+            <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Perfis / função</th>
             <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground hidden md:table-cell">Telefone</th>
             <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground hidden lg:table-cell">Desde</th>
             <th class="h-10 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
@@ -145,7 +140,7 @@
             <% @presenter.users.each do |u| %>
               <%
                 initials = u.name.to_s.split.first(2).map { |p| p[0]&.upcase }.join
-                primary_dept = u.departaments.first
+                primary_dept = u.departaments.detect { |d| current_user.allowed_church_ids.include?(d.church_id) }
                 can_edit = policy(u).update?
               %>
               <tr class="border-b border-border/60 transition-colors hover:bg-muted/30">
@@ -180,18 +175,8 @@
 
                 <!-- Role -->
                 <td class="px-4 py-3">
-                  <% case u.role %>
-                  <% when "admin" %>
-                    <span class="inline-flex items-center gap-1 rounded-full bg-primary/20 px-2.5 py-0.5 text-xs font-semibold text-primary">
-                      <%= lucide_icon("shield", class: "h-3 w-3") %> Admin
-                    </span>
-                  <% when "leader" %>
-                    <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                      <%= lucide_icon("crown", class: "h-3 w-3") %> Líder
-                    </span>
-                  <% else %>
-                    <span class="text-sm text-muted-foreground">Membro</span>
-                  <% end %>
+                  <span class="text-sm"><%= u.role_label(church: current_user.church) %></span>
+                  <span class="block text-xs text-muted-foreground"><%= u.position %></span>
                 </td>
 
                 <!-- Phone -->
@@ -327,15 +312,7 @@
         </select>
       </div>
 
-      <!-- Cargo -->
-      <div class="space-y-2">
-        <label for="user_role" class="text-sm font-medium">Cargo</label>
-        <%= f.select :role,
-              options_for_select([["Membro", "member"], ["Líder", "leader"]], "member"),
-              {},
-              id: "user_role",
-              class: "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" %>
-      </div>
+      <%= render "access/member_fields", form: f, member: nil, prefix: "new_member" %>
 
       <!-- Footer buttons -->
       <div class="flex justify-end gap-3 border-t border-border/40 pt-4">
@@ -422,23 +399,13 @@
           <%= select_tag "user[departament_id]",
                 options_for_select(
                   [["Sem departamento", ""]] + @presenter.departaments.map { |d| [d.name, d.id.to_s] },
-                  u.primary_department&.id.to_s
+                  u.departaments.find_by(church_id: current_user.church_id)&.id.to_s
                 ),
                 id: "edit_user_departament_id_#{u.id}",
                 class: "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" %>
         </div>
 
-        <!-- Cargo (somente admin pode alterar) -->
-        <% if policy(u).update_role? %>
-          <div class="space-y-2">
-            <label for="edit_user_role_<%= u.id %>" class="text-sm font-medium">Cargo</label>
-            <%= f.select :role,
-                  options_for_select([["Membro", "member"], ["Líder", "leader"], ["Admin", "admin"]], u.role),
-                  {},
-                  id: "edit_user_role_#{u.id}",
-                  class: "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" %>
-          </div>
-        <% end %>
+        <%= render "access/member_fields", form: f, member: u, prefix: "member_#{u.id}" %>
 
         <!-- Footer buttons -->
         <div class="flex justify-end gap-3 border-t border-border/40 pt-4">

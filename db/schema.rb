@@ -10,9 +10,26 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_08_07_200639) do
+ActiveRecord::Schema[8.0].define(version: 2026_10_29_210000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "access_profiles", force: :cascade do |t|
+    t.bigint "church_id", null: false
+    t.string "key", null: false
+    t.string "name", null: false
+    t.string "normalized_name", null: false
+    t.text "description", null: false
+    t.boolean "standard", default: false, null: false
+    t.bigint "parent_profile_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["church_id", "key"], name: "index_access_profiles_on_church_id_and_key", unique: true
+    t.index ["church_id", "normalized_name"], name: "index_access_profiles_on_church_id_and_normalized_name", unique: true
+    t.index ["church_id"], name: "index_access_profiles_on_church_id"
+    t.index ["id", "church_id"], name: "index_access_profiles_on_id_and_church_id", unique: true
+    t.index ["parent_profile_id"], name: "index_access_profiles_on_parent_profile_id"
+  end
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -67,6 +84,19 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_07_200639) do
     t.index ["user_id"], name: "index_audit_logs_on_user_id"
   end
 
+  create_table "church_memberships", force: :cascade do |t|
+    t.bigint "church_id", null: false
+    t.bigint "user_id", null: false
+    t.boolean "active", default: true, null: false
+    t.boolean "access_enabled", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["church_id", "user_id"], name: "index_church_memberships_on_church_id_and_user_id", unique: true
+    t.index ["church_id"], name: "index_church_memberships_on_church_id"
+    t.index ["id", "church_id"], name: "index_church_memberships_on_id_and_church_id", unique: true
+    t.index ["user_id"], name: "index_church_memberships_on_user_id"
+  end
+
   create_table "churches", force: :cascade do |t|
     t.string "name", null: false
     t.string "slug", null: false
@@ -85,6 +115,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_07_200639) do
     t.string "responsible_name"
     t.bigint "address_id"
     t.bigint "parent_church_id"
+    t.datetime "profiles_provisioned_at"
     t.index ["address_id"], name: "index_churches_on_address_id"
     t.index ["parent_church_id"], name: "index_churches_on_parent_church_id"
     t.index ["slug"], name: "index_churches_on_slug", unique: true
@@ -277,13 +308,30 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_07_200639) do
     t.index ["church_id"], name: "index_notifications_on_church_id"
   end
 
+  create_table "profile_assignments", force: :cascade do |t|
+    t.bigint "church_id", null: false
+    t.bigint "church_membership_id", null: false
+    t.bigint "access_profile_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["access_profile_id"], name: "index_profile_assignments_on_access_profile_id"
+    t.index ["church_id"], name: "index_profile_assignments_on_church_id"
+    t.index ["church_membership_id", "access_profile_id"], name: "index_unique_profile_assignment", unique: true
+    t.index ["church_membership_id"], name: "index_profile_assignments_on_church_membership_id"
+  end
+
   create_table "role_permissions", force: :cascade do |t|
     t.bigint "church_id", null: false
-    t.integer "role", null: false
+    t.integer "role"
     t.string "module_key", null: false
     t.boolean "allowed", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "access_profile_id"
+    t.string "action_key", default: "read", null: false
+    t.string "scope_key", default: "church", null: false
+    t.index ["access_profile_id", "module_key", "action_key"], name: "index_profile_module_action", unique: true
+    t.index ["access_profile_id"], name: "index_role_permissions_on_access_profile_id"
     t.index ["church_id", "role", "module_key"], name: "index_role_permissions_on_church_id_and_role_and_module_key", unique: true
     t.index ["church_id"], name: "index_role_permissions_on_church_id"
   end
@@ -367,6 +415,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_07_200639) do
     t.integer "status", default: 0
     t.bigint "address_id"
     t.date "birth_date"
+    t.string "position"
     t.index "EXTRACT(month FROM birth_date), EXTRACT(day FROM birth_date)", name: "index_users_on_birth_date_month_day"
     t.index ["address_id"], name: "index_users_on_address_id"
     t.index ["church_id"], name: "index_users_on_church_id"
@@ -394,10 +443,14 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_07_200639) do
     t.index ["registered_by_id"], name: "index_welcome_records_on_registered_by_id"
   end
 
+  add_foreign_key "access_profiles", "access_profiles", column: "parent_profile_id"
+  add_foreign_key "access_profiles", "churches"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "audit_logs", "churches"
   add_foreign_key "audit_logs", "users"
+  add_foreign_key "church_memberships", "churches"
+  add_foreign_key "church_memberships", "users"
   add_foreign_key "churches", "addresses"
   add_foreign_key "churches", "churches", column: "parent_church_id"
   add_foreign_key "departaments", "churches"
@@ -424,6 +477,13 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_07_200639) do
   add_foreign_key "memberchips", "users"
   add_foreign_key "notification_settings", "churches"
   add_foreign_key "notifications", "churches"
+  add_foreign_key "profile_assignments", "access_profiles"
+  add_foreign_key "profile_assignments", "access_profiles", column: ["access_profile_id", "church_id"], primary_key: ["id", "church_id"]
+  add_foreign_key "profile_assignments", "church_memberships"
+  add_foreign_key "profile_assignments", "church_memberships", column: ["church_membership_id", "church_id"], primary_key: ["id", "church_id"]
+  add_foreign_key "profile_assignments", "churches"
+  add_foreign_key "role_permissions", "access_profiles"
+  add_foreign_key "role_permissions", "access_profiles", column: ["access_profile_id", "church_id"], primary_key: ["id", "church_id"]
   add_foreign_key "role_permissions", "churches"
   add_foreign_key "schedule_assignments", "schedule_columns"
   add_foreign_key "schedule_assignments", "schedule_entries"

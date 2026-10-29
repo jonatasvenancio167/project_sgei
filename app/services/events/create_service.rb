@@ -34,7 +34,7 @@ module Events
     end
 
     def assign_initial_status(event)
-      if creator.admin?
+      if creator.can_access?("events", action: "manage")
         event.status = :approved
         event.approved_by = creator
         event.approved_at = Time.current

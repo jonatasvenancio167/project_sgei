@@ -69,6 +69,6 @@ class MemberchipsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def memberchip_params
-      params.fetch(:memberchip, {})
+      params.require(:memberchip).permit(:departament_id, :user_id)
     end
 end

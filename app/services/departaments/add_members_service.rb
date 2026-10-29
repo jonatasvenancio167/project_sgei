@@ -1,58 +1,58 @@
 module Departaments
-  # Links members to a departament, either picking someone already
-  # registered in the church or creating a brand new member on the fly.
   class AddMembersService < BaseService
     def initialize(departament:, current_user:, params:)
-      @departament = departament
-      @current_user = current_user
-      @params = params
+      @departament, @current_user, @params = departament, current_user, params
     end
 
     def call
-      case params[:kind]
-      when "existing" then add_existing
-      when "new"       then add_new
-      else Failure(:invalid_kind)
+      raise Pundit::NotAuthorizedError unless DepartamentPolicy.new(@current_user, @departament).add_members?
+      result = nil
+      ActiveRecord::Base.transaction do
+        result = case @params[:kind]
+        when "existing" then add_existing
+        when "new" then add_new
+        else Failure(:invalid_kind)
+        end
+        raise ActiveRecord::Rollback if result.failure?
       end
+      result
+    rescue ActiveRecord::RecordInvalid => e
+      Failure(e.record)
     end
 
     private
 
-    attr_reader :departament, :current_user, :params
-
     def add_existing
-      user_ids = Array(params[:user_ids]).map(&:to_i)
-      return Failure(:no_contact_selected) if user_ids.empty?
-
-      added_count = user_ids.count do |u_id|
-        departament.memberchips.build(user_id: u_id, role: :member).save
+      ids = Array(@params[:user_ids]).reject(&:blank?).map(&:to_i).uniq
+      return Failure(:no_contact_selected) if ids.empty?
+      valid_ids = ChurchMembership.where(church_id: @departament.church_id, user_id: ids, active: true).pluck(:user_id)
+      raise Pundit::NotAuthorizedError unless valid_ids.sort == ids.sort
+      count = 0
+      ids.each do |id|
+        link = @departament.memberchips.find_or_initialize_by(user_id: id)
+        next if link.persisted?
+        link.role = :member
+        link.save!
+        count += 1
       end
-      Success(added_count)
+      audit(ids)
+      Success(count)
     end
 
     def add_new
-      make_leader = params[:make_leader] == "1" || params[:make_leader] == "true"
-      user = find_or_build_user(make_leader)
-
-      memberchip = departament.memberchips.build(user: user, role: make_leader ? :leader : :member)
-      memberchip.save ? Success(user) : Failure(memberchip)
+      result = Access::MemberSaveService.call(church: @current_user.church, performed_by: @current_user,
+        params: { name: @params[:name], email: @params[:email], phone: @params[:phone], departament_id: @departament.id })
+      return result if result.failure?
+      user = result.value!
+      make_leader = %w[1 true].include?(@params[:make_leader].to_s)
+      user.memberchips.find_by!(departament: @departament).update!(role: make_leader ? :leader : :member)
+      audit([ user.id ])
+      Success(user)
     end
 
-    def find_or_build_user(make_leader)
-      user = current_user.church.users.find_by(id: params[:user_ids])
-      return user_with_leader_role(user, make_leader) if user
-
-      password = SecureRandom.hex(8)
-      User.create!(
-        name: params[:name], email: params[:email].presence, phone: params[:phone],
-        password: password, password_confirmation: password,
-        church: current_user.church, role: make_leader ? :leader : :member
-      )
-    end
-
-    def user_with_leader_role(user, make_leader)
-      user.update!(role: :leader) if make_leader && !user.admin?
-      user
+    def audit(ids)
+      Audit::RecordService.call(church: @current_user.church, user: @current_user, module_key: "access",
+        action: "Vinculou participantes ao ministério", detail: { departament_id: @departament.id, user_ids: ids, leadership: @params[:make_leader] }.to_json)
     end
   end
 end
