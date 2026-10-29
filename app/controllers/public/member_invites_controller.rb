@@ -24,7 +24,7 @@ module Public
         redirect_to public_member_invite_success_path(params[:token])
       in Failure(User => user)
         @user = user
-        render :show, status: :unprocessable_entity
+        render :show, status: :unprocessable_content
       in Failure(:unusable)
         render_not_found
       end

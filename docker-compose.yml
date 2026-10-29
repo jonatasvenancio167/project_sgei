@@ -72,7 +72,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: ["bin/rails", "tailwindcss:watch"]
+    command: ["bin/rails", "tailwindcss:watch[always]"]
 
 
   # Jobs em background: este projeto usa Solid Queue (gem solid_queue), não Sidekiq.

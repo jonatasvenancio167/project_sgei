@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe "Components", type: :request do
   let!(:church) { Church.create!(name: "Test Church", slug: "test-church") }
-  let!(:user) { User.create!(name: "Test Admin", email: "admin@test.com", password: "password123", password_confirmation: "password123", church: church, role: :admin) }
+  let!(:user) { User.create!(name: "Test Admin", email: "admin@test.com", phone: "(11) 91111-1111", password: "password123", password_confirmation: "password123", church: church, role: :admin) }
 
   before do
     sign_in user

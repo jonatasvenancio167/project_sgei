@@ -80,7 +80,10 @@ RSpec.describe "Member invites", type: :request do
 
     it "creates a pending member and consumes the invite" do
       expect {
-        post "/i/#{invite.token}", params: { user: { name: "Novo Membro", phone: "(11) 91111-1111" } }
+        post "/i/#{invite.token}", params: { user: {
+          name: "Novo Membro", phone: "(11) 91111-1111",
+          password: "password123", password_confirmation: "password123"
+        } }
       }.to change(User, :count).by(1)
 
       new_user = User.find_by(name: "Novo Membro")
@@ -93,7 +96,7 @@ RSpec.describe "Member invites", type: :request do
     it "re-renders the form when required fields are missing" do
       post "/i/#{invite.token}", params: { user: { name: "", phone: "" } }
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
     end
 
     it "rejects submissions once the invite is exhausted" do
